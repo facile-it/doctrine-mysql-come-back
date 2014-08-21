@@ -13,7 +13,7 @@ $ composer require facile-it/doctrine-mysql-come-back dev-master
 # Configuration
 
 In order to use DoctrineMySQLComeBack you have to set `wrapperClass` and `driverClass` connection params.
-You can choose how many times Doctrine should be able to reconnect, setting `x_reconnect_attempts` connection option. Its value should be an int.
+You can choose how many times Doctrine should be able to reconnect, setting `x_reconnect_attempts` driver option. Its value should be an int.
 
 An example of configuration at connection instantiation time:
 
@@ -33,7 +33,9 @@ $connectionParams = array(
     // [doctrine-mysql-come-back] settings
     'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection',
     'driverClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver',
-    'x_reconnect_attempts' => 3
+    'driverOptions' => array(
+        'x_reconnect_attempts' => 3
+    )
 );
 
 $conn = DriverManager::getConnection($connectionParams, $config);
