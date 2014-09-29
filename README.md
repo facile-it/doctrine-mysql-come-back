@@ -64,4 +64,4 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
-Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are aon doctrine/dbal 2.1.x.
+Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are using doctrine/dbal 2.1.x.
