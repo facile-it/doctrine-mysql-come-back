@@ -200,4 +200,13 @@ class Connection extends \Doctrine\DBAL\Connection
         // returns the actual statement
         return parent::prepare($sql);
     }
+
+    /**
+     * Forces connection to reconnect by doing a simple query
+     * @throws \Exception
+     */
+    public function refresh()
+    {
+        $this->query('SELECT 1')->execute();
+    }
 }
