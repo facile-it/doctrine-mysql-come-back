@@ -64,4 +64,16 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
+# Usage
+
+To force a reconnection try after a long running task you can call 
+```php
+$em->getConnection()->refresh();
+```
+before performing any other operation different from SELECT.
+
+Instead, in case your next query will be a SELECT, reconnection will be automagically done.
+
+# Thanks
+
 Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are using doctrine/dbal 2.1.x.
