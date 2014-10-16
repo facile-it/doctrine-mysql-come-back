@@ -2,13 +2,14 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration,
     Doctrine\DBAL\Driver,
-    Doctrine\Common\EventManager;
+    Doctrine\Common\EventManager,
+    Doctrine\DBAL\Cache\QueryCacheProfile;
 
 /**
  * Class Connection
+ *
  * @package Facile\DoctrineMySQLComeBack
  */
 class Connection extends \Doctrine\DBAL\Connection
@@ -29,16 +30,17 @@ class Connection extends \Doctrine\DBAL\Connection
         Driver $driver,
         Configuration $config = null,
         EventManager $eventManager = null
-    ) {
+    )
+    {
         if (isset($params['driverOptions']['x_reconnect_attempts']) && method_exists(
                 $driver,
                 'getReconnectExceptions'
             )
         ) {
-            // sanity check: 0 if no exceptions are available
             $reconnectExceptions = $driver->getReconnectExceptions();
             $this->reconnectAttempts = empty($reconnectExceptions) ? 0 : (int)$params['driverOptions']['x_reconnect_attempts'];
         }
+
         parent::__construct($params, $driver, $config, $eventManager);
     }
 
@@ -58,7 +60,7 @@ class Connection extends \Doctrine\DBAL\Connection
         while ($retry) {
             $retry = false;
             try {
-                $stmt = parent::executeQuery($query, $params, $types);
+                $stmt = parent::executeQuery($query, $params, $types, $qcp);
             } catch (\Exception $e) {
                 if ($this->validateReconnectAttempt($e, $attempt)) {
                     $this->close();
@@ -81,7 +83,6 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         if ($this->getTransactionNestingLevel() < 1 && $this->reconnectAttempts && $attempt < $this->reconnectAttempts
         ) {
-            // method_exists($this->_driver,'getReconnectExceptions') already checked in constructor
             $reconnectExceptions = $this->_driver->getReconnectExceptions();
             $message = $e->getMessage();
             if (!empty($reconnectExceptions)) {
@@ -108,7 +109,6 @@ class Connection extends \Doctrine\DBAL\Connection
         while ($retry) {
             $retry = false;
             try {
-                // max arguments is 4 -> anything is better then calling call_user_func_array()!
                 switch (count($args)) {
                     case 1:
                         $stmt = parent::query($args[0]);
@@ -124,8 +124,6 @@ class Connection extends \Doctrine\DBAL\Connection
                         break;
                     default:
                         $stmt = parent::query();
-                    // no break
-
                 }
             } catch (\Exception $e) {
                 if ($this->validateReconnectAttempt($e, $attempt)) {
@@ -179,18 +177,18 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
+     * returns a reconnect-wrapper for Statements
+     *
      * @param $sql
      * @return Statement
      */
     protected function prepareWrapped($sql)
     {
-        // returns a reconnect-wrapper for Statements
         return new Statement($sql, $this);
     }
 
     /**
      * do not use, only used by Statement-class
-     *
      * needs to be public for access from the Statement-class
      *
      * @deprecated
@@ -202,7 +200,8 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
-     * Forces connection to reconnect by doing a simple query
+     * Forces reconnection by doing a dummy query
+     *
      * @throws \Exception
      */
     public function refresh()
