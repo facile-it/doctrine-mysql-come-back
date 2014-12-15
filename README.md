@@ -1,9 +1,9 @@
 [![Latest Stable Version](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/v/stable.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) [![Total Downloads](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/downloads.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) [![Latest Unstable Version](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/v/unstable.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) [![License](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back)
 # DoctrineMySQLComeBack
 
-Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal 2.3.x.
+Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3,<2.5-dev.
 
-Tested with doctrine/dbal >=2.3,<2.4-dev, but could works with other versions.
+No more required on doctrine/dbal 2.5.x, thanks to [this](https://github.com/doctrine/dbal/pull/414).
 
 # Installation
 
@@ -77,4 +77,4 @@ Instead, in case your next query will be a SELECT, reconnection will be automagi
 
 # Thanks
 
-Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are using doctrine/dbal 2.1.x.
+Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are using doctrine/dbal <2.3.
