@@ -3,7 +3,7 @@
     "description": "Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal",
     "keywords": ["mysql","doctrine","reconnect","refresh","connection","has gone away","exception"],
     "require": {
-        "doctrine/dbal": ">=2.3,<2.5-dev"
+        "doctrine/dbal": ">=2.3,<2.6-dev"
     },
     "license": "Apache License Version 2.0",
     "authors": [
