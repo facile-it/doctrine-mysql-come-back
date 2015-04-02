@@ -84,11 +84,7 @@ class Statement implements \IteratorAggregate, DriverStatement
                     $attempt++;
                     $retry = true;
                 } else {
-                    throw DBALException::driverExceptionDuringQuery(
-                        $e,
-                        $this->sql,
-                        $this->conn->resolveParams($this->params, $this->types)
-                    );
+                    throw $e;
                 }
             }
         }
