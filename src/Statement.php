@@ -2,9 +2,7 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\DBALException;
 use PDO,
-    Doctrine\DBAL\Types\Type,
     Doctrine\DBAL\Driver\Statement as DriverStatement;
 
 /**
@@ -14,25 +12,13 @@ use PDO,
 class Statement implements \IteratorAggregate, DriverStatement
 {
     /**
-     * @var
+     * @var string
      */
     protected $sql;
     /**
-     * @var array
-     */
-    protected $params = array();
-    /**
-     * @var array
-     */
-    protected $types = array();
-    /**
-     * @var
+     * @var \Doctrine\DBAL\Statement
      */
     protected $stmt;
-    /**
-     * @var
-     */
-    protected $platform;
     /**
      * @var Connection
      */
@@ -47,7 +33,6 @@ class Statement implements \IteratorAggregate, DriverStatement
         $this->sql = $sql;
         $this->conn = $conn;
         $this->createStatement();
-        $this->platform = $conn->getDatabasePlatform();
     }
 
     /**
@@ -65,11 +50,6 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function execute($params = null)
     {
-        $logger = $this->conn->getConfiguration()->getSQLLogger();
-        if ($logger) {
-            $logger->startQuery($this->sql, $this->params, $this->types);
-        }
-
         $stmt = null;
         $attempt = 0;
         $retry = true;
@@ -89,12 +69,6 @@ class Statement implements \IteratorAggregate, DriverStatement
             }
         }
 
-        if ($logger) {
-            $logger->stopQuery();
-        }
-        $this->params = array();
-        $this->types = array();
-
         return $stmt;
     }
 
@@ -106,22 +80,7 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindValue($name, $value, $type = null)
     {
-        $this->params[$name] = $value;
-        $this->types[$name] = $type;
-        if ($type !== null) {
-            if (is_string($type)) {
-                $type = Type::getType($type);
-            }
-            if ($type instanceof Type) {
-                $value = $type->convertToDatabaseValue($value, $this->platform);
-                $bindingType = $type->getBindingType();
-            } else {
-                $bindingType = $type; // PDO::PARAM_* constants
-            }
-            return $this->stmt->bindValue($name, $value, $bindingType);
-        } else {
-            return $this->stmt->bindValue($name, $value);
-        }
+        return $this->stmt->bindValue($name, $value, $type);
     }
 
     /**
@@ -176,14 +135,6 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
-        if ($arg2 === null) {
-            return $this->stmt->setFetchMode($fetchMode);
-        } else {
-            if ($arg3 === null) {
-                return $this->stmt->setFetchMode($fetchMode, $arg2);
-            }
-        }
-
         return $this->stmt->setFetchMode($fetchMode, $arg2, $arg3);
     }
 
@@ -211,10 +162,7 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function fetchAll($fetchMode = null, $fetchArgument = 0)
     {
-        if ($fetchArgument !== 0) {
-            return $this->stmt->fetchAll($fetchMode, $fetchArgument);
-        }
-        return $this->stmt->fetchAll($fetchMode);
+        return $this->stmt->fetchAll($fetchMode, $fetchArgument);
     }
 
     /**
@@ -235,7 +183,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return \Doctrine\DBAL\Statement
      */
     public function getWrappedStatement()
     {
