@@ -191,7 +191,7 @@ class Connection extends \Doctrine\DBAL\Connection
      * do not use, only used by Statement-class
      * needs to be public for access from the Statement-class
      *
-     * @deprecated
+     * @internal
      */
     public function prepareUnwrapped($sql)
     {
