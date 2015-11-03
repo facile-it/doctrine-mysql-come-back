@@ -6,7 +6,7 @@ Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3
 # Installation
 
 ```console
-$ composer require facile-it/doctrine-mysql-come-back dev-master
+$ composer require facile-it/doctrine-mysql-come-back 1.5.*
 ```
 
 # Configuration
@@ -75,4 +75,5 @@ Instead, in case your next query will be a SELECT, reconnection will be automagi
 
 # Thanks
 
-Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275). Check it out if you are using doctrine/dbal <2.3.
+Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275).
+Check it out if you are using doctrine/dbal <2.3.
