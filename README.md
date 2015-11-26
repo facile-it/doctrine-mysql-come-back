@@ -73,6 +73,9 @@ before performing any other operation different from SELECT.
 
 Instead, in case your next query will be a SELECT, reconnection will be automagically done.
 
+From `v1.5.4` automagically reconnection is enabled also during `$em->getConnection()->beginTransaction()` calls,
+and this works also during simple `$em->getConnection()->flush`, if out of a previous transaction.
+
 # Thanks
 
 Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275).

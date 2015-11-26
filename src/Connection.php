@@ -168,6 +168,36 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
+     * @throws \Exception
+     */
+    public function beginTransaction()
+    {
+        if (0 !== $this->getTransactionNestingLevel()) {
+            return parent::beginTransaction();
+        }
+
+        $attempt = 0;
+        $retry = true;
+        while ($retry) {
+            $retry = false;
+            try {
+
+                parent::beginTransaction();
+
+            } catch (\Exception $e) {
+
+                if ($this->validateReconnectAttempt($e, $attempt)) {
+                    $this->close();
+                    $attempt++;
+                    $retry = true;
+                } else {
+                    throw $e;
+                }
+            }
+        }
+    }
+
+    /**
      * @param $sql
      * @return Statement
      */
