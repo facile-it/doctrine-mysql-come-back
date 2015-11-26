@@ -248,7 +248,7 @@ class Connection extends \Doctrine\DBAL\Connection
     private function resetTransactionNestingLevel()
     {
         if(!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
-            $reflection = new \ReflectionClass(self::class);
+            $reflection = new \ReflectionClass(parent::class);
             $this->selfReflectionNestingLevelProperty = $reflection->getProperty("_transactionNestingLevel");
             $this->selfReflectionNestingLevelProperty->setAccessible(true);
         }
