@@ -58,7 +58,7 @@ class Statement implements \IteratorAggregate, DriverStatement
             try {
                 $stmt = $this->stmt->execute($params);
             } catch (\Exception $e) {
-                if ($this->conn->validateReconnectAttempt($e, $attempt)) {
+                if ($this->conn->canTryAgain($attempt) && $this->conn->getDriver()->isGoneAwayException($e)) {
                     $this->conn->close();
                     $this->createStatement();
                     $attempt++;

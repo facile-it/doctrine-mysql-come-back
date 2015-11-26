@@ -6,7 +6,7 @@ Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3
 # Installation
 
 ```console
-$ composer require facile-it/doctrine-mysql-come-back ^1.5
+$ composer require facile-it/doctrine-mysql-come-back ^1.6
 ```
 
 # Configuration
@@ -73,7 +73,7 @@ before performing any other operation different from SELECT.
 
 Instead, in case your next query will be a SELECT, reconnection will be automagically done.
 
-From `v1.5.4` automagically reconnection is enabled also during `$em->getConnection()->beginTransaction()` calls,
+From `v1.6` automagically reconnection is enabled also during `$em->getConnection()->beginTransaction()` calls,
 and this works also during simple `$em->getConnection()->flush`, if out of a previous transaction.
 
 # Thanks

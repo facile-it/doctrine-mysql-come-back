@@ -6,6 +6,7 @@ use Doctrine\DBAL\Configuration,
     Doctrine\DBAL\Driver,
     Doctrine\Common\EventManager,
     Doctrine\DBAL\Cache\QueryCacheProfile;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\ServerGoneAwayExceptionsAwareInterface;
 
 /**
  * Class Connection
@@ -20,8 +21,13 @@ class Connection extends \Doctrine\DBAL\Connection
     protected $reconnectAttempts = 0;
 
     /**
+     * @var \ReflectionProperty|null
+     */
+    private $selfReflectionNestingLevelProperty;
+
+    /**
      * @param array $params
-     * @param Driver $driver
+     * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
      * @param Configuration $config
      * @param EventManager $eventManager
      */
@@ -32,13 +38,11 @@ class Connection extends \Doctrine\DBAL\Connection
         EventManager $eventManager = null
     )
     {
-        if (isset($params['driverOptions']['x_reconnect_attempts']) && method_exists(
-                $driver,
-                'getReconnectExceptions'
-            )
+        if (
+            $driver instanceof ServerGoneAwayExceptionsAwareInterface &&
+            isset($params['driverOptions']['x_reconnect_attempts'])
         ) {
-            $reconnectExceptions = $driver->getReconnectExceptions();
-            $this->reconnectAttempts = empty($reconnectExceptions) ? 0 : (int)$params['driverOptions']['x_reconnect_attempts'];
+            $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
         }
 
         parent::__construct($params, $driver, $config, $eventManager);
@@ -62,7 +66,7 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeQuery($query, $params, $types, $qcp);
             } catch (\Exception $e) {
-                if ($this->validateReconnectAttempt($e, $attempt)) {
+                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -72,28 +76,6 @@ class Connection extends \Doctrine\DBAL\Connection
             }
         }
         return $stmt;
-    }
-
-    /**
-     * @param \Exception $e
-     * @param $attempt
-     * @return bool
-     */
-    public function validateReconnectAttempt(\Exception $e, $attempt)
-    {
-        if ($this->getTransactionNestingLevel() < 1 && $this->reconnectAttempts && $attempt < $this->reconnectAttempts
-        ) {
-            $reconnectExceptions = $this->_driver->getReconnectExceptions();
-            $message = $e->getMessage();
-            if (!empty($reconnectExceptions)) {
-                foreach ($reconnectExceptions as $reconnectException) {
-                    if (strpos($message, $reconnectException) !== false) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -126,7 +108,7 @@ class Connection extends \Doctrine\DBAL\Connection
                         $stmt = parent::query();
                 }
             } catch (\Exception $e) {
-                if ($this->validateReconnectAttempt($e, $attempt)) {
+                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -155,7 +137,7 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeUpdate($query, $params, $types);
             } catch (\Exception $e) {
-                if ($this->validateReconnectAttempt($e, $attempt)) {
+                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -173,21 +155,25 @@ class Connection extends \Doctrine\DBAL\Connection
     public function beginTransaction()
     {
         if (0 !== $this->getTransactionNestingLevel()) {
-            return parent::beginTransaction();
+           return parent::beginTransaction();
         }
 
+        $queryResult = null;
         $attempt = 0;
         $retry = true;
         while ($retry) {
             $retry = false;
             try {
 
-                parent::beginTransaction();
+                $queryResult = parent::beginTransaction();
 
             } catch (\Exception $e) {
 
-                if ($this->validateReconnectAttempt($e, $attempt)) {
+                if ($this->canTryAgain($attempt,true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
+                    if(0 < $this->getTransactionNestingLevel()) {
+                        $this->resetTransactionNestingLevel();
+                    }
                     $attempt++;
                     $retry = true;
                 } else {
@@ -195,6 +181,8 @@ class Connection extends \Doctrine\DBAL\Connection
                 }
             }
         }
+
+        return $queryResult;
     }
 
     /**
@@ -237,5 +225,33 @@ class Connection extends \Doctrine\DBAL\Connection
     public function refresh()
     {
         $this->query('SELECT 1')->execute();
+    }
+
+    /**
+     * @param $attempt
+     * @param bool $ignoreTransactionLevel
+     * @return bool
+     */
+    public function canTryAgain($attempt, $ignoreTransactionLevel = false)
+    {
+        $canByAttempt = ($attempt < $this->reconnectAttempts);
+        $canByTransactionNestingLevel = $ignoreTransactionLevel ? true : (0 === $this->getTransactionNestingLevel());
+
+        return ($canByAttempt && $canByTransactionNestingLevel);
+    }
+
+    /**
+     * This is required because beginTransaction increment _transactionNestingLevel
+     * before the real query is executed, and results incremented also on gone away error.
+     * This should be safe for a new established connection.
+     */
+    private function resetTransactionNestingLevel()
+    {
+        if(!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
+            $reflection = new \ReflectionClass(self::class);
+            $this->selfReflectionNestingLevelProperty = $reflection->getProperty("_transactionNestingLevel");
+        }
+
+        $this->selfReflectionNestingLevelProperty->setValue($this,0);
     }
 }
