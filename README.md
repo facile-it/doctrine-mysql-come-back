@@ -74,7 +74,7 @@ before performing any other operation different from SELECT.
 Instead, in case your next query will be a SELECT, reconnection will be automagically done.
 
 From `v1.6` automagically reconnection is enabled also during `$em->getConnection()->beginTransaction()` calls,
-and this works also during simple `$em->getConnection()->flush`, if out of a previous transaction.
+and this works also during simple `$em->flush()`, if out of a previous transaction.
 
 # Thanks
 
