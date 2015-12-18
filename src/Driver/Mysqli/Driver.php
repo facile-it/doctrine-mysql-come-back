@@ -1,11 +1,4 @@
 <?php
-/**
- * Copyright (c) 2015 Nickel Media Inc.
- * Created by IntelliJ IDEA.
- * User: zackbrenton
- * Date: 2015-12-18
- * Time: 11:50 AM
- */
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli;
 
