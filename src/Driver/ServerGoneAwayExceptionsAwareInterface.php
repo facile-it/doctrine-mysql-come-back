@@ -1,6 +1,6 @@
 <?php
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql;
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
 
 /**
  * Class ServerGoneAwayExceptionsAwareInterface

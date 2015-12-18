@@ -7,10 +7,8 @@
  * Time: 11:50 AM
  */
 
-namespace Driver\Mysqli;
-
-
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\ServerGoneAwayExceptionsAwareInterface;
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
 class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAwayExceptionsAwareInterface
 {
