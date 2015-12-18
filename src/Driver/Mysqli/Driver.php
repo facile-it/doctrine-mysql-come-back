@@ -8,11 +8,16 @@
  */
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Mysqli\MysqliConnection;
-use Doctrine\DBAL\Driver\Mysqli\MysqliException;
+
+use Doctrine\DBAL\DBALException,
+    Doctrine\DBAL\Driver\Mysqli\MysqliConnection,
+    Doctrine\DBAL\Driver\Mysqli\MysqliException;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
+/**
+ * Class Driver
+ * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli
+ */
 class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAwayExceptionsAwareInterface
 {
     /**
