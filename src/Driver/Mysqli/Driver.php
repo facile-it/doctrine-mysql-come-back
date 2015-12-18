@@ -34,7 +34,7 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
     {
-        $driverOptions = array_diff_key($driverOptions, $this->extendedDriverOptions);
+        $driverOptions = array_diff_key($driverOptions, array_flip($this->extendedDriverOptions));
         try {
             return new MysqliConnection($params, $username, $password, $driverOptions);
         } catch (MysqliException $e) {
