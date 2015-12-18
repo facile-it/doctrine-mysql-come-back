@@ -8,6 +8,9 @@
  */
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Mysqli\MysqliConnection;
+use Doctrine\DBAL\Driver\Mysqli\MysqliException;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
 class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAwayExceptionsAwareInterface
@@ -15,9 +18,29 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
     /**
      * @var array
      */
-    protected $goneAwayExceptions = array(
-        'MySQL server has gone away'
-    );
+    protected $goneAwayExceptions = [
+        'MySQL server has gone away',
+    ];
+
+    /**
+     * @var array
+     */
+    private $extendedDriverOptions = [
+        "x_reconnect_attempts",
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = [])
+    {
+        $driverOptions = array_diff_key($driverOptions, $this->extendedDriverOptions);
+        try {
+            return new MysqliConnection($params, $username, $password, $driverOptions);
+        } catch (MysqliException $e) {
+            throw DBALException::driverException($this, $e);
+        }
+    }
 
     /**
      * @param \Exception $exception
