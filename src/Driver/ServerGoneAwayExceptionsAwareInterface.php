@@ -1,10 +1,10 @@
 <?php
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql;
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
 
 /**
  * Class ServerGoneAwayExceptionsAwareInterface
- * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql
+ * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver
  */
 interface ServerGoneAwayExceptionsAwareInterface
 {

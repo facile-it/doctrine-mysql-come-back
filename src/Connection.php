@@ -6,7 +6,7 @@ use Doctrine\DBAL\Configuration,
     Doctrine\DBAL\Driver,
     Doctrine\Common\EventManager,
     Doctrine\DBAL\Cache\QueryCacheProfile;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\ServerGoneAwayExceptionsAwareInterface;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
 /**
  * Class Connection

@@ -2,6 +2,8 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql;
 
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+
 /**
  * Class Driver
  * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql
