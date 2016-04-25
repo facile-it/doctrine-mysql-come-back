@@ -14,8 +14,8 @@ class Driver extends \Doctrine\DBAL\Driver\PDOMySql\Driver implements ServerGone
      * @var array
      */
     protected $goneAwayExceptions = array(
-        'SQLSTATE[HY000]: General error: 2006 MySQL server has gone away',
-        'PDOStatement::execute(): MySQL server has gone away'
+        'MySQL server has gone away',
+        'Lost connection to MySQL server during query',
     );
 
     /**
@@ -27,7 +27,7 @@ class Driver extends \Doctrine\DBAL\Driver\PDOMySql\Driver implements ServerGone
         $message = $exception->getMessage();
 
         foreach ($this->goneAwayExceptions as $goneAwayException) {
-            if (strpos($message, $goneAwayException) !== false) {
+            if (stripos($message, $goneAwayException) !== false) {
                 return true;
             }
         }

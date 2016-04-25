@@ -18,6 +18,7 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
      */
     protected $goneAwayExceptions = [
         'MySQL server has gone away',
+        'Lost connection to MySQL server during query',
     ];
 
     /**
@@ -49,7 +50,7 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
         $message = $exception->getMessage();
 
         foreach ($this->goneAwayExceptions as $goneAwayException) {
-            if (strpos($message, $goneAwayException) !== false) {
+            if (stripos($message, $goneAwayException) !== false) {
                 return true;
             }
         }
