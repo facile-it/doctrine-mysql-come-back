@@ -63,6 +63,32 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
+An example of configuration on Zend Framework 2/3 projects:
+
+```php
+return [
+    'doctrine' => [
+        'connection' => [
+            'orm_default' => [
+                'driverClass' => \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver::class,
+                'wrapperClass' => \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection::class,
+                'params' => [
+                    'host' => 'localhost',
+                    'port' => '3307',
+                    'user' => '##user##',
+                    'password' => '##password##',
+                    'dbname' => '##database##',
+                    'charset' => 'UTF8',
+                    'driverOptions' => [
+                        'x_reconnect_attempts' => 9,
+                    ]
+                ],
+            ],
+        ],
+    ],
+];
+```
+
 # Usage
 
 To force a reconnection try after a long running task you can call 
