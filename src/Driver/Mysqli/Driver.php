@@ -27,6 +27,6 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
     {
         $driverOptions = array_diff_key($driverOptions, array_flip($this->extendedDriverOptions));
 
-        parent::connect($params, $username, $password, $driverOptions);
+        return parent::connect($params, $username, $password, $driverOptions);
     }
 }
