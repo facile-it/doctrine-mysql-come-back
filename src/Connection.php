@@ -51,10 +51,12 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
-     * @param string $query
+     * @param string            $query
      * @param array             $params
      * @param array             $types
      * @param QueryCacheProfile $qcp
+     *
+     * @return \Doctrine\DBAL\Driver\Statement The executed statement.
      *
      * @throws \Exception
      */
@@ -82,6 +84,7 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
+     * @return \Doctrine\DBAL\Driver\Statement
      * @throws \Exception
      */
     public function query()
@@ -125,8 +128,10 @@ class Connection extends \Doctrine\DBAL\Connection
 
     /**
      * @param string $query
-     * @param array $params
-     * @param array $types
+     * @param array  $params
+     * @param array  $types
+     *
+     * @return integer The number of affected rows.
      *
      * @throws \Exception
      */
