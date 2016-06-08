@@ -12,6 +12,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
  * Class Connection
  *
  * @package Facile\DoctrineMySQLComeBack
+ * @property \Doctrine\DBAL\Driver|ServerGoneAwayExceptionsAwareInterface $_driver
  */
 class Connection extends \Doctrine\DBAL\Connection
 {
@@ -66,7 +67,7 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeQuery($query, $params, $types, $qcp);
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $query)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -108,7 +109,7 @@ class Connection extends \Doctrine\DBAL\Connection
                         $stmt = parent::query();
                 }
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $args[0])) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -137,7 +138,7 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeUpdate($query, $params, $types);
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayInUpdateException($e)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -169,7 +170,7 @@ class Connection extends \Doctrine\DBAL\Connection
 
             } catch (\Exception $e) {
 
-                if ($this->canTryAgain($attempt,true) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
                     if(0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
@@ -241,6 +242,20 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
+     * @param \Exception $e
+     * @param string|null $query
+     * @return bool
+     */
+    public function isRetryableException(\Exception $e, $query = null)
+    {
+        if (null === $query || $this->isUpdateQuery($query)) {
+            return $this->_driver->isGoneAwayInUpdateException($e);
+        }
+
+        return $this->_driver->isGoneAwayException($e);
+    }
+
+    /**
      * This is required because beginTransaction increment _transactionNestingLevel
      * before the real query is executed, and results incremented also on gone away error.
      * This should be safe for a new established connection.
@@ -254,5 +269,14 @@ class Connection extends \Doctrine\DBAL\Connection
         }
 
         $this->selfReflectionNestingLevelProperty->setValue($this,0);
+    }
+
+    /**
+     * @param $query
+     * @return bool
+     */
+    public function isUpdateQuery($query)
+    {
+        return !preg_match('/^[\s\n\r\t(]*(select|show) /i', $query);
     }
 }

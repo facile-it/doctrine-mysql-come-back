@@ -46,7 +46,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @param null $params
      * @return null
-     * @throws
+     * @throws \Exception
      */
     public function execute($params = null)
     {
@@ -58,7 +58,7 @@ class Statement implements \IteratorAggregate, DriverStatement
             try {
                 $stmt = $this->stmt->execute($params);
             } catch (\Exception $e) {
-                if ($this->conn->canTryAgain($attempt) && $this->conn->getDriver()->isGoneAwayException($e)) {
+                if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
                     $this->createStatement();
                     $attempt++;
@@ -98,7 +98,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @return mixed
      */
-    function closeCursor()
+    public function closeCursor()
     {
         return $this->stmt->closeCursor();
     }
@@ -106,7 +106,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @return mixed
      */
-    function columnCount()
+    public function columnCount()
     {
         return $this->stmt->columnCount();
     }
@@ -114,7 +114,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @return mixed
      */
-    function errorCode()
+    public function errorCode()
     {
         return $this->stmt->errorCode();
     }
@@ -122,7 +122,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @return mixed
      */
-    function errorInfo()
+    public function errorInfo()
     {
         return $this->stmt->errorInfo();
     }
