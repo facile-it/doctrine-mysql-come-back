@@ -11,16 +11,18 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $params = [
-            'driverOptions' => [
-                'x_reconnect_attempts' => 3
-            ]
-        ];
-
         $driver = $this->prophesize('Doctrine\DBAL\Driver')
             ->willImplement('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface');
         $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
         $eventManager = $this->prophesize('Doctrine\Common\EventManager');
+        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+
+        $params = [
+            'driverOptions' => [
+                'x_reconnect_attempts' => 3
+            ],
+            'platform' => $platform->reveal()
+        ];
 
         $this->connection = new Connection(
             $params,
@@ -32,16 +34,18 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testContructor()
     {
-        $params = [
-            'driverOptions' => [
-                'x_reconnect_attempts' => 999
-            ]
-        ];
-
         $driver = $this->prophesize('Doctrine\DBAL\Driver')
             ->willImplement('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface');
         $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
         $eventManager = $this->prophesize('Doctrine\Common\EventManager');
+        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+
+        $params = [
+            'driverOptions' => [
+                'x_reconnect_attempts' => 999
+            ],
+            'platform' => $platform->reveal()
+        ];
 
         $connection = new Connection(
             $params,
@@ -58,15 +62,17 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testContructorWithInvalidDriver()
     {
-        $params = [
-            'driverOptions' => [
-                'x_reconnect_attempts' => 999
-            ]
-        ];
-
         $driver = $this->prophesize('Doctrine\DBAL\Driver');
         $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
         $eventManager = $this->prophesize('Doctrine\Common\EventManager');
+        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+
+        $params = [
+            'driverOptions' => [
+                'x_reconnect_attempts' => 999
+            ],
+            'platform' => $platform->reveal()
+        ];
 
         $connection = new Connection(
             $params,
