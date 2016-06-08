@@ -12,7 +12,6 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
  * Class Connection
  *
  * @package Facile\DoctrineMySQLComeBack
- * @property \Doctrine\DBAL\Driver|ServerGoneAwayExceptionsAwareInterface $_driver
  */
 class Connection extends \Doctrine\DBAL\Connection
 {
@@ -142,7 +141,7 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeUpdate($query, $params, $types);
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayInUpdateException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
                     $attempt++;
                     $retry = true;
@@ -160,23 +159,23 @@ class Connection extends \Doctrine\DBAL\Connection
     public function beginTransaction()
     {
         if (0 !== $this->getTransactionNestingLevel()) {
-           return parent::beginTransaction();
+            parent::beginTransaction();
+            return;
         }
 
-        $queryResult = null;
         $attempt = 0;
         $retry = true;
         while ($retry) {
             $retry = false;
             try {
-
-                $queryResult = parent::beginTransaction();
+                
+                parent::beginTransaction();
 
             } catch (\Exception $e) {
 
                 if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
-                    if(0 < $this->getTransactionNestingLevel()) {
+                    if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
                     }
                     $attempt++;
@@ -186,8 +185,6 @@ class Connection extends \Doctrine\DBAL\Connection
                 }
             }
         }
-
-        return $queryResult;
     }
 
     /**
@@ -268,7 +265,7 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         if(!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
             $reflection = new \ReflectionClass('Doctrine\DBAL\Connection');
-            $this->selfReflectionNestingLevelProperty = $reflection->getProperty("_transactionNestingLevel");
+            $this->selfReflectionNestingLevelProperty = $reflection->getProperty('_transactionNestingLevel');
             $this->selfReflectionNestingLevelProperty->setAccessible(true);
         }
 
@@ -276,7 +273,7 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @return bool
      */
     public function isUpdateQuery($query)
