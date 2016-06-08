@@ -3,8 +3,7 @@
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
 
 /**
- * Trait ServerGoneAwayExceptionsAwareTrait
- * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver
+ * Trait ServerGoneAwayExceptionsAwareTrait.
  */
 trait ServerGoneAwayExceptionsAwareTrait
 {
@@ -25,6 +24,7 @@ trait ServerGoneAwayExceptionsAwareTrait
 
     /**
      * @param \Exception $exception
+     *
      * @return bool
      */
     public function isGoneAwayException(\Exception $exception)
@@ -42,6 +42,7 @@ trait ServerGoneAwayExceptionsAwareTrait
 
     /**
      * @param \Exception $exception
+     *
      * @return bool
      */
     public function isGoneAwayInUpdateException(\Exception $exception)

@@ -6,8 +6,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait;
 
 /**
- * Class Driver
- * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql
+ * Class Driver.
  */
 class Driver extends \Doctrine\DBAL\Driver\PDOMySql\Driver implements ServerGoneAwayExceptionsAwareInterface
 {

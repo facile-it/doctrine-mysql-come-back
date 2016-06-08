@@ -24,5 +24,9 @@
         "preferred-install": "dist",
         "bin-dir": "bin"
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "scripts": {
+        "phpcs": "php-cs-fixer fix -v --diff --dry-run src/",
+        "phpcs-fix": "php-cs-fixer fix -v --diff src/"
+    }
 }

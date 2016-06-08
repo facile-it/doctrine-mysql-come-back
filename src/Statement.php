@@ -2,12 +2,11 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use PDO,
-    Doctrine\DBAL\Driver\Statement as DriverStatement;
+use PDO;
+use Doctrine\DBAL\Driver\Statement as DriverStatement;
 
 /**
- * Class Statement
- * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL
+ * Class Statement.
  */
 class Statement implements \IteratorAggregate, DriverStatement
 {
@@ -36,7 +35,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     *
+     * Create Statement.
      */
     private function createStatement()
     {
@@ -44,8 +43,10 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param null $params
-     * @return null
+     * @param array|null $params
+     *
+     * @return bool
+     *
      * @throws \Exception
      */
     public function execute($params = null)
@@ -61,7 +62,7 @@ class Statement implements \IteratorAggregate, DriverStatement
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
                     $this->createStatement();
-                    $attempt++;
+                    ++$attempt;
                     $retry = true;
                 } else {
                     throw $e;
@@ -73,10 +74,11 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param $name
-     * @param $value
-     * @param null $type
-     * @return mixed
+     * @param string $name
+     * @param mixed  $value
+     * @param mixed  $type
+     *
+     * @return bool
      */
     public function bindValue($name, $value, $type = null)
     {
@@ -84,11 +86,12 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param $name
-     * @param $var
-     * @param int $type
-     * @param null $length
-     * @return mixed
+     * @param string   $name
+     * @param mixed    $var
+     * @param int      $type
+     * @param int|null $length
+     *
+     * @return bool
      */
     public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
     {
@@ -96,7 +99,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function closeCursor()
     {
@@ -104,7 +107,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function columnCount()
     {
@@ -112,7 +115,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function errorCode()
     {
@@ -120,7 +123,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return array
      */
     public function errorInfo()
     {
@@ -128,10 +131,11 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param $fetchMode
-     * @param null $arg2
-     * @param null $arg3
-     * @return mixed
+     * @param int   $fetchMode
+     * @param mixed $arg2
+     * @param mixed $arg3
+     *
+     * @return bool
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
@@ -139,7 +143,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return \Traversable
      */
     public function getIterator()
     {
@@ -147,7 +151,8 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param null $fetchMode
+     * @param int|null $fetchMode
+     *
      * @return mixed
      */
     public function fetch($fetchMode = null)
@@ -156,8 +161,9 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param null $fetchMode
-     * @param int $fetchArgument
+     * @param int|null $fetchMode
+     * @param int      $fetchArgument
+     *
      * @return mixed
      */
     public function fetchAll($fetchMode = null, $fetchArgument = 0)
@@ -167,6 +173,7 @@ class Statement implements \IteratorAggregate, DriverStatement
 
     /**
      * @param int $columnIndex
+     *
      * @return mixed
      */
     public function fetchColumn($columnIndex = 0)
@@ -175,7 +182,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function rowCount()
     {
