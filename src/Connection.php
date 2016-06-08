@@ -27,10 +27,11 @@ class Connection extends \Doctrine\DBAL\Connection
     private $selfReflectionNestingLevelProperty;
 
     /**
-     * @param array $params
+     * @param array                                         $params
      * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
-     * @param Configuration $config
-     * @param EventManager $eventManager
+     * @param Configuration                                 $config
+     * @param EventManager                                  $eventManager
+     * @throws \InvalidArgumentException
      */
     public function __construct(
         array $params,
@@ -39,10 +40,13 @@ class Connection extends \Doctrine\DBAL\Connection
         EventManager $eventManager = null
     )
     {
-        if (
-            $driver instanceof ServerGoneAwayExceptionsAwareInterface &&
-            isset($params['driverOptions']['x_reconnect_attempts'])
-        ) {
+        if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
+            throw new \InvalidArgumentException(
+                sprintf('%s needs a driver that implements ServerGoneAwayExceptionsAwareInterface', get_class($this))
+            );
+        }
+
+        if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
         }
 
