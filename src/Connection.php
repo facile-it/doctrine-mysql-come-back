@@ -2,16 +2,14 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\Configuration,
-    Doctrine\DBAL\Driver,
-    Doctrine\Common\EventManager,
-    Doctrine\DBAL\Cache\QueryCacheProfile;
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Driver;
+use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
 /**
- * Class Connection
- *
- * @package Facile\DoctrineMySQLComeBack
+ * Class Connection.
  */
 class Connection extends \Doctrine\DBAL\Connection
 {
@@ -26,34 +24,40 @@ class Connection extends \Doctrine\DBAL\Connection
     private $selfReflectionNestingLevelProperty;
 
     /**
-     * @param array $params
+     * @param array                                         $params
      * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
-     * @param Configuration $config
-     * @param EventManager $eventManager
+     * @param Configuration                                 $config
+     * @param EventManager                                  $eventManager
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct(
         array $params,
         Driver $driver,
         Configuration $config = null,
         EventManager $eventManager = null
-    )
-    {
-        if (
-            $driver instanceof ServerGoneAwayExceptionsAwareInterface &&
-            isset($params['driverOptions']['x_reconnect_attempts'])
-        ) {
-            $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
+    ) {
+        if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
+            throw new \InvalidArgumentException(
+                sprintf('%s needs a driver that implements ServerGoneAwayExceptionsAwareInterface', get_class($this))
+            );
+        }
+
+        if (isset($params['driverOptions']['x_reconnect_attempts'])) {
+            $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
         }
 
         parent::__construct($params, $driver, $config, $eventManager);
     }
 
     /**
-     * @param $query
-     * @param array $params
-     * @param array $types
+     * @param string            $query
+     * @param array             $params
+     * @param array             $types
      * @param QueryCacheProfile $qcp
-     * @return null
+     *
+     * @return \Doctrine\DBAL\Driver\Statement The executed statement.
+     *
      * @throws \Exception
      */
     public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
@@ -66,20 +70,21 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeQuery($query, $params, $types, $qcp);
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $query)) {
                     $this->close();
-                    $attempt++;
+                    ++$attempt;
                     $retry = true;
                 } else {
                     throw $e;
                 }
             }
         }
+
         return $stmt;
     }
 
     /**
-     * @return null
+     * @return \Doctrine\DBAL\Driver\Statement
      * @throws \Exception
      */
     public function query()
@@ -108,23 +113,26 @@ class Connection extends \Doctrine\DBAL\Connection
                         $stmt = parent::query();
                 }
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $args[0])) {
                     $this->close();
-                    $attempt++;
+                    ++$attempt;
                     $retry = true;
                 } else {
                     throw $e;
                 }
             }
         }
+
         return $stmt;
     }
 
     /**
-     * @param $query
-     * @param array $params
-     * @param array $types
-     * @return null
+     * @param string $query
+     * @param array  $params
+     * @param array  $types
+     *
+     * @return integer The number of affected rows.
+     *
      * @throws \Exception
      */
     public function executeUpdate($query, array $params = array(), array $types = array())
@@ -137,56 +145,53 @@ class Connection extends \Doctrine\DBAL\Connection
             try {
                 $stmt = parent::executeUpdate($query, $params, $types);
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
-                    $attempt++;
+                    ++$attempt;
                     $retry = true;
                 } else {
                     throw $e;
                 }
             }
         }
+
         return $stmt;
     }
 
     /**
+     * @return void
      * @throws \Exception
      */
     public function beginTransaction()
     {
         if (0 !== $this->getTransactionNestingLevel()) {
-           return parent::beginTransaction();
+            return parent::beginTransaction();
         }
 
-        $queryResult = null;
         $attempt = 0;
         $retry = true;
         while ($retry) {
             $retry = false;
             try {
-
-                $queryResult = parent::beginTransaction();
-
+                parent::beginTransaction();
             } catch (\Exception $e) {
-
-                if ($this->canTryAgain($attempt,true) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
-                    if(0 < $this->getTransactionNestingLevel()) {
+                    if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
                     }
-                    $attempt++;
+                    ++$attempt;
                     $retry = true;
                 } else {
                     throw $e;
                 }
             }
         }
-
-        return $queryResult;
     }
 
     /**
      * @param $sql
+     *
      * @return Statement
      */
     public function prepare($sql)
@@ -195,9 +200,10 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
-     * returns a reconnect-wrapper for Statements
+     * returns a reconnect-wrapper for Statements.
      *
      * @param $sql
+     *
      * @return Statement
      */
     protected function prepareWrapped($sql)
@@ -207,7 +213,7 @@ class Connection extends \Doctrine\DBAL\Connection
 
     /**
      * do not use, only used by Statement-class
-     * needs to be public for access from the Statement-class
+     * needs to be public for access from the Statement-class.
      *
      * @internal
      */
@@ -218,7 +224,7 @@ class Connection extends \Doctrine\DBAL\Connection
     }
 
     /**
-     * Forces reconnection by doing a dummy query
+     * Forces reconnection by doing a dummy query.
      *
      * @throws \Exception
      */
@@ -230,6 +236,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @param $attempt
      * @param bool $ignoreTransactionLevel
+     *
      * @return bool
      */
     public function canTryAgain($attempt, $ignoreTransactionLevel = false)
@@ -237,7 +244,22 @@ class Connection extends \Doctrine\DBAL\Connection
         $canByAttempt = ($attempt < $this->reconnectAttempts);
         $canByTransactionNestingLevel = $ignoreTransactionLevel ? true : (0 === $this->getTransactionNestingLevel());
 
-        return ($canByAttempt && $canByTransactionNestingLevel);
+        return $canByAttempt && $canByTransactionNestingLevel;
+    }
+
+    /**
+     * @param \Exception  $e
+     * @param string|null $query
+     *
+     * @return bool
+     */
+    public function isRetryableException(\Exception $e, $query = null)
+    {
+        if (null === $query || $this->isUpdateQuery($query)) {
+            return $this->_driver->isGoneAwayInUpdateException($e);
+        }
+
+        return $this->_driver->isGoneAwayException($e);
     }
 
     /**
@@ -247,12 +269,22 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     private function resetTransactionNestingLevel()
     {
-        if(!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
+        if (!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
             $reflection = new \ReflectionClass('Doctrine\DBAL\Connection');
-            $this->selfReflectionNestingLevelProperty = $reflection->getProperty("_transactionNestingLevel");
+            $this->selfReflectionNestingLevelProperty = $reflection->getProperty('_transactionNestingLevel');
             $this->selfReflectionNestingLevelProperty->setAccessible(true);
         }
 
-        $this->selfReflectionNestingLevelProperty->setValue($this,0);
+        $this->selfReflectionNestingLevelProperty->setValue($this, 0);
+    }
+
+    /**
+     * @param string $query
+     *
+     * @return bool
+     */
+    public function isUpdateQuery($query)
+    {
+        return !preg_match('/^[\s\n\r\t(]*(select|show) /i', $query);
     }
 }

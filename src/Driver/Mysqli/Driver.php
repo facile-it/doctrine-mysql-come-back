@@ -2,12 +2,11 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli;
 
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface,
-    Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait;
 
 /**
- * Class Driver
- * @package Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli
+ * Class Driver.
  */
 class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAwayExceptionsAwareInterface
 {
@@ -17,7 +16,7 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
      * @var array
      */
     private $extendedDriverOptions = [
-        "x_reconnect_attempts",
+        'x_reconnect_attempts',
     ];
 
     /**
