@@ -23,6 +23,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     private $selfReflectionNestingLevelProperty;
 
+    private $sleepNumberOfSeconds;
     /**
      * @param array                                         $params
      * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
@@ -45,6 +46,11 @@ class Connection extends \Doctrine\DBAL\Connection
 
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
+        }
+
+        if (isset($params['driverOptions']['seconds_before_retry']))
+        {
+            $this->sleepNumberOfSeconds = (int) $params['driverOptions']['seconds_before_retry'];
         }
 
         parent::__construct($params, $driver, $config, $eventManager);
@@ -74,6 +80,7 @@ class Connection extends \Doctrine\DBAL\Connection
                     $this->close();
                     ++$attempt;
                     $retry = true;
+                    sleep($this->sleepNumberOfSeconds);
                 } else {
                     throw $e;
                 }
@@ -117,6 +124,7 @@ class Connection extends \Doctrine\DBAL\Connection
                     $this->close();
                     ++$attempt;
                     $retry = true;
+                    sleep($this->sleepNumberOfSeconds);
                 } else {
                     throw $e;
                 }
@@ -149,6 +157,7 @@ class Connection extends \Doctrine\DBAL\Connection
                     $this->close();
                     ++$attempt;
                     $retry = true;
+                    sleep($this->sleepNumberOfSeconds);
                 } else {
                     throw $e;
                 }
@@ -182,6 +191,7 @@ class Connection extends \Doctrine\DBAL\Connection
                     }
                     ++$attempt;
                     $retry = true;
+                    sleep($this->sleepNumberOfSeconds);
                 } else {
                     throw $e;
                 }
