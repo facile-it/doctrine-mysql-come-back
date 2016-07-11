@@ -13,6 +13,8 @@ trait ServerGoneAwayExceptionsAwareTrait
     protected $goneAwayExceptions = array(
         'MySQL server has gone away',
         'Lost connection to MySQL server during query',
+        'The MySQL server is running with the --read-only option so it cannot execute this statement',
+        'Connection refused'
     );
 
     /**
@@ -20,6 +22,8 @@ trait ServerGoneAwayExceptionsAwareTrait
      */
     protected $goneAwayInUpdateExceptions = array(
         'MySQL server has gone away',
+        'The MySQL server is running with the --read-only option so it cannot execute this statement',
+        'Connection refused'
     );
 
     /**
