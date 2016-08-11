@@ -104,5 +104,5 @@ and this works also during simple `$em->flush()`, if out of a previous transacti
 
 # Thanks
 
-Thanks to Dieter Peeters and his proposal on [DBAL-275](http://www.doctrine-project.org/jira/browse/DBAL-275).
+Thanks to Dieter Peeters and his proposal on [DBAL-275](https://github.com/doctrine/dbal/issues/1454).
 Check it out if you are using doctrine/dbal <2.3.
