@@ -2,20 +2,24 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
+use Doctrine\DBAL\Driver;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+use Doctrine\DBAL\Configuration;
+use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var Connection
-     */
+    /** @var Connection */
     protected $connection;
 
     public function setUp()
     {
-        $driver = $this->prophesize('Doctrine\DBAL\Driver')
-            ->willImplement('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface');
-        $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
-        $eventManager = $this->prophesize('Doctrine\Common\EventManager');
-        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+        $driver = $this->prophesize(Driver::class)
+            ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
+        $configuration = $this->prophesize(Configuration::class);
+        $eventManager = $this->prophesize(EventManager::class);
+        $platform = $this->prophesize(AbstractPlatform::class);
 
         $params = [
             'driverOptions' => [
@@ -32,13 +36,13 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testContructor()
+    public function testConstructor()
     {
-        $driver = $this->prophesize('Doctrine\DBAL\Driver')
-            ->willImplement('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface');
-        $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
-        $eventManager = $this->prophesize('Doctrine\Common\EventManager');
-        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+        $driver = $this->prophesize(Driver::class)
+            ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
+        $configuration = $this->prophesize(Configuration::class);
+        $eventManager = $this->prophesize(EventManager::class);
+        $platform = $this->prophesize(AbstractPlatform::class);
 
         $params = [
             'driverOptions' => [
@@ -54,18 +58,18 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
             $eventManager->reveal()
         );
 
-        static::assertInstanceOf('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection', $connection);
+        static::assertInstanceOf(Connection::class, $connection);
     }
 
     /**
      * @expectedException \InvalidArgumentException
      */
-    public function testContructorWithInvalidDriver()
+    public function testConstructorWithInvalidDriver()
     {
-        $driver = $this->prophesize('Doctrine\DBAL\Driver');
-        $configuration = $this->prophesize('Doctrine\DBAL\Configuration');
-        $eventManager = $this->prophesize('Doctrine\Common\EventManager');
-        $platform = $this->prophesize('Doctrine\DBAL\Platforms\AbstractPlatform');
+        $driver = $this->prophesize(Driver::class);
+        $configuration = $this->prophesize(Configuration::class);
+        $eventManager = $this->prophesize(EventManager::class);
+        $platform = $this->prophesize(AbstractPlatform::class);
 
         $params = [
             'driverOptions' => [
@@ -81,7 +85,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
             $eventManager->reveal()
         );
 
-        static::assertInstanceOf('Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection', $connection);
+        static::assertInstanceOf(Connection::class, $connection);
     }
 
     /**
