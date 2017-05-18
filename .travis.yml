@@ -12,6 +12,9 @@ env:
 matrix:
   fast_finish: true
   include:
+    - php: 7.1
+      env: 
+        - TEST_COVERAGE=true
     - php: hhvm
       sudo: required
       dist: trusty
@@ -37,7 +40,10 @@ install:
   - composer update --prefer-dist --no-interaction ${COMPOSER_FLAGS}
 
 script:
-  - bin/phpunit
+  - if [[ $TEST_COVERAGE ]]; then phpdbg -qrr bin/phpunit --coverage-clover clover.xml; else bin/phpunit; fi;
+
+after_success:
+  - if [[ $TEST_COVERAGE ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./clover.xml; fi
 
 notifications:
   on_success: never
