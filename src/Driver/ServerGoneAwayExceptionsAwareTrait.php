@@ -7,20 +7,16 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
  */
 trait ServerGoneAwayExceptionsAwareTrait
 {
-    /**
-     * @var array
-     */
-    protected $goneAwayExceptions = array(
+    /** @var string[] */
+    protected $goneAwayExceptions = [
         'MySQL server has gone away',
         'Lost connection to MySQL server during query',
-    );
+    ];
 
-    /**
-     * @var array
-     */
-    protected $goneAwayInUpdateExceptions = array(
+    /** @var string[] */
+    protected $goneAwayInUpdateExceptions = [
         'MySQL server has gone away',
-    );
+    ];
 
     /**
      * @param \Exception $exception

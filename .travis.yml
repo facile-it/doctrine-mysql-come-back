@@ -1,50 +1,32 @@
 language: php
+sudo: false
 
 php:
-  - 5.4
-  - 5.5
   - 5.6
   - 7.0
-  - hhvm
+  - 7.1
+env:
+  - COMPOSER_FLAGS="--prefer-lowest"
+  - COMPOSER_FLAGS=""
 
 matrix:
   fast_finish: true
   include:
-    - php: '5.4'
-      env: COMPOSER_FLAGS="--prefer-lowest"
-    - php: '5.4'
-      env: SYMFONY=2.8.*
-
-    - php: '5.5'
-      env: COMPOSER_FLAGS="--prefer-lowest"
-    - php: '5.5'
-      env: SYMFONY=2.8.*
-    - php: '5.5'
-      env: SYMFONY=3.0.*
-
-    - php: '5.6'
-      env: COMPOSER_FLAGS="--prefer-lowest"
-    - php: '5.6'
-      env: SYMFONY=2.8.*
-    - php: '5.6'
-      env: SYMFONY=3.0.*
-    - php: '5.6'
-      env: SYMFONY=3.1.*
-
-    - php: '7.0'
-      env: COMPOSER_FLAGS="--prefer-lowest"
-    - php: '7.0'
-      env: SYMFONY=2.8.*
-    - php: '7.0'
-      env: SYMFONY=3.0.*
-    - php: '7.0'
-      env: SYMFONY=3.1.*
-    - php: '7.0'
-      env: SYMFONY=dev-master
-
-  allow_failures:
-    - env: SYMFONY=3.1.*
-    - env: SYMFONY=dev-master
+    - php: 7.1
+      env: 
+        - TEST_COVERAGE=true
+    - php: hhvm
+      sudo: required
+      dist: trusty
+      group: edge
+      env:
+        - COMPOSER_FLAGS="--prefer-lowest"
+    - php: hhvm
+      sudo: required
+      dist: trusty
+      group: edge
+      env:
+        - COMPOSER_FLAGS=""
 
 cache:
   directories:
@@ -53,16 +35,15 @@ cache:
 before_install:
   - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then phpenv config-rm xdebug.ini; fi;
   - composer self-update
-  - if [ "$SYMFONY" != "" ]; then composer require "symfony/symfony:${SYMFONY}" --no-update; fi;
 
 install:
   - composer update --prefer-dist --no-interaction ${COMPOSER_FLAGS}
 
-before_script:
-  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then echo "zend_extension=xdebug.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini; fi;
-
 script:
-  - bin/phpunit
+  - if [[ $TEST_COVERAGE ]]; then phpdbg -qrr bin/phpunit --coverage-clover clover.xml; else bin/phpunit; fi;
+
+after_success:
+  - if [[ $TEST_COVERAGE ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./clover.xml; fi
 
 notifications:
   on_success: never

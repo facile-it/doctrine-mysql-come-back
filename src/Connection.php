@@ -7,20 +7,17 @@ use Doctrine\DBAL\Driver;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+use Doctrine\DBAL\Connection as DBALConnection;
 
 /**
  * Class Connection.
  */
-class Connection extends \Doctrine\DBAL\Connection
+class Connection extends DBALConnection
 {
-    /**
-     * @var int
-     */
+    /** @var int */
     protected $reconnectAttempts = 0;
 
-    /**
-     * @var \ReflectionProperty|null
-     */
+    /** @var \ReflectionProperty|null */
     private $selfReflectionNestingLevelProperty;
 
     /**
@@ -30,6 +27,7 @@ class Connection extends \Doctrine\DBAL\Connection
      * @param EventManager                                  $eventManager
      *
      * @throws \InvalidArgumentException
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function __construct(
         array $params,
@@ -37,14 +35,14 @@ class Connection extends \Doctrine\DBAL\Connection
         Configuration $config = null,
         EventManager $eventManager = null
     ) {
-        if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
+        if (! $driver instanceof ServerGoneAwayExceptionsAwareInterface) {
             throw new \InvalidArgumentException(
                 sprintf('%s needs a driver that implements ServerGoneAwayExceptionsAwareInterface', get_class($this))
             );
         }
 
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
-            $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
+            $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
         }
 
         parent::__construct($params, $driver, $config, $eventManager);
@@ -269,8 +267,8 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     private function resetTransactionNestingLevel()
     {
-        if (!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
-            $reflection = new \ReflectionClass('Doctrine\DBAL\Connection');
+        if (! $this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
+            $reflection = new \ReflectionClass(DBALConnection::class);
             $this->selfReflectionNestingLevelProperty = $reflection->getProperty('_transactionNestingLevel');
             $this->selfReflectionNestingLevelProperty->setAccessible(true);
         }
@@ -285,6 +283,6 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function isUpdateQuery($query)
     {
-        return !preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $query);
+        return ! preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $query);
     }
 }
