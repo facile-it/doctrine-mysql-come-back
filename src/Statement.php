@@ -152,23 +152,24 @@ class Statement implements \IteratorAggregate, DriverStatement
 
     /**
      * @param int|null $fetchMode
-     *
+     * @param int $cursorOrientation Only for doctrine/DBAL >= 2.6
+     * @param int $cursorOffset Only for doctrine/DBAL >= 2.6
      * @return mixed
      */
-    public function fetch($fetchMode = null)
+    public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
-        return $this->stmt->fetch($fetchMode);
+        return $this->stmt->fetch($fetchMode, $cursorOrientation, $cursorOffset);
     }
 
     /**
      * @param int|null $fetchMode
-     * @param int      $fetchArgument
-     *
+     * @param int $fetchArgument Only for doctrine/DBAL >= 2.6
+     * @param null $ctorArgs Only for doctrine/DBAL >= 2.6
      * @return mixed
      */
-    public function fetchAll($fetchMode = null, $fetchArgument = 0)
+    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
-        return $this->stmt->fetchAll($fetchMode, $fetchArgument);
+        return $this->stmt->fetchAll($fetchMode, $fetchArgument, $ctorArgs);
     }
 
     /**
