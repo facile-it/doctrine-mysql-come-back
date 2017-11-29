@@ -71,6 +71,37 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
+An example of configuration on Symfony 3/4 projects using url instead of separate parameters.
+
+#### Warning:
+The url **MUST** be schemaless. An `InvalidArgumentException` will be thrown otherwise.
+```
+Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection needs a driver that implements ServerGoneAwayExceptionsAwareInterface 
+```
+
+```yaml
+# Doctrine example Configuration
+parameters:
+    # Adds a fallback DATABASE_URL if the env var is not set.
+    # This allows you to run cache:warmup even if your
+    # environment variables are not available yet.
+    # You should not need to change this value.
+env(DATABASE_URL): '//user:example@localhost:3306/db-name?serverVersion=5.6&charset=utf8mb4'
+
+doctrine:
+    dbal:
+        default_connection: %connection_name%
+        connections:
+            %connection_name%:
+                # With Symfony 3.3, remove the `resolve:` prefix
+                url: '%env(DATABASE_URL)%'
+                wrapper_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection'
+                driver_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver'
+                options:
+                    x_reconnect_attempts: 3
+
+```
+
 An example of configuration on Zend Framework 2/3 projects:
 
 ```php
