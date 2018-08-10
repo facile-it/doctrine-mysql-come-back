@@ -9,7 +9,7 @@
 [![License](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back)
 # DoctrineMySQLComeBack
 
-Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3,<2.7-dev.
+Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3, <3.0.
 
 # Installation
 
