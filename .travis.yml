@@ -14,6 +14,9 @@ matrix:
   include:
     - php: 7.1
       env: 
+        - TEST_PHPSTAN=true
+    - php: 7.1
+      env:
         - TEST_COVERAGE=true
     - php: hhvm
       sudo: required
@@ -41,6 +44,7 @@ install:
 
 script:
   - if [[ $TEST_COVERAGE ]]; then phpdbg -qrr bin/phpunit --coverage-clover clover.xml; else bin/phpunit; fi;
+  - if [[ $TEST_PHPSTAN ]]; then bin/phpstan analyse -l 7 src fi;
 
 after_success:
   - if [[ $TEST_COVERAGE ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./clover.xml; fi
