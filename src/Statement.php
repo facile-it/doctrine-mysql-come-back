@@ -24,7 +24,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     protected $conn;
 
     /**
-     * @param $sql
+     * @param string $sql
      * @param Connection $conn
      */
     public function __construct($sql, Connection $conn)
@@ -45,7 +45,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @param array|null $params
      *
-     * @return bool
+     * @return bool|null
      *
      * @throws \Exception
      */
@@ -115,7 +115,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return int
+     * @return string|int|bool
      */
     public function errorCode()
     {

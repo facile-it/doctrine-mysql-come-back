@@ -14,6 +14,9 @@ use Doctrine\DBAL\Connection as DBALConnection;
  */
 class Connection extends DBALConnection
 {
+    /** @var ServerGoneAwayExceptionsAwareInterface */
+    protected $_driver;
+
     /** @var int */
     protected $reconnectAttempts = 0;
 
@@ -21,10 +24,10 @@ class Connection extends DBALConnection
     private $selfReflectionNestingLevelProperty;
 
     /**
-     * @param array                                         $params
-     * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
-     * @param Configuration                                 $config
-     * @param EventManager                                  $eventManager
+     * @param array         $params
+     * @param Driver        $driver
+     * @param Configuration $config
+     * @param EventManager  $eventManager
      *
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -54,7 +57,7 @@ class Connection extends DBALConnection
      * @param array             $types
      * @param QueryCacheProfile $qcp
      *
-     * @return \Doctrine\DBAL\Driver\Statement The executed statement.
+     * @return \Doctrine\DBAL\Driver\ResultStatement|null The executed statement.
      *
      * @throws \Exception
      */
@@ -87,6 +90,7 @@ class Connection extends DBALConnection
      */
     public function query()
     {
+        /** @var \Doctrine\DBAL\Driver\Statement $stmt */
         $stmt = null;
         $args = func_get_args();
         $attempt = 0;
@@ -129,7 +133,7 @@ class Connection extends DBALConnection
      * @param array  $params
      * @param array  $types
      *
-     * @return integer The number of affected rows.
+     * @return integer|null The number of affected rows.
      *
      * @throws \Exception
      */
@@ -163,7 +167,9 @@ class Connection extends DBALConnection
     public function beginTransaction()
     {
         if (0 !== $this->getTransactionNestingLevel()) {
-            return parent::beginTransaction();
+            parent::beginTransaction();
+
+            return;
         }
 
         $attempt = 0;
@@ -188,7 +194,7 @@ class Connection extends DBALConnection
     }
 
     /**
-     * @param $sql
+     * @param string $sql
      *
      * @return Statement
      */
@@ -200,7 +206,7 @@ class Connection extends DBALConnection
     /**
      * returns a reconnect-wrapper for Statements.
      *
-     * @param $sql
+     * @param string $sql
      *
      * @return Statement
      */
@@ -232,7 +238,7 @@ class Connection extends DBALConnection
     }
 
     /**
-     * @param $attempt
+     * @param int $attempt
      * @param bool $ignoreTransactionLevel
      *
      * @return bool
