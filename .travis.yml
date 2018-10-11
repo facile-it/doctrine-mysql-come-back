@@ -13,11 +13,9 @@ matrix:
   fast_finish: true
   include:
     - php: 7.1
-      env: 
-        - TEST_PHPSTAN=true
-    - php: 7.1
       env:
         - TEST_COVERAGE=true
+        - TEST_PHPSTAN=true
     - php: hhvm
       sudo: required
       dist: trusty
