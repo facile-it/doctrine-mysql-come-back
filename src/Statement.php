@@ -45,13 +45,13 @@ class Statement implements \IteratorAggregate, DriverStatement
     /**
      * @param array|null $params
      *
-     * @return bool|null
+     * @return bool
      *
      * @throws \Exception
      */
     public function execute($params = null)
     {
-        $stmt = null;
+        $stmt = false;
         $attempt = 0;
         $retry = true;
         while ($retry) {

@@ -29,9 +29,11 @@ class ConnectionTest extends TestCase
             'platform' => $platform->reveal()
         ];
 
+        /** @var Driver $driverReveal */
+        $driverReveal = $driver->reveal();
         $this->connection = new Connection(
             $params,
-            $driver->reveal(),
+            $driverReveal,
             $configuration->reveal(),
             $eventManager->reveal()
         );
@@ -52,9 +54,11 @@ class ConnectionTest extends TestCase
             'platform' => $platform->reveal()
         ];
 
+        /** @var Driver $driverReveal */
+        $driverReveal = $driver->reveal();
         $connection = new Connection(
             $params,
-            $driver->reveal(),
+            $driverReveal,
             $configuration->reveal(),
             $eventManager->reveal()
         );

@@ -14,9 +14,6 @@ use Doctrine\DBAL\Connection as DBALConnection;
  */
 class Connection extends DBALConnection
 {
-    /** @var ServerGoneAwayExceptionsAwareInterface */
-    protected $_driver;
-
     /** @var int */
     protected $reconnectAttempts = 0;
 
@@ -133,13 +130,13 @@ class Connection extends DBALConnection
      * @param array  $params
      * @param array  $types
      *
-     * @return integer|null The number of affected rows.
+     * @return integer The number of affected rows.
      *
      * @throws \Exception
      */
     public function executeUpdate($query, array $params = array(), array $types = array())
     {
-        $stmt = null;
+        $stmt = 0;
         $attempt = 0;
         $retry = true;
         while ($retry) {
@@ -179,7 +176,9 @@ class Connection extends DBALConnection
             try {
                 parent::beginTransaction();
             } catch (\Exception $e) {
-                if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
+                /** @var ServerGoneAwayExceptionsAwareInterface $driver */
+                $driver = $this->_driver;
+                if ($this->canTryAgain($attempt, true) && $driver->isGoneAwayException($e)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
@@ -259,11 +258,14 @@ class Connection extends DBALConnection
      */
     public function isRetryableException(\Exception $e, $query = null)
     {
+        /** @var ServerGoneAwayExceptionsAwareInterface $driver */
+        $driver = $this->_driver;
+
         if (null === $query || $this->isUpdateQuery($query)) {
-            return $this->_driver->isGoneAwayInUpdateException($e);
+            return $driver->isGoneAwayInUpdateException($e);
         }
 
-        return $this->_driver->isGoneAwayException($e);
+        return $driver->isGoneAwayException($e);
     }
 
     /**

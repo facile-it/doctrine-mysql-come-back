@@ -1,7 +1,10 @@
 <?php
 
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
+use Prophecy\Argument;
 
 class StatementTest extends \PHPUnit\Framework\TestCase
 {
@@ -10,7 +13,9 @@ class StatementTest extends \PHPUnit\Framework\TestCase
         $sql = 'SELECT 1';
         $connection = $this->prophesize(Connection::class);
         $connection
-            ->prepareUnwrapped($sql)
+            ->prepareUnwrapped(
+                Argument::exact($sql)
+            )
             ->shouldBeCalledTimes(1);
 
         $statement = new Statement($sql, $connection->reveal());
