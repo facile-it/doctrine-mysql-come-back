@@ -261,7 +261,7 @@ class Connection extends DBALConnection
     }
 
     /**
-     * This is required because beginTransaction increment _transactionNestingLevel
+     * This is required because beginTransaction increment transactionNestingLevel
      * before the real query is executed, and results incremented also on gone away error.
      * This should be safe for a new established connection.
      */
@@ -269,7 +269,14 @@ class Connection extends DBALConnection
     {
         if (! $this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
             $reflection = new \ReflectionClass(DBALConnection::class);
-            $this->selfReflectionNestingLevelProperty = $reflection->getProperty('_transactionNestingLevel');
+
+            // Private property has been renamed in DBAL 2.9.0+
+            if ($reflection->hasProperty('transactionNestingLevel')) {
+                $this->selfReflectionNestingLevelProperty = $reflection->getProperty('transactionNestingLevel');
+            } else {
+                $this->selfReflectionNestingLevelProperty = $reflection->getProperty('_transactionNestingLevel');
+            }
+
             $this->selfReflectionNestingLevelProperty->setAccessible(true);
         }
 
