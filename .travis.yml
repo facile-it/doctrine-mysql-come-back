@@ -15,18 +15,6 @@ matrix:
     - php: 7.1
       env: 
         - TEST_COVERAGE=true
-    - php: hhvm
-      sudo: required
-      dist: trusty
-      group: edge
-      env:
-        - COMPOSER_FLAGS="--prefer-lowest"
-    - php: hhvm
-      sudo: required
-      dist: trusty
-      group: edge
-      env:
-        - COMPOSER_FLAGS=""
 
 cache:
   directories:
