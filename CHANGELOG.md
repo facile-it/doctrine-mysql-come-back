@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [1.7] - 2019-02-05
+### Fixed
+ * Compatibility with doctrine/dbal up to version 2.9 (#32)
+
 ## [1.6.5] - 2018-04-20
 ### Changed
- * Changed the version constraint o `doctrine/dbal` to `^2.3` to allow v2.7 (#26)
+ * Changed the version constraint of `doctrine/dbal` to `^2.3` to allow v2.7 (#26)
 
 ## [1.6.4] - 2017-09-01
 ### Added
