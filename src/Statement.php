@@ -2,8 +2,8 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use PDO;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
+use PDO;
 
 /**
  * Class Statement.
@@ -25,9 +25,9 @@ class Statement implements \IteratorAggregate, DriverStatement
 
     /**
      * @param $sql
-     * @param Connection $conn
+     * @param ConnectionInterface $conn
      */
-    public function __construct($sql, Connection $conn)
+    public function __construct($sql, ConnectionInterface $conn)
     {
         $this->sql = $sql;
         $this->conn = $conn;

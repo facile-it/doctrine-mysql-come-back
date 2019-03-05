@@ -97,6 +97,9 @@ return [
 ];
 ```
 
+You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` if you are 
+using master / slave Doctrine configuration.
+
 # Usage
 
 To force a reconnection try after a long running task you can call 
