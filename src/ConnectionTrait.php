@@ -5,6 +5,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 
