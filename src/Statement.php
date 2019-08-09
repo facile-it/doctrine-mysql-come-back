@@ -2,8 +2,8 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use PDO;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
+use PDO;
 
 /**
  * Class Statement.
@@ -14,14 +14,21 @@ class Statement implements \IteratorAggregate, DriverStatement
      * @var string
      */
     protected $sql;
+
     /**
-     * @var \Doctrine\DBAL\Statement
+     * @var DriverStatement
      */
     protected $stmt;
     /**
      * @var Connection
      */
     protected $conn;
+
+    private $boundValues = [];
+
+    private $boundParams = [];
+
+    private $fetchMode;
 
     /**
      * @param $sql
@@ -43,6 +50,23 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
+     * Recreate statement for retry.
+     */
+    private function recreateStatement()
+    {
+        $this->createStatement();
+        if (null !== $this->fetchMode) {
+            call_user_func_array([$this->stmt, 'setFetchMode'], $this->fetchMode);
+        }
+        foreach ($this->boundValues as $boundValue) {
+            call_user_func_array([$this->stmt, 'bindValue'], $boundValue);
+        }
+        foreach ($this->boundParams as $boundParam) {
+            call_user_func_array([$this->stmt, 'bindParam'], $boundParam);
+        }
+    }
+
+    /**
      * @param array|null $params
      *
      * @return bool
@@ -61,7 +85,7 @@ class Statement implements \IteratorAggregate, DriverStatement
             } catch (\Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
-                    $this->createStatement();
+                    $this->recreateStatement();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -82,7 +106,9 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindValue($name, $value, $type = null)
     {
-        return $this->stmt->bindValue($name, $value, $type);
+        $this->boundValues[$name] = func_get_args();
+
+        return call_user_func_array([$this->stmt, 'bindValue'], $this->boundValues[$name]);
     }
 
     /**
@@ -95,7 +121,11 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
     {
-        return $this->stmt->bindParam($name, $var, $type, $length);
+        $this->boundParams[$name] = func_get_args();
+        // func_get_args() returns copy, not reference
+        $this->boundParams[$name][1] = &$var;
+
+        return call_user_func_array([$this->stmt, 'bindParam'], $this->boundParams[$name]);
     }
 
     /**
@@ -139,6 +169,8 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
+        $this->fetchMode = func_get_args();
+
         return $this->stmt->setFetchMode($fetchMode, $arg2, $arg3);
     }
 
@@ -156,7 +188,7 @@ class Statement implements \IteratorAggregate, DriverStatement
      * @param int $cursorOffset Only for doctrine/DBAL >= 2.6
      * @return mixed
      */
-    public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
+    public function fetch($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
         return $this->stmt->fetch($fetchMode, $cursorOrientation, $cursorOffset);
     }
@@ -191,7 +223,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return \Doctrine\DBAL\Statement
+     * @return DriverStatement
      */
     public function getWrappedStatement()
     {
