@@ -5,6 +5,7 @@ use Doctrine\DBAL\Driver\Statement as DriverStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 
 class StatementTest extends TestCase
@@ -124,6 +125,47 @@ class StatementTest extends TestCase
 
         $this->expectException(get_class($exception2));
         $this->expectExceptionMessage($exception2->getMessage());
+
+        $this->assertTrue($statement->execute());
+    }
+
+    public function test_state_cache_only_changed_on_success()
+    {
+        $sql = 'SELECT :value, :param';
+        /** @var DriverStatement|ObjectProphecy $driverStatement1 */
+        $driverStatement1 = $this->prophesize(DriverStatement::class);
+        /** @var DriverStatement|ObjectProphecy $driverStatement2 */
+        $driverStatement2 = $this->prophesize(DriverStatement::class);
+        /** @var Connection|ObjectProphecy $connection */
+        $connection = $this->prophesize(Connection::class);
+        $connection
+            ->prepareUnwrapped($sql)
+            ->willReturn($driverStatement1->reveal(), $driverStatement2)
+            ->shouldBeCalledTimes(2);
+
+        $statement = new Statement($sql, $connection->reveal());
+
+        $param = 1;
+        $driverStatement1->bindParam('param', $param, PDO::PARAM_INT)->willReturn(false)->shouldBeCalledTimes(1);
+        $driverStatement1->bindValue('value', 'foo')->willReturn(false)->shouldBeCalledTimes(1);
+        $driverStatement1->setFetchMode(PDO::FETCH_COLUMN, 1, null)->willReturn(false)->shouldBeCalledTimes(1);
+
+        $this->assertFalse($statement->bindParam('param', $param, PDO::PARAM_INT));
+        $this->assertFalse($statement->bindValue('value', 'foo'));
+        $this->assertFalse($statement->setFetchMode(PDO::FETCH_COLUMN, 1));
+
+        $exception = new DBALException('Test');
+        $driverStatement1->execute(null)->willThrow($exception)->shouldBeCalledTimes(1);
+
+        $connection->canTryAgain(0)->willReturn(true)->shouldBeCalledTimes(1);
+        $connection->isRetryableException($exception, $sql)->willReturn(true)->shouldBeCalledTimes(1);
+
+        // retry
+        $connection->close()->shouldBeCalledTimes(1);
+        $driverStatement2->bindParam(Argument::cetera())->shouldNotBeCalled();
+        $driverStatement2->bindValue(Argument::cetera())->shouldNotBeCalled();
+        $driverStatement2->setFetchMode(Argument::cetera())->shouldNotBeCalled();
+        $driverStatement2->execute(null)->willReturn(true)->shouldBeCalledTimes(1);
 
         $this->assertTrue($statement->execute());
     }

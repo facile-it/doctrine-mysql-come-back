@@ -106,9 +106,15 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindValue($name, $value, $type = null)
     {
-        $this->boundValues[$name] = func_get_args();
+        $args = func_get_args();
 
-        return call_user_func_array([$this->stmt, 'bindValue'], $this->boundValues[$name]);
+        if (call_user_func_array([$this->stmt, __FUNCTION__], $args)) {
+            $this->boundValues[$name] = $args;
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -121,11 +127,17 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
     {
-        $this->boundParams[$name] = func_get_args();
+        $args = func_get_args();
         // func_get_args() returns copy, not reference
-        $this->boundParams[$name][1] = &$var;
+        $args[1] = &$var;
 
-        return call_user_func_array([$this->stmt, 'bindParam'], $this->boundParams[$name]);
+        if (call_user_func_array([$this->stmt, __FUNCTION__], $args)) {
+            $this->boundParams[$name] = $args;
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -169,9 +181,13 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
-        $this->fetchMode = func_get_args();
+        if ($this->stmt->setFetchMode($fetchMode, $arg2, $arg3)) {
+            $this->fetchMode = func_get_args();
 
-        return $this->stmt->setFetchMode($fetchMode, $arg2, $arg3);
+            return true;
+        }
+
+        return false;
     }
 
     /**
