@@ -16,9 +16,10 @@ class Statement implements \IteratorAggregate, DriverStatement
     protected $sql;
 
     /**
-     * @var DriverStatement
+     * @var \Doctrine\DBAL\Statement
      */
     protected $stmt;
+
     /**
      * @var Connection
      */
@@ -104,12 +105,10 @@ class Statement implements \IteratorAggregate, DriverStatement
      *
      * @return bool
      */
-    public function bindValue($name, $value, $type = null)
+    public function bindValue($name, $value, $type = PDO::PARAM_STR)
     {
-        $args = func_get_args();
-
-        if (call_user_func_array([$this->stmt, __FUNCTION__], $args)) {
-            $this->boundValues[$name] = $args;
+        if ($this->stmt->bindValue($name, $value, $type)) {
+            $this->boundValues[$name] = [$name, $value, $type];
 
             return true;
         }
@@ -127,12 +126,8 @@ class Statement implements \IteratorAggregate, DriverStatement
      */
     public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
     {
-        $args = func_get_args();
-        // func_get_args() returns copy, not reference
-        $args[1] = &$var;
-
-        if (call_user_func_array([$this->stmt, __FUNCTION__], $args)) {
-            $this->boundParams[$name] = $args;
+        if ($this->stmt->bindParam($name, $var, $type, $length)) {
+            $this->boundParams[$name] = [$name, &$var, $type, $length];
 
             return true;
         }
@@ -182,7 +177,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
         if ($this->stmt->setFetchMode($fetchMode, $arg2, $arg3)) {
-            $this->fetchMode = func_get_args();
+            $this->fetchMode = [$fetchMode, $arg2, $arg3];
 
             return true;
         }
@@ -239,7 +234,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return DriverStatement
+     * @return \Doctrine\DBAL\Statement
      */
     public function getWrappedStatement()
     {

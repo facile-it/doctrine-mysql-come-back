@@ -69,8 +69,8 @@ class StatementTest extends TestCase
         $statement = new Statement($sql, $connection->reveal());
 
         $param = 1;
-        $driverStatement1->bindParam('param', $param, PDO::PARAM_INT)->willReturn(true)->shouldBeCalledTimes(1);
-        $driverStatement1->bindValue('value', 'foo')->willReturn(true)->shouldBeCalledTimes(1);
+        $driverStatement1->bindParam('param', $param, PDO::PARAM_INT, null)->willReturn(true)->shouldBeCalledTimes(1);
+        $driverStatement1->bindValue('value', 'foo', PDO::PARAM_STR)->willReturn(true)->shouldBeCalledTimes(1);
         $driverStatement1->setFetchMode(PDO::FETCH_COLUMN, 1, null)->willReturn(true)->shouldBeCalledTimes(1);
 
         $this->assertTrue($statement->bindParam('param', $param, PDO::PARAM_INT));
@@ -85,9 +85,9 @@ class StatementTest extends TestCase
 
         // retry
         $connection->close()->shouldBeCalledTimes(1);
-        $driverStatement2->bindParam('param', $param, PDO::PARAM_INT)->willReturn(true)->shouldBeCalledTimes(1);
-        $driverStatement2->bindValue('value', 'foo')->willReturn(true)->shouldBeCalledTimes(1);
-        $driverStatement2->setFetchMode(PDO::FETCH_COLUMN, 1)->willReturn(true)->shouldBeCalledTimes(1);
+        $driverStatement2->bindParam('param', $param, PDO::PARAM_INT, null)->willReturn(true)->shouldBeCalledTimes(1);
+        $driverStatement2->bindValue('value', 'foo', PDO::PARAM_STR)->willReturn(true)->shouldBeCalledTimes(1);
+        $driverStatement2->setFetchMode(PDO::FETCH_COLUMN, 1, null)->willReturn(true)->shouldBeCalledTimes(1);
         $driverStatement2->execute(null)->willReturn(true)->shouldBeCalledTimes(1);
 
         $this->assertTrue($statement->execute());
@@ -146,8 +146,8 @@ class StatementTest extends TestCase
         $statement = new Statement($sql, $connection->reveal());
 
         $param = 1;
-        $driverStatement1->bindParam('param', $param, PDO::PARAM_INT)->willReturn(false)->shouldBeCalledTimes(1);
-        $driverStatement1->bindValue('value', 'foo')->willReturn(false)->shouldBeCalledTimes(1);
+        $driverStatement1->bindParam('param', $param, PDO::PARAM_INT, null)->willReturn(false)->shouldBeCalledTimes(1);
+        $driverStatement1->bindValue('value', 'foo', PDO::PARAM_STR)->willReturn(false)->shouldBeCalledTimes(1);
         $driverStatement1->setFetchMode(PDO::FETCH_COLUMN, 1, null)->willReturn(false)->shouldBeCalledTimes(1);
 
         $this->assertFalse($statement->bindParam('param', $param, PDO::PARAM_INT));
