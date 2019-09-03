@@ -33,9 +33,9 @@ class Statement implements \IteratorAggregate, DriverStatement
 
     /**
      * @param $sql
-     * @param Connection $conn
+     * @param ConnectionInterface $conn
      */
-    public function __construct($sql, Connection $conn)
+    public function __construct($sql, ConnectionInterface $conn)
     {
         $this->sql = $sql;
         $this->conn = $conn;
