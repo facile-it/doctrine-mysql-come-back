@@ -14,7 +14,7 @@ Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3
 # Installation
 
 ```console
-$ composer require facile-it/doctrine-mysql-come-back ^1.7
+$ composer require facile-it/doctrine-mysql-come-back ^1.8
 ```
 
 # Configuration
@@ -97,8 +97,7 @@ return [
 ];
 ```
 
-You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` if you are 
-using master / slave Doctrine configuration.
+You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` if you are using master / slave Doctrine configuration.
 
 # Usage
 
