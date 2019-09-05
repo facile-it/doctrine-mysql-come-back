@@ -1,5 +1,5 @@
 {
-    "name": "facile-it/doctrine-mysql-come-back",
+    "name": "accountmanager/doctrine-mysql-come-back",
     "description": "Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal",
     "keywords": ["mysql","doctrine","reconnect","refresh","connection","has gone away","exception"],
     "license": "Apache-2.0",
@@ -19,9 +19,6 @@
     },
     "autoload": {
         "psr-4": { "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "src/" }
-    },
-    "autoload-dev": {
-        "psr-4": { "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "tests/unit/" }
     },
     "config": {
         "preferred-install": "dist",
