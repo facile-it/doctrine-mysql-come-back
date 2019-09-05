@@ -1,12 +1,12 @@
-[![Latest Stable Version](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/v/stable.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) 
-[![Latest Unstable Version](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/v/unstable.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) 
-[![Total Downloads](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/downloads.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) 
+[![Latest Stable Version](https://poser.pugx.org/adgoal/doctrine-mysql-come-back/v/stable.svg)](https://packagist.org/packages/adgoal/doctrine-mysql-come-back) 
+[![Latest Unstable Version](https://poser.pugx.org/adgoal/doctrine-mysql-come-back/v/unstable.svg)](https://packagist.org/packages/adgoal/doctrine-mysql-come-back) 
+[![Total Downloads](https://poser.pugx.org/adgoal/doctrine-mysql-come-back/downloads.svg)](https://packagist.org/packages/adgoal/doctrine-mysql-come-back) 
 
-[![Build status](https://travis-ci.org/facile-it/doctrine-mysql-come-back.svg)]( https://travis-ci.org/facile-it/doctrine-mysql-come-back)
-[![Scrutinizer score](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/?branch=master)
-[![Test coverage](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/?branch=master)
+[![Build status](https://travis-ci.org/adgoal/doctrine-mysql-come-back.svg)]( https://travis-ci.org/adgoal/doctrine-mysql-come-back)
+[![Scrutinizer score](https://scrutinizer-ci.com/g/adgoal/doctrine-mysql-come-back/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/adgoal/doctrine-mysql-come-back/?branch=master)
+[![Test coverage](https://scrutinizer-ci.com/g/adgoal/doctrine-mysql-come-back/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/adgoal/doctrine-mysql-come-back/?branch=master)
 
-[![License](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back)
+[![License](https://poser.pugx.org/adgoal/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/adgoal/doctrine-mysql-come-back)
 # DoctrineMySQLComeBack
 
 Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3, <3.0.
@@ -14,7 +14,7 @@ Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal >=2.3
 # Installation
 
 ```console
-$ composer require facile-it/doctrine-mysql-come-back ^1.7
+$ composer require adgoal/doctrine-mysql-come-back ^1.7
 ```
 
 # Configuration
@@ -38,11 +38,11 @@ $connectionParams = array(
     'password' => 'secret',
     'host' => 'localhost',
     // [doctrine-mysql-come-back] settings
-    'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection',
-    'driverClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver',
-    'driverOptions' => array(
+    'wrapperClass' => Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection::class,
+    'driverClass' => Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver:class,
+    'driverOptions' => [
         'x_reconnect_attempts' => 3
-    )
+    ]
 );
 
 $conn = DriverManager::getConnection($connectionParams, $config);
