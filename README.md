@@ -71,7 +71,7 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
-If you are setting up your database connection using a`database_url` env variable (like newer Symfony versions require) **you need to remove the protocol** from your database url.
+If you are setting up your database connection using a DSN/`database_url` env variable (like the Doctrine Symfony Flex recipe suggests) **you need to remove the protocol** from your database url.
 Otherwise, Doctrine is going to ignore your `driver_class` configuration and use the default protocol driver, which will lead you to an error.
 
 ```yaml
