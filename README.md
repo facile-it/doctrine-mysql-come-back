@@ -71,6 +71,25 @@ doctrine:
                     x_reconnect_attempts: 3
 ```
 
+If you are setting up your database connection using a`database_url` env variable (like newer Symfony versions require) **you need to remove the protocol** from your database url.
+Otherwise, Doctrine is going to ignore your `driver_class` configuration and use the default protocol driver, which will lead you to an error.
+
+```yaml
+doctrine:
+    dbal:
+        connections:
+            default:
+                # DATABASE_URL needs to be without driver protocol.  
+                # use "//db_user:db_password@127.0.0.1:3306/db_name"
+                # instead of "mysql://db_user:db_password@127.0.0.1:3306/db_name" 
+                url: '%env(resolve:DATABASE_URL)%'
+                wrapper_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection'
+                driver_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver'
+                options:
+                    x_reconnect_attempts: 3
+
+``` 
+
 An example of configuration on Zend Framework 2/3 projects:
 
 ```php
