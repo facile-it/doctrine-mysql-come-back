@@ -8,6 +8,8 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\ConnectionInterface;
 
 /**
  * Class MasterSlaveConnection
+ *
+ * @deprecated Use PrimaryReadReplicaConnection instead
  */
 class MasterSlaveConnection extends DBALMasterSlaveConnection implements ConnectionInterface
 {
