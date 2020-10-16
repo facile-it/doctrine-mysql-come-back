@@ -134,7 +134,28 @@ trait ConnectionTrait
      *
      * @throws \Exception
      */
-    public function executeUpdate($query, array $params = array(), array $types = array())
+    public function executeUpdate($query, array $params = [], array $types = [])
+    {
+        return $this->executeStatement($query, $params, $types);
+    }
+
+    /**
+     * Executes an SQL statement with the given parameters and returns the number of affected rows.
+     *
+     * Could be used for:
+     *  - DML statements: INSERT, UPDATE, DELETE, etc.
+     *  - DDL statements: CREATE, DROP, ALTER, etc.
+     *  - DCL statements: GRANT, REVOKE, etc.
+     *  - Session control statements: ALTER SESSION, SET, DECLARE, etc.
+     *  - Other statements that don't yield a row set.
+     *
+     * @param string                 $sql    The statement SQL
+     * @param array<mixed>           $params The query parameters
+     * @param array<int|string|null> $types  The parameter types
+     *
+     * @return int The number of affected rows.
+     */
+    public function executeStatement($sql, array $params = [], array $types = [])
     {
         $stmt = null;
         $attempt = 0;
@@ -142,7 +163,8 @@ trait ConnectionTrait
         while ($retry) {
             $retry = false;
             try {
-                $stmt = parent::executeUpdate($query, $params, $types);
+                // use parent::executeUpdate() for RC
+                $stmt = parent::executeUpdate($sql, $params, $types);
             } catch (\Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
