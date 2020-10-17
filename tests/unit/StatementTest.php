@@ -1,16 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
+use PDO;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 
 class StatementTest extends TestCase
 {
-    public function test_construction()
+    use ProphecyTrait;
+
+    public function test_construction(): void
     {
         $sql = 'SELECT 1';
         $connection = $this->prophesize(Connection::class);
@@ -23,7 +29,7 @@ class StatementTest extends TestCase
         $this->assertInstanceOf(Statement::class, $statement);
     }
 
-    public function test_retry()
+    public function test_retry(): void
     {
         $sql = 'SELECT :param';
         /** @var DriverStatement|ObjectProphecy $driverStatement1 */
@@ -52,7 +58,7 @@ class StatementTest extends TestCase
         $this->assertTrue($statement->execute(['param' => 'value']));
     }
 
-    public function test_retry_with_state()
+    public function test_retry_with_state(): void
     {
         $sql = 'SELECT :value, :param';
         /** @var DriverStatement|ObjectProphecy $driverStatement1 */
@@ -93,7 +99,7 @@ class StatementTest extends TestCase
         $this->assertTrue($statement->execute());
     }
 
-    public function test_retry_fails()
+    public function test_retry_fails(): void
     {
         $sql = 'SELECT 1';
         /** @var DriverStatement|ObjectProphecy $driverStatement1 */
@@ -129,7 +135,7 @@ class StatementTest extends TestCase
         $this->assertTrue($statement->execute());
     }
 
-    public function test_state_cache_only_changed_on_success()
+    public function test_state_cache_only_changed_on_success(): void
     {
         $sql = 'SELECT :value, :param';
         /** @var DriverStatement|ObjectProphecy $driverStatement1 */

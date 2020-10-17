@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\Common\EventManager;
@@ -7,7 +9,11 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\ResultStatement;
+use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+use ReflectionClass;
+use ReflectionProperty;
 
 /**
  * Trait ConnectionTrait
@@ -17,14 +23,14 @@ trait ConnectionTrait
     /** @var int */
     protected $reconnectAttempts = 0;
 
-    /** @var \ReflectionProperty|null */
+    /** @var ReflectionProperty|null */
     private $selfReflectionNestingLevelProperty;
 
     /**
      * @param array $params
      * @param Driver|ServerGoneAwayExceptionsAwareInterface $driver
-     * @param Configuration $config
-     * @param EventManager $eventManager
+     * @param null|Configuration $config
+     * @param null|EventManager $eventManager
      *
      * @throws \InvalidArgumentException
      * @throws \Doctrine\DBAL\DBALException
@@ -32,8 +38,8 @@ trait ConnectionTrait
     public function __construct(
         array $params,
         Driver $driver,
-        Configuration $config = null,
-        EventManager $eventManager = null
+        ?Configuration $config = null,
+        ?EventManager $eventManager = null
     )
     {
         if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
@@ -55,9 +61,9 @@ trait ConnectionTrait
      * @param array $types
      * @param QueryCacheProfile $qcp
      *
-     * @return \Doctrine\DBAL\Driver\Statement The executed statement.
+     * @return ResultStatement The executed statement.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
     {
@@ -68,7 +74,7 @@ trait ConnectionTrait
             $retry = false;
             try {
                 $stmt = parent::executeQuery($query, $params, $types, $qcp);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $query)) {
                     $this->close();
                     ++$attempt;
@@ -84,7 +90,7 @@ trait ConnectionTrait
 
     /**
      * @return \Doctrine\DBAL\Driver\Statement
-     * @throws \Exception
+     * @throws Exception
      */
     public function query()
     {
@@ -95,23 +101,8 @@ trait ConnectionTrait
         while ($retry) {
             $retry = false;
             try {
-                switch (count($args)) {
-                    case 1:
-                        $stmt = parent::query($args[0]);
-                        break;
-                    case 2:
-                        $stmt = parent::query($args[0], $args[1]);
-                        break;
-                    case 3:
-                        $stmt = parent::query($args[0], $args[1], $args[2]);
-                        break;
-                    case 4:
-                        $stmt = parent::query($args[0], $args[1], $args[2], $args[3]);
-                        break;
-                    default:
-                        $stmt = parent::query();
-                }
-            } catch (\Exception $e) {
+                $stmt = parent::query(...$args);
+            } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $args[0])) {
                     $this->close();
                     ++$attempt;
@@ -125,18 +116,9 @@ trait ConnectionTrait
         return $stmt;
     }
 
-    /**
-     * @param string $query
-     * @param array $params
-     * @param array $types
-     *
-     * @return integer The number of affected rows.
-     *
-     * @throws \Exception
-     */
-    public function executeUpdate($query, array $params = [], array $types = [])
+    public function executeUpdate($sql, array $params = [], array $types = [])
     {
-        return $this->executeStatement($query, $params, $types);
+        return $this->executeStatement($sql, $params, $types);
     }
 
     /**
@@ -163,9 +145,12 @@ trait ConnectionTrait
         while ($retry) {
             $retry = false;
             try {
-                // use parent::executeUpdate() for RC
-                $stmt = parent::executeUpdate($sql, $params, $types);
-            } catch (\Exception $e) {
+                if (is_callable('parent::executeStatement')) {
+                    $stmt = parent::executeStatement($sql, $params, $types);
+                } else {
+                    $stmt = parent::executeUpdate($sql, $params, $types);
+                }
+            } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
                     ++$attempt;
@@ -181,7 +166,7 @@ trait ConnectionTrait
 
     /**
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function beginTransaction()
     {
@@ -195,7 +180,7 @@ trait ConnectionTrait
             $retry = false;
             try {
                 parent::beginTransaction();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
@@ -247,7 +232,7 @@ trait ConnectionTrait
     /**
      * Forces reconnection by doing a dummy query.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function refresh()
     {
@@ -269,12 +254,12 @@ trait ConnectionTrait
     }
 
     /**
-     * @param \Exception $e
+     * @param Exception $e
      * @param string|null $query
      *
      * @return bool
      */
-    public function isRetryableException(\Exception $e, $query = null)
+    public function isRetryableException(Exception $e, ?string $query = null)
     {
         if (null === $query || $this->isUpdateQuery($query)) {
             return $this->_driver->isGoneAwayInUpdateException($e);
@@ -290,8 +275,8 @@ trait ConnectionTrait
      */
     private function resetTransactionNestingLevel()
     {
-        if (!$this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
-            $reflection = new \ReflectionClass(DBALConnection::class);
+        if (!$this->selfReflectionNestingLevelProperty instanceof ReflectionProperty) {
+            $reflection = new ReflectionClass(DBALConnection::class);
 
             // Private property has been renamed in DBAL 2.9.0+
             if ($reflection->hasProperty('transactionNestingLevel')) {

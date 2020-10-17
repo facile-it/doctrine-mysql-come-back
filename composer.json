@@ -10,25 +10,29 @@
         }
     ],
     "require": {
-        "php" : "^5.6 || ^7.0",
-        "doctrine/dbal": "^2.3"
+        "php" : "^7.3",
+        "doctrine/dbal": "^2.11"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.4.3 || ^6.0",
-        "friendsofphp/php-cs-fixer": "^2.3"
+        "phpunit/phpunit": "^9.4",
+        "friendsofphp/php-cs-fixer": "^2.12.17",
+        "phpspec/prophecy-phpunit": "^2.0"
     },
     "autoload": {
         "psr-4": { "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "src/" }
     },
     "autoload-dev": {
-        "psr-4": { "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "tests/unit/" }
+        "psr-4": {
+            "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\FunctionalTest\\": "tests/functional/",
+            "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "tests/unit/"
+        }
     },
     "config": {
-        "preferred-install": "dist",
-        "bin-dir": "bin"
+        "preferred-install": "dist"
     },
     "minimum-stability": "stable",
     "scripts": {
+        "test": "phpunit",
         "phpcs": "php-cs-fixer fix --level=psr2 -v --diff --dry-run src/",
         "phpcs-fix": "php-cs-fixer fix --level=psr2 -v --diff src/"
     }
