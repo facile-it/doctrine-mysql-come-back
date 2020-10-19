@@ -116,11 +116,6 @@ trait ConnectionTrait
         return $stmt;
     }
 
-    public function executeUpdate($sql, array $params = [], array $types = [])
-    {
-        return $this->executeStatement($sql, $params, $types);
-    }
-
     /**
      * Executes an SQL statement with the given parameters and returns the number of affected rows.
      *
@@ -145,11 +140,7 @@ trait ConnectionTrait
         while ($retry) {
             $retry = false;
             try {
-                if (is_callable('parent::executeStatement')) {
-                    $stmt = parent::executeStatement($sql, $params, $types);
-                } else {
-                    $stmt = parent::executeUpdate($sql, $params, $types);
-                }
+                $stmt = parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
