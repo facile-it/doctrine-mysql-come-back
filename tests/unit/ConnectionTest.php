@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\Driver;
@@ -7,14 +9,18 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
 use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class ConnectionTest extends TestCase
 {
+    use ProphecyTrait;
+
     /** @var Connection */
     protected $connection;
 
-    public function setUp()
+    public function setUp(): void
     {
         $driver = $this->prophesize(Driver::class)
             ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
@@ -37,7 +43,7 @@ class ConnectionTest extends TestCase
         );
     }
 
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $driver = $this->prophesize(Driver::class)
             ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
@@ -62,10 +68,7 @@ class ConnectionTest extends TestCase
         static::assertInstanceOf(Connection::class, $connection);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testConstructorWithInvalidDriver()
+    public function testConstructorWithInvalidDriver(): void
     {
         $driver = $this->prophesize(Driver::class);
         $configuration = $this->prophesize(Configuration::class);
@@ -79,14 +82,14 @@ class ConnectionTest extends TestCase
             'platform' => $platform->reveal()
         ];
 
-        $connection = new Connection(
+        $this->expectException(InvalidArgumentException::class);
+
+        new Connection(
             $params,
             $driver->reveal(),
             $configuration->reveal(),
             $eventManager->reveal()
         );
-
-        static::assertInstanceOf(Connection::class, $connection);
     }
 
     /**
@@ -95,12 +98,12 @@ class ConnectionTest extends TestCase
      * @param string $query
      * @param boolean $expected
      */
-    public function testIsUpdateQuery($query, $expected)
+    public function testIsUpdateQuery(string $query, bool $expected): void
     {
         static::assertEquals($expected, $this->connection->isUpdateQuery($query));
     }
 
-    public function isUpdateQueryDataProvider()
+    public function isUpdateQueryDataProvider(): array
     {
         return [
             ['UPDATE ', true],

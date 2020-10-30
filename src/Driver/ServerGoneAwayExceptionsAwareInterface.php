@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
+
+use Exception;
 
 /**
  * Class ServerGoneAwayExceptionsAwareInterface.
@@ -8,16 +12,16 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver;
 interface ServerGoneAwayExceptionsAwareInterface
 {
     /**
-     * @param \Exception $e
+     * @param Exception $e
      *
      * @return bool
      */
-    public function isGoneAwayException(\Exception $e);
+    public function isGoneAwayException(Exception $e): bool;
 
     /**
-     * @param \Exception $e
+     * @param Exception $e
      *
      * @return bool
      */
-    public function isGoneAwayInUpdateException(\Exception $e);
+    public function isGoneAwayInUpdateException(Exception $e): bool;
 }

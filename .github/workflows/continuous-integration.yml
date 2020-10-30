@@ -1,0 +1,108 @@
+name: "Continuous Integration"
+
+on:
+  pull_request:
+    branches:
+      - "*.x"
+      - "master"
+  push:
+    branches:
+      - "*.x"
+      - "master"
+  schedule:
+    - cron: "42 3 * * 1"
+
+jobs:
+  phpunit-mysql:
+    name: "PHPUnit with MySQL"
+    runs-on: "ubuntu-20.04"
+
+    strategy:
+      matrix:
+        php-version:
+          - "7.3"
+          - "7.4"
+        mysql-version:
+          - "5.7"
+          - "8.0"
+        deps:
+          - "latest"
+        coverage:
+          - "false"
+        extension:
+          - "mysqli"
+          - "pdo_mysql"
+        include:
+          - php-version: "7.3"
+            mysql-version: "8.0"
+            extension: "mysqli"
+            custom-entrypoint: >-
+              --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+          - php-version: "7.3"
+            mysql-version: "8.0"
+            extension: "pdo_mysql"
+            custom-entrypoint: >-
+              --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+          - mysql-version: "5.7"
+          - mysql-version: "8.0"
+            # https://stackoverflow.com/questions/60902904/how-to-pass-mysql-native-password-to-mysql-service-in-github-actions
+            custom-entrypoint: >-
+              --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+          - deps: "lowest"
+            php-version: "7.3"
+            mysql-version: "5.7"
+            extension: "pdo_mysql"
+            coverage: "true"
+
+    services:
+      mysql:
+        image: "mysql:${{ matrix.mysql-version }}"
+
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes
+          -e MYSQL_DATABASE=test
+          ${{ matrix.custom-entrypoint }}
+        ports:
+          - "3306:3306"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 2
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php-version }}"
+          coverage: "pcov"
+          ini-values: "zend.assertions=1"
+          extensions: "${{ matrix.extension }}"
+
+      - name: "Cache dependencies installed with composer"
+        uses: "actions/cache@v2"
+        with:
+          path: "~/.composer/cache"
+          key: "php-${{ matrix.php-version }}-composer-locked-${{ hashFiles('composer.lock') }}"
+          restore-keys: "php-${{ matrix.php-version }}-composer-locked-"
+
+      - name: "Install dependencies with composer"
+        run: "composer install --no-interaction --no-progress --no-suggest --prefer-dist"
+        if: "${{ matrix.deps != 'low' }}"
+
+      - name: "Install lowest possible dependencies with composer"
+        run: "composer update --no-interaction --no-progress --no-suggest --prefer-dist --prefer-lowest"
+        if: "${{ matrix.deps == 'low' }}"
+
+      - name: "Run PHPUnit"
+        run: "vendor/bin/phpunit -c ci/github/phpunit/${{ matrix.extension }}.xml"
+        if: "${{ matrix.coverage != 'true' }}"
+
+      - name: "Run PHPUnit with coverage"
+        run: "vendor/bin/phpunit -c ci/github/phpunit/${{ matrix.extension }}.xml --coverage-clover=coverage.xml"
+        if: "${{ matrix.coverage == 'true' }}"
+
+      - name: "Upload coverage"
+        run: "wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./coverage.xml"
+        if: "${{ matrix.coverage == 'true' }}"

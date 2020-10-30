@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
+use IteratorAggregate;
 use PDO;
+use Traversable;
 
 /**
  * Class Statement.
  */
-class Statement implements \IteratorAggregate, DriverStatement
+class Statement implements IteratorAggregate, DriverStatement
 {
     /**
      * @var string
@@ -186,7 +190,7 @@ class Statement implements \IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return \Traversable
+     * @return Traversable
      */
     public function getIterator()
     {

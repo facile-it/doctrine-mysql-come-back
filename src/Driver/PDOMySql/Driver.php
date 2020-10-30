@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql;
 
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
