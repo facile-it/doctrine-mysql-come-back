@@ -70,8 +70,6 @@ class ConnectionTest extends TestCase
 
     public function testConstructorWithInvalidDriver(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-
         $driver = $this->prophesize(Driver::class);
         $configuration = $this->prophesize(Configuration::class);
         $eventManager = $this->prophesize(EventManager::class);
@@ -84,14 +82,14 @@ class ConnectionTest extends TestCase
             'platform' => $platform->reveal()
         ];
 
-        $connection = new Connection(
+        $this->expectException(InvalidArgumentException::class);
+
+        new Connection(
             $params,
             $driver->reveal(),
             $configuration->reveal(),
             $eventManager->reveal()
         );
-
-        static::assertInstanceOf(Connection::class, $connection);
     }
 
     /**

@@ -61,12 +61,13 @@ TABLE
 
     public function testExecuteQueryShouldNotReconnect(): void
     {
-        $this->expectException(DBALException::class);
-        
         $connection = $this->createConnection(0);
         $this->assertSame(1, $connection->connectCount);
         $this->setConnectionTimeout($connection, 2);
         sleep(3);
+        
+        $this->expectException(DBALException::class);
+
         $connection->executeQuery('SELECT 1');
     }
 
