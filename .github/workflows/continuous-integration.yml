@@ -89,11 +89,11 @@ jobs:
 
       - name: "Install dependencies with composer"
         run: "composer install --no-interaction --no-progress --no-suggest --prefer-dist"
-        if: "${{ matrix.deps != 'low' }}"
+        if: "${{ matrix.deps != 'lowest' }}"
 
       - name: "Install lowest possible dependencies with composer"
         run: "composer update --no-interaction --no-progress --no-suggest --prefer-dist --prefer-lowest"
-        if: "${{ matrix.deps == 'low' }}"
+        if: "${{ matrix.deps == 'lowest' }}"
 
       - name: "Run PHPUnit"
         run: "vendor/bin/phpunit -c ci/github/phpunit/${{ matrix.extension }}.xml"
