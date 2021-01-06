@@ -10,6 +10,7 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\ResultStatement;
+use Doctrine\DBAL\FetchMode;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 use ReflectionClass;
@@ -25,6 +26,9 @@ trait ConnectionTrait
 
     /** @var ReflectionProperty|null */
     private $selfReflectionNestingLevelProperty;
+
+    /** @var int */
+    protected $defaultFetchMode = FetchMode::ASSOCIATIVE;
 
     /**
      * @param array $params
@@ -205,23 +209,16 @@ trait ConnectionTrait
      */
     protected function prepareWrapped($sql)
     {
-        return new Statement($sql, $this);
-    }
+        $stmt = new Statement($sql, $this);
+        $stmt->setFetchMode($this->defaultFetchMode);
 
-    /**
-     * do not use, only used by Statement-class
-     * needs to be public for access from the Statement-class.
-     *
-     * @internal
-     */
-    public function prepareUnwrapped($sql)
-    {
-        // returns the actual statement
-        return parent::prepare($sql);
+        return $stmt;
     }
 
     /**
      * Forces reconnection by doing a dummy query.
+     *
+     * @deprecated Use ping()
      *
      * @throws Exception
      */
@@ -231,7 +228,7 @@ trait ConnectionTrait
     }
 
     /**
-     * @param $attempt
+     * @param int $attempt
      * @param bool $ignoreTransactionLevel
      *
      * @return bool
