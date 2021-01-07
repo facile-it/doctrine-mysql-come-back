@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.9.0] - TBD
+## [1.10.0] - TBD
+### Added
+* Added compatibility with doctrine/dbal > 2.11 Statement
+* Added ability to reconnect when creating `Mysqli` statement
+### Changed
+* `Statement` now extends the original one, so all methods are implemented now
+* `Connection::refresh()` is deprecated, you should use the original `Connection::ping()`
+
+## [1.9.0] - 2020-11-02
 ### Added
  * Added compatibility with doctrine/dbal 2.11
  * Added Github Actions for CI

@@ -4,54 +4,58 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\Driver\Statement as DriverStatement;
-use IteratorAggregate;
-use PDO;
-use Traversable;
+use Doctrine\DBAL\ParameterType;
 
 /**
- * Class Statement.
+ * @internal
  */
-class Statement implements IteratorAggregate, DriverStatement
+class Statement extends \Doctrine\DBAL\Statement
 {
     /**
-     * @var string
-     */
-    protected $sql;
-
-    /**
-     * @var \Doctrine\DBAL\Statement
-     */
-    protected $stmt;
-
-    /**
+     * The connection this statement is bound to and executed on.
+     *
      * @var Connection
      */
     protected $conn;
 
+    /**
+     * @var mixed[][]
+     */
     private $boundValues = [];
 
+    /**
+     * @var mixed[][]
+     */
     private $boundParams = [];
 
+    /**
+     * @var mixed[]|null
+     */
     private $fetchMode;
 
     /**
      * @param $sql
-     * @param ConnectionInterface $conn
+     * @param Connection $conn
      */
-    public function __construct($sql, ConnectionInterface $conn)
+    public function __construct($sql, Connection $conn)
     {
-        $this->sql = $sql;
-        $this->conn = $conn;
-        $this->createStatement();
-    }
-
-    /**
-     * Create Statement.
-     */
-    private function createStatement()
-    {
-        $this->stmt = $this->conn->prepareUnwrapped($this->sql);
+        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
+        $attempt = 0;
+        $retry = true;
+        while ($retry) {
+            $retry = false;
+            try {
+                parent::__construct($sql, $conn);
+            } catch (\Exception $e) {
+                if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
+                    $conn->close();
+                    ++$attempt;
+                    $retry = true;
+                } else {
+                    throw $e;
+                }
+            }
+        }
     }
 
     /**
@@ -59,7 +63,8 @@ class Statement implements IteratorAggregate, DriverStatement
      */
     private function recreateStatement()
     {
-        $this->createStatement();
+        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
+
         if (null !== $this->fetchMode) {
             call_user_func_array([$this->stmt, 'setFetchMode'], $this->fetchMode);
         }
@@ -86,7 +91,7 @@ class Statement implements IteratorAggregate, DriverStatement
         while ($retry) {
             $retry = false;
             try {
-                $stmt = $this->stmt->execute($params);
+                $stmt = parent::execute($params);
             } catch (\Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
@@ -109,9 +114,9 @@ class Statement implements IteratorAggregate, DriverStatement
      *
      * @return bool
      */
-    public function bindValue($name, $value, $type = PDO::PARAM_STR)
+    public function bindValue($name, $value, $type = ParameterType::STRING)
     {
-        if ($this->stmt->bindValue($name, $value, $type)) {
+        if (parent::bindValue($name, $value, $type)) {
             $this->boundValues[$name] = [$name, $value, $type];
 
             return true;
@@ -121,17 +126,17 @@ class Statement implements IteratorAggregate, DriverStatement
     }
 
     /**
-     * @param string   $name
-     * @param mixed    $var
+     * @param string|int   $param
+     * @param mixed    $variable
      * @param int      $type
      * @param int|null $length
      *
      * @return bool
      */
-    public function bindParam($name, &$var, $type = PDO::PARAM_STR, $length = null)
+    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
     {
-        if ($this->stmt->bindParam($name, $var, $type, $length)) {
-            $this->boundParams[$name] = [$name, &$var, $type, $length];
+        if (parent::bindParam($param, $variable, $type, $length)) {
+            $this->boundParams[$param] = [$param, &$variable, $type, $length];
 
             return true;
         }
@@ -140,38 +145,8 @@ class Statement implements IteratorAggregate, DriverStatement
     }
 
     /**
-     * @return bool
-     */
-    public function closeCursor()
-    {
-        return $this->stmt->closeCursor();
-    }
-
-    /**
-     * @return int
-     */
-    public function columnCount()
-    {
-        return $this->stmt->columnCount();
-    }
-
-    /**
-     * @return int
-     */
-    public function errorCode()
-    {
-        return $this->stmt->errorCode();
-    }
-
-    /**
-     * @return array
-     */
-    public function errorInfo()
-    {
-        return $this->stmt->errorInfo();
-    }
-
-    /**
+     * @deprecated Use one of the fetch- or iterate-related methods.
+     *
      * @param int   $fetchMode
      * @param mixed $arg2
      * @param mixed $arg3
@@ -180,68 +155,12 @@ class Statement implements IteratorAggregate, DriverStatement
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
-        if ($this->stmt->setFetchMode($fetchMode, $arg2, $arg3)) {
+        if (parent::setFetchMode($fetchMode, $arg2, $arg3)) {
             $this->fetchMode = [$fetchMode, $arg2, $arg3];
 
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * @return Traversable
-     */
-    public function getIterator()
-    {
-        return $this->stmt;
-    }
-
-    /**
-     * @param int|null $fetchMode
-     * @param int $cursorOrientation Only for doctrine/DBAL >= 2.6
-     * @param int $cursorOffset Only for doctrine/DBAL >= 2.6
-     * @return mixed
-     */
-    public function fetch($fetchMode = null, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
-    {
-        return $this->stmt->fetch($fetchMode, $cursorOrientation, $cursorOffset);
-    }
-
-    /**
-     * @param int|null $fetchMode
-     * @param int $fetchArgument Only for doctrine/DBAL >= 2.6
-     * @param null $ctorArgs Only for doctrine/DBAL >= 2.6
-     * @return mixed
-     */
-    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
-    {
-        return $this->stmt->fetchAll($fetchMode, $fetchArgument, $ctorArgs);
-    }
-
-    /**
-     * @param int $columnIndex
-     *
-     * @return mixed
-     */
-    public function fetchColumn($columnIndex = 0)
-    {
-        return $this->stmt->fetchColumn($columnIndex);
-    }
-
-    /**
-     * @return int
-     */
-    public function rowCount()
-    {
-        return $this->stmt->rowCount();
-    }
-
-    /**
-     * @return \Doctrine\DBAL\Statement
-     */
-    public function getWrappedStatement()
-    {
-        return $this->stmt;
     }
 }
