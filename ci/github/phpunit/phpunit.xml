@@ -10,7 +10,6 @@
 >
     <php>
         <ini name="error_reporting" value="-1" />
-        <var name="db_driver" value="mysqli" />
         <var name="db_host" value="127.0.0.1" />
         <var name="db_port" value="3306"/>
         <var name="db_user" value="root" />
