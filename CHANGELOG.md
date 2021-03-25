@@ -5,8 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.10.0] - TBD
+## [1.10.0] - 2021-03-25
 ### Added
+* Added PHP 8 support
 * Added compatibility with doctrine/dbal > 2.11 Statement
 * Added ability to reconnect when creating `Mysqli` statement
 ### Changed
