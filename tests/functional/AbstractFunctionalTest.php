@@ -90,7 +90,7 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->executeQuery('SELECT 1')->execute();
+        $connection->executeQuery('SELECT 1')->fetch();
         $this->assertSame(2, $connection->connectCount);
     }
 
