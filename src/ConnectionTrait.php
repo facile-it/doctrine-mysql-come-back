@@ -233,7 +233,7 @@ trait ConnectionTrait
      *
      * @return bool
      */
-    public function canTryAgain($attempt, $ignoreTransactionLevel = false)
+    public function canTryAgain(int $attempt, bool $ignoreTransactionLevel = false): bool
     {
         $canByAttempt = ($attempt < $this->reconnectAttempts);
         $canByTransactionNestingLevel = $ignoreTransactionLevel ? true : (0 === $this->getTransactionNestingLevel());
@@ -241,13 +241,7 @@ trait ConnectionTrait
         return $canByAttempt && $canByTransactionNestingLevel;
     }
 
-    /**
-     * @param Exception $e
-     * @param string|null $query
-     *
-     * @return bool
-     */
-    public function isRetryableException(Exception $e, ?string $query = null)
+    public function isRetryableException(Exception $e, ?string $query = null): bool
     {
         if (null === $query || $this->isUpdateQuery($query)) {
             return $this->_driver->isGoneAwayInUpdateException($e);
@@ -279,12 +273,7 @@ trait ConnectionTrait
         $this->selfReflectionNestingLevelProperty->setValue($this, 0);
     }
 
-    /**
-     * @param string $query
-     *
-     * @return bool
-     */
-    public function isUpdateQuery($query)
+    public function isUpdateQuery(string $query): bool
     {
         return !preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $query);
     }

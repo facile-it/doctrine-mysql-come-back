@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Connection as DBALConnection;
+use Exception;
 
 /**
  * @internal
@@ -14,7 +16,7 @@ class Statement extends \Doctrine\DBAL\Statement
     /**
      * The connection this statement is bound to and executed on.
      *
-     * @var Connection
+     * @var DBALConnection&ConnectionInterface
      */
     protected $conn;
 
@@ -35,7 +37,7 @@ class Statement extends \Doctrine\DBAL\Statement
 
     /**
      * @param $sql
-     * @param Connection $conn
+     * @param DBALConnection&ConnectionInterface $conn
      */
     public function __construct($sql, ConnectionInterface $conn)
     {
@@ -46,7 +48,7 @@ class Statement extends \Doctrine\DBAL\Statement
             $retry = false;
             try {
                 parent::__construct($sql, $conn);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
                     $conn->close();
                     ++$attempt;
@@ -81,7 +83,7 @@ class Statement extends \Doctrine\DBAL\Statement
      *
      * @return bool
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute($params = null)
     {
@@ -92,7 +94,7 @@ class Statement extends \Doctrine\DBAL\Statement
             $retry = false;
             try {
                 $stmt = parent::execute($params);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
                     $this->recreateStatement();
