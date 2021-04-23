@@ -13,6 +13,7 @@ use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\FetchMode;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -36,8 +37,8 @@ trait ConnectionTrait
      * @param null|Configuration $config
      * @param null|EventManager $eventManager
      *
-     * @throws \InvalidArgumentException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws InvalidArgumentException
+     * @throws \Doctrine\DBAL\Exception
      */
     public function __construct(
         array $params,
@@ -47,7 +48,7 @@ trait ConnectionTrait
     )
     {
         if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('%s needs a driver that implements ServerGoneAwayExceptionsAwareInterface', get_class($this))
             );
         }
@@ -209,6 +210,7 @@ trait ConnectionTrait
      */
     protected function prepareWrapped($sql)
     {
+        /** @var DBALConnection&ConnectionInterface $this */
         $stmt = new Statement($sql, $this);
         $stmt->setFetchMode($this->defaultFetchMode);
 
@@ -236,7 +238,7 @@ trait ConnectionTrait
     public function canTryAgain($attempt, $ignoreTransactionLevel = false)
     {
         $canByAttempt = ($attempt < $this->reconnectAttempts);
-        $canByTransactionNestingLevel = $ignoreTransactionLevel ? true : (0 === $this->getTransactionNestingLevel());
+        $canByTransactionNestingLevel = $ignoreTransactionLevel || 0 === $this->getTransactionNestingLevel();
 
         return $canByAttempt && $canByTransactionNestingLevel;
     }

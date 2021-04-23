@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\ParameterType;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTest extends TestCase
@@ -79,7 +78,7 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
         
-        $this->expectException(DBALException::class);
+        $this->expectException(Exception::class);
 
         $connection->executeQuery('SELECT 1');
     }
