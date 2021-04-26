@@ -12,7 +12,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
 /**
  * Class Driver.
  */
-class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwareInterface
+final class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwareInterface
 {
     use ServerGoneAwayExceptionsAwareTrait;
 
@@ -36,7 +36,7 @@ class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwar
      *
      * @return string The DSN.
      */
-    protected function constructPdoDsn(array $params): string
+    private function constructPdoDsn(array $params): string
     {
         $dsn = 'mysql:';
         if (isset($params['host']) && $params['host'] !== '') {
