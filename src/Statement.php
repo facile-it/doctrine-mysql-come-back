@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\ParameterType;
+use Exception;
 
 /**
  * @internal
@@ -46,7 +47,7 @@ class Statement extends \Doctrine\DBAL\Statement
             $retry = false;
             try {
                 parent::__construct($sql, $conn);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
                     $conn->close();
                     ++$attempt;
@@ -81,7 +82,7 @@ class Statement extends \Doctrine\DBAL\Statement
      *
      * @return bool
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute($params = null)
     {
@@ -92,7 +93,7 @@ class Statement extends \Doctrine\DBAL\Statement
             $retry = false;
             try {
                 $stmt = parent::execute($params);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
                     $this->recreateStatement();
@@ -108,16 +109,16 @@ class Statement extends \Doctrine\DBAL\Statement
     }
 
     /**
-     * @param string $name
+     * @param string $param
      * @param mixed  $value
      * @param mixed  $type
      *
      * @return bool
      */
-    public function bindValue($name, $value, $type = ParameterType::STRING)
+    public function bindValue($param, $value, $type = ParameterType::STRING)
     {
-        if (parent::bindValue($name, $value, $type)) {
-            $this->boundValues[$name] = [$name, $value, $type];
+        if (parent::bindValue($param, $value, $type)) {
+            $this->boundValues[$param] = [$param, $value, $type];
 
             return true;
         }
