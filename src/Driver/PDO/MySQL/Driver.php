@@ -12,7 +12,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAw
 /**
  * Class Driver.
  */
-final class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwareInterface
+class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwareInterface
 {
     use ServerGoneAwayExceptionsAwareTrait;
 
