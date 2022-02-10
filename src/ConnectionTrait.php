@@ -9,9 +9,10 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Driver\Result;
 use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Result as ResultInterface;
 use Doctrine\DBAL\Statement;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
@@ -61,27 +62,16 @@ trait ConnectionTrait
         parent::__construct($params, $driver, $config, $eventManager);
     }
 
-    /**
-     * @param string $query
-     * @param array $params
-     * @param array $types
-     * @param QueryCacheProfile $qcp
-     *
-     * @throws Exception
-     *
-     * @return ResultStatement the executed statement
-     */
-    public function executeQuery($query, array $params = [], $types = [], QueryCacheProfile $qcp = null)
+    public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
-        $stmt = null;
         $attempt = 0;
-        $retry = true;
-        while ($retry) {
-            $retry = false;
+        $retry = false;
+
+        do {
             try {
-                $stmt = parent::executeQuery($query, $params, $types, $qcp);
+                return parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $query)) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -89,15 +79,13 @@ trait ConnectionTrait
                     throw $e;
                 }
             }
-        }
-
-        return $stmt;
+        } while ($retry);
     }
 
     /**
      * @inheritDoc
      */
-    public function query(string $sql): Result
+    public function query(string $sql): ResultInterface
     {
         $attempt = 0;
 
