@@ -1,7 +1,15 @@
 {
     "name": "facile-it/doctrine-mysql-come-back",
     "description": "Auto reconnect on Doctrine MySql has gone away exceptions on doctrine/dbal",
-    "keywords": ["mysql","doctrine","reconnect","refresh","connection","has gone away","exception"],
+    "keywords": [
+        "mysql",
+        "doctrine",
+        "reconnect",
+        "refresh",
+        "connection",
+        "has gone away",
+        "exception"
+    ],
     "license": "Apache-2.0",
     "authors": [
         {
@@ -10,16 +18,18 @@
         }
     ],
     "require": {
-        "php" : "^7.3 || ^8.0",
-        "doctrine/dbal": "^2.11"
+        "php": "^7.3 || ^8.0",
+        "doctrine/dbal": "^3"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.4",
-        "friendsofphp/php-cs-fixer": "^2.12.17",
+        "phpunit/phpunit": "^9.5",
+        "facile-it/facile-coding-standard": "^0.5.1",
         "phpspec/prophecy-phpunit": "^2.0"
     },
     "autoload": {
-        "psr-4": { "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "src/" }
+        "psr-4": {
+            "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -28,7 +38,10 @@
         }
     },
     "config": {
-        "preferred-install": "dist"
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "facile-it/facile-coding-standard": true
+        }
     },
     "minimum-stability": "stable",
     "scripts": {
