@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
+use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 
 class PDOMySqlTest extends AbstractFunctionalTest
 {
