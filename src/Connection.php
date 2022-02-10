@@ -15,7 +15,7 @@ use Doctrine\DBAL\Result;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
-class Connection extends DBALConnection implements ConnectionInterface
+class Connection extends DBALConnection
 {
     /** @var GoneAwayDetector */
     protected $goneAwayDetector;

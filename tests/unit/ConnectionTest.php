@@ -8,8 +8,6 @@ use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -17,37 +15,12 @@ class ConnectionTest extends TestCase
 {
     use ProphecyTrait;
 
-    /** @var Connection */
-    protected $connection;
-
-    public function setUp(): void
-    {
-        $driver = $this->prophesize(Driver::class)
-            ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
-        $configuration = $this->prophesize(Configuration::class);
-        $eventManager = $this->prophesize(EventManager::class);
-        $platform = $this->prophesize(AbstractPlatform::class);
-
-        $params = [
-            'driverOptions' => [
-                'x_reconnect_attempts' => 3,
-            ],
-            'platform' => $platform->reveal(),
-        ];
-
-        $this->connection = new Connection(
-            $params,
-            $driver->reveal(),
-            $configuration->reveal(),
-            $eventManager->reveal()
-        );
-    }
-
     public function testConstructor(): void
     {
-        $driver = $this->prophesize(Driver::class)
-            ->willImplement(ServerGoneAwayExceptionsAwareInterface::class);
+        $driver = $this->prophesize(Driver::class);
         $configuration = $this->prophesize(Configuration::class);
+        $configuration->getAutoCommit()
+            ->willReturn(false);
         $eventManager = $this->prophesize(EventManager::class);
         $platform = $this->prophesize(AbstractPlatform::class);
 
@@ -68,30 +41,6 @@ class ConnectionTest extends TestCase
         static::assertInstanceOf(Connection::class, $connection);
     }
 
-    public function testConstructorWithInvalidDriver(): void
-    {
-        $driver = $this->prophesize(Driver::class);
-        $configuration = $this->prophesize(Configuration::class);
-        $eventManager = $this->prophesize(EventManager::class);
-        $platform = $this->prophesize(AbstractPlatform::class);
-
-        $params = [
-            'driverOptions' => [
-                'x_reconnect_attempts' => 999,
-            ],
-            'platform' => $platform->reveal(),
-        ];
-
-        $this->expectException(InvalidArgumentException::class);
-
-        new Connection(
-            $params,
-            $driver->reveal(),
-            $configuration->reveal(),
-            $eventManager->reveal()
-        );
-    }
-
     /**
      * @dataProvider isUpdateQueryDataProvider
      *
@@ -100,7 +49,28 @@ class ConnectionTest extends TestCase
      */
     public function testIsUpdateQuery(string $query, bool $expected): void
     {
-        static::assertEquals($expected, $this->connection->isUpdateQuery($query));
+        $driver = $this->prophesize(Driver::class);
+        $configuration = $this->prophesize(Configuration::class);
+        $configuration->getAutoCommit()
+            ->willReturn(false);
+        $eventManager = $this->prophesize(EventManager::class);
+        $platform = $this->prophesize(AbstractPlatform::class);
+
+        $params = [
+            'driverOptions' => [
+                'x_reconnect_attempts' => 3,
+            ],
+            'platform' => $platform->reveal(),
+        ];
+
+        $connection = new Connection(
+            $params,
+            $driver->reveal(),
+            $configuration->reveal(),
+            $eventManager->reveal()
+        );
+
+        static::assertEquals($expected, $connection->isUpdateQuery($query));
     }
 
     public function isUpdateQueryDataProvider(): array
