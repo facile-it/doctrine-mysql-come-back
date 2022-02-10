@@ -88,7 +88,7 @@ class Statement extends \Doctrine\DBAL\Statement
             try {
                 return $parentCall(...$params);
             } catch (Exception $e) {
-                if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
+                if ($this->conn->canTryAgain($e, $attempt, $this->sql)) {
                     $this->conn->close();
                     $this->recreateStatement();
                     ++$attempt;

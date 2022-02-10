@@ -58,7 +58,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e, $sql)) {
+                if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -78,7 +78,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e, $sql)) {
+                if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -102,7 +102,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::beginTransaction();
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e)) {
+                if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
@@ -116,34 +116,17 @@ class Connection extends DBALConnection implements ConnectionInterface
         } while ($retry);
     }
 
-    /**
-     * @param int $attempt
-     * @param bool $ignoreTransactionLevel
-     *
-     * @return bool
-     */
-    public function canTryAgain(int $attempt, bool $ignoreTransactionLevel = false): bool
+    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null, bool $ignoreTransactionLevel = false): bool
     {
         if ($attempt >= $this->reconnectAttempts) {
             return false;
         }
 
-        return $ignoreTransactionLevel || 0 === $this->getTransactionNestingLevel();
-    }
-
-    /**
-     * @param Exception $e
-     * @param string|null $query
-     *
-     * @return bool
-     */
-    public function isRetryableException(Exception $e, ?string $query = null)
-    {
-        if (null === $query || $this->isUpdateQuery($query)) {
-            return $this->goneAwayDetector->isGoneAwayInUpdateException($e);
+        if (! $ignoreTransactionLevel && $this->getTransactionNestingLevel() > 0) {
+            return false;
         }
 
-        return $this->goneAwayDetector->isGoneAwayException($e);
+        return $this->goneAwayDetector->isGoneAwayException($throwable, $sql);
     }
 
     /**
