@@ -10,7 +10,9 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Result;
+use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Statement;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 use InvalidArgumentException;
@@ -185,27 +187,17 @@ trait ConnectionTrait
         }
     }
 
-    /**
-     * @param $sql
-     *
-     * @return Statement
-     */
-    public function prepare($sql)
+    public function prepare(string $sql): StatementInterface
     {
         return $this->prepareWrapped($sql);
     }
 
     /**
-     * returns a reconnect-wrapper for Statements.
-     *
-     * @param $sql
-     *
-     * @return Statement
+     * Returns a reconnect-wrapper for Statements.
      */
-    protected function prepareWrapped($sql)
+    protected function prepareWrapped(string $sql): StatementInterface
     {
-        /** @var DBALConnection&ConnectionInterface $this */
-        $stmt = new Statement($sql, $this);
+        $stmt = new Statement($this, $TODO, $sql);
         $stmt->setFetchMode($this->defaultFetchMode);
 
         return $stmt;
