@@ -186,21 +186,9 @@ trait ConnectionTrait
     protected function prepareWrapped(string $sql): StatementInterface
     {
         $stmt = new Statement($this, $TODO, $sql);
-        $stmt->setFetchMode($this->defaultFetchMode);
+//        $stmt->setFetchMode($this->defaultFetchMode);
 
         return $stmt;
-    }
-
-    /**
-     * Forces reconnection by doing a dummy query.
-     *
-     * @deprecated Use ping()
-     *
-     * @throws Exception
-     */
-    public function refresh()
-    {
-        $this->query('SELECT 1')->execute();
     }
 
     /**

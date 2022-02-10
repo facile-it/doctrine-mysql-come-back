@@ -144,24 +144,4 @@ class Statement extends \Doctrine\DBAL\Statement
 
         return false;
     }
-
-    /**
-     * @deprecated use one of the fetch- or iterate-related methods
-     *
-     * @param int   $fetchMode
-     * @param mixed $arg2
-     * @param mixed $arg3
-     *
-     * @return bool
-     */
-    public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
-    {
-        if (parent::setFetchMode($fetchMode, $arg2, $arg3)) {
-            $this->fetchMode = [$fetchMode, $arg2, $arg3];
-
-            return true;
-        }
-
-        return false;
-    }
 }

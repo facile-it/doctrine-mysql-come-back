@@ -61,14 +61,4 @@ class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwar
 
         return $dsn;
     }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @deprecated
-     */
-    public function getName()
-    {
-        return 'pdo_mysql';
-    }
 }
