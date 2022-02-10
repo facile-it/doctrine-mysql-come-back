@@ -24,7 +24,8 @@
     "require-dev": {
         "phpunit/phpunit": "^9.5",
         "facile-it/facile-coding-standard": "^0.5.1",
-        "phpspec/prophecy-phpunit": "^2.0"
+        "phpspec/prophecy-phpunit": "^2.0",
+        "vimeo/psalm": "^4.20"
     },
     "autoload": {
         "psr-4": {
@@ -40,7 +41,8 @@
     "config": {
         "preferred-install": "dist",
         "allow-plugins": {
-            "facile-it/facile-coding-standard": true
+            "facile-it/facile-coding-standard": true,
+            "composer/package-versions-deprecated": true
         }
     },
     "minimum-stability": "stable",
