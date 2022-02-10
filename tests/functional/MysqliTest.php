@@ -17,9 +17,9 @@ class MysqliTest extends AbstractFunctionalTest
             [
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
-                'driverOptions' => array(
-                    'x_reconnect_attempts' => $attempts
-                )
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
             ]
         ));
 

@@ -80,9 +80,9 @@ class Statement extends \Doctrine\DBAL\Statement
     /**
      * @param array|null $params
      *
-     * @return bool
-     *
      * @throws Exception
+     *
+     * @return bool
      */
     public function execute($params = null)
     {
@@ -146,7 +146,7 @@ class Statement extends \Doctrine\DBAL\Statement
     }
 
     /**
-     * @deprecated Use one of the fetch- or iterate-related methods.
+     * @deprecated use one of the fetch- or iterate-related methods
      *
      * @param int   $fetchMode
      * @param mixed $arg2

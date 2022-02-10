@@ -34,7 +34,7 @@ class Driver extends AbstractMySQLDriver implements ServerGoneAwayExceptionsAwar
      *
      * @param mixed[] $params
      *
-     * @return string The DSN.
+     * @return string the DSN
      */
     private function constructPdoDsn(array $params): string
     {

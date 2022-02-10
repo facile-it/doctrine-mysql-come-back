@@ -45,16 +45,15 @@ trait ConnectionTrait
         Driver $driver,
         ?Configuration $config = null,
         ?EventManager $eventManager = null
-    )
-    {
-        if (!$driver instanceof ServerGoneAwayExceptionsAwareInterface) {
+    ) {
+        if (! $driver instanceof ServerGoneAwayExceptionsAwareInterface) {
             throw new InvalidArgumentException(
                 sprintf('%s needs a driver that implements ServerGoneAwayExceptionsAwareInterface', get_class($this))
             );
         }
 
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
-            $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
+            $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
         }
 
         parent::__construct($params, $driver, $config, $eventManager);
@@ -66,11 +65,11 @@ trait ConnectionTrait
      * @param array $types
      * @param QueryCacheProfile $qcp
      *
-     * @return ResultStatement The executed statement.
-     *
      * @throws Exception
+     *
+     * @return ResultStatement the executed statement
      */
-    public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
+    public function executeQuery($query, array $params = [], $types = [], QueryCacheProfile $qcp = null)
     {
         $stmt = null;
         $attempt = 0;
@@ -94,8 +93,9 @@ trait ConnectionTrait
     }
 
     /**
-     * @return \Doctrine\DBAL\Driver\Statement
      * @throws Exception
+     *
+     * @return \Doctrine\DBAL\Driver\Statement
      */
     public function query()
     {
@@ -135,7 +135,7 @@ trait ConnectionTrait
      * @param array<mixed>           $params The query parameters
      * @param array<int|string|null> $types  The parameter types
      *
-     * @return int The number of affected rows.
+     * @return int the number of affected rows
      */
     public function executeStatement($sql, array $params = [], array $types = [])
     {
@@ -161,8 +161,9 @@ trait ConnectionTrait
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function beginTransaction()
     {
@@ -265,7 +266,7 @@ trait ConnectionTrait
      */
     private function resetTransactionNestingLevel()
     {
-        if (!$this->selfReflectionNestingLevelProperty instanceof ReflectionProperty) {
+        if (! $this->selfReflectionNestingLevelProperty instanceof ReflectionProperty) {
             $reflection = new ReflectionClass(DBALConnection::class);
 
             // Private property has been renamed in DBAL 2.9.0+
@@ -288,6 +289,6 @@ trait ConnectionTrait
      */
     public function isUpdateQuery($query)
     {
-        return !preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $query);
+        return ! preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $query);
     }
 }

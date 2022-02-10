@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\Driver;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
-use Doctrine\DBAL\Configuration;
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -30,9 +30,9 @@ class ConnectionTest extends TestCase
 
         $params = [
             'driverOptions' => [
-                'x_reconnect_attempts' => 3
+                'x_reconnect_attempts' => 3,
             ],
-            'platform' => $platform->reveal()
+            'platform' => $platform->reveal(),
         ];
 
         $this->connection = new Connection(
@@ -53,9 +53,9 @@ class ConnectionTest extends TestCase
 
         $params = [
             'driverOptions' => [
-                'x_reconnect_attempts' => 999
+                'x_reconnect_attempts' => 999,
             ],
-            'platform' => $platform->reveal()
+            'platform' => $platform->reveal(),
         ];
 
         $connection = new Connection(
@@ -77,9 +77,9 @@ class ConnectionTest extends TestCase
 
         $params = [
             'driverOptions' => [
-                'x_reconnect_attempts' => 999
+                'x_reconnect_attempts' => 999,
             ],
-            'platform' => $platform->reveal()
+            'platform' => $platform->reveal(),
         ];
 
         $this->expectException(InvalidArgumentException::class);
@@ -96,7 +96,7 @@ class ConnectionTest extends TestCase
      * @dataProvider isUpdateQueryDataProvider
      *
      * @param string $query
-     * @param boolean $expected
+     * @param bool $expected
      */
     public function testIsUpdateQuery(string $query, bool $expected): void
     {
