@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\Statement as StatementInterface;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Result;
 use Exception;
 
 /**
@@ -34,37 +37,18 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private $fetchMode;
 
-    /**
-     * @param $sql
-     * @param Connection $conn
-     */
-    public function __construct($sql, ConnectionInterface $conn)
+    public function __construct(Connection $conn, StatementInterface $statement, string $sql)
     {
         // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
-        $attempt = 0;
-        $retry = true;
-        while ($retry) {
-            $retry = false;
-            try {
-                parent::__construct($sql, $conn);
-            } catch (Exception $e) {
-                if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
-                    $conn->close();
-                    ++$attempt;
-                    $retry = true;
-                } else {
-                    throw $e;
-                }
-            }
-        }
+        $this->executeWithRetry(__METHOD__, $conn, $statement, $sql);
     }
 
     /**
-     * Recreate statement for retry.
+     * Recreates the statement for retry.
      */
-    private function recreateStatement()
+    private function recreateStatement(): void
     {
-        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
+        $this->stmt = $this->conn->prepare($this->sql);
 
         if (null !== $this->fetchMode) {
             call_user_func_array([$this->stmt, 'setFetchMode'], $this->fetchMode);
@@ -77,22 +61,32 @@ class Statement extends \Doctrine\DBAL\Statement
         }
     }
 
-    /**
-     * @param array|null $params
-     *
-     * @throws Exception
-     *
-     * @return bool
-     */
-    public function execute($params = null)
+    public function execute($params = null): Result
     {
-        $stmt = null;
+        return $this->executeWithRetry(__METHOD__, $params);
+    }
+
+    public function executeQuery(array $params = []): Result
+    {
+        return $this->executeWithRetry(__METHOD__, $params);
+    }
+
+    public function executeStatement(array $params = []): int
+    {
+        return $this->executeWithRetry(__METHOD__, $params);
+    }
+
+    private function executeWithRetry(string $methodName, ...$params)
+    {
+        $parentCall = \Closure::fromCallable([$this, $methodName]);
+        $parentCall->bindTo($this, parent::class);
+
         $attempt = 0;
-        $retry = true;
-        while ($retry) {
+
+        do {
             $retry = false;
             try {
-                $stmt = parent::execute($params);
+                return $parentCall(...$params);
             } catch (Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
@@ -103,18 +97,9 @@ class Statement extends \Doctrine\DBAL\Statement
                     throw $e;
                 }
             }
-        }
-
-        return $stmt;
+        } while ($retry);
     }
 
-    /**
-     * @param string $param
-     * @param mixed  $value
-     * @param mixed  $type
-     *
-     * @return bool
-     */
     public function bindValue($param, $value, $type = ParameterType::STRING)
     {
         if (parent::bindValue($param, $value, $type)) {
@@ -126,14 +111,6 @@ class Statement extends \Doctrine\DBAL\Statement
         return false;
     }
 
-    /**
-     * @param string|int   $param
-     * @param mixed    $variable
-     * @param int      $type
-     * @param int|null $length
-     *
-     * @return bool
-     */
     public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
     {
         if (parent::bindParam($param, $variable, $type, $length)) {

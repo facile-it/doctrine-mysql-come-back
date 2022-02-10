@@ -12,9 +12,14 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Result;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
 class Connection extends DBALConnection implements ConnectionInterface
 {
+    /** @var GoneAwayDetector */
+    protected $goneAwayDetector;
+
     /** @var int */
     protected $reconnectAttempts = 0;
 
@@ -34,7 +39,14 @@ class Connection extends DBALConnection implements ConnectionInterface
             $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
         }
 
+        $this->goneAwayDetector = new MySQLGoneAwayDetector();
+
         parent::__construct($params, $driver, $config, $eventManager);
+    }
+
+    public function setGoneAwayDetector(GoneAwayDetector $goneAwayDetector): void
+    {
+        $this->goneAwayDetector = $goneAwayDetector;
     }
 
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
@@ -46,7 +58,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $sql)) {
+                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -66,7 +78,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
+                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -90,7 +102,7 @@ class Connection extends DBALConnection implements ConnectionInterface
             try {
                 return parent::beginTransaction();
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
+                if ($this->canTryAgain($attempt) && $this->goneAwayDetector->isGoneAwayException($e)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
@@ -110,12 +122,13 @@ class Connection extends DBALConnection implements ConnectionInterface
      *
      * @return bool
      */
-    public function canTryAgain($attempt, $ignoreTransactionLevel = false)
+    public function canTryAgain(int $attempt, bool $ignoreTransactionLevel = false): bool
     {
-        $canByAttempt = ($attempt < $this->reconnectAttempts);
-        $canByTransactionNestingLevel = $ignoreTransactionLevel || 0 === $this->getTransactionNestingLevel();
+        if ($attempt >= $this->reconnectAttempts) {
+            return false;
+        }
 
-        return $canByAttempt && $canByTransactionNestingLevel;
+        return $ignoreTransactionLevel || 0 === $this->getTransactionNestingLevel();
     }
 
     /**
@@ -127,10 +140,10 @@ class Connection extends DBALConnection implements ConnectionInterface
     public function isRetryableException(Exception $e, ?string $query = null)
     {
         if (null === $query || $this->isUpdateQuery($query)) {
-            return $this->_driver->isGoneAwayInUpdateException($e);
+            return $this->goneAwayDetector->isGoneAwayInUpdateException($e);
         }
 
-        return $this->_driver->isGoneAwayException($e);
+        return $this->goneAwayDetector->isGoneAwayException($e);
     }
 
     /**
@@ -148,10 +161,5 @@ class Connection extends DBALConnection implements ConnectionInterface
         $this->selfReflectionNestingLevelProperty->setAccessible(true);
         $this->selfReflectionNestingLevelProperty->setValue($this, 0);
         $this->selfReflectionNestingLevelProperty->setAccessible(false);
-    }
-
-    public function isUpdateQuery(string $sql): bool
-    {
-        return ! preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $sql);
     }
 }
