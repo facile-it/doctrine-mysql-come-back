@@ -9,7 +9,7 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Driver\ResultStatement;
+use Doctrine\DBAL\Driver\Result;
 use Doctrine\DBAL\FetchMode;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface;
@@ -93,22 +93,17 @@ trait ConnectionTrait
     }
 
     /**
-     * @throws Exception
-     *
-     * @return \Doctrine\DBAL\Driver\Statement
+     * @inheritDoc
      */
-    public function query()
+    public function query(string $sql): Result
     {
-        $stmt = null;
-        $args = func_get_args();
         $attempt = 0;
-        $retry = true;
-        while ($retry) {
-            $retry = false;
+
+        do {
             try {
-                $stmt = parent::query(...$args);
+                return parent::query($sql);
             } catch (Exception $e) {
-                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $args[0])) {
+                if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $sql)) {
                     $this->close();
                     ++$attempt;
                     $retry = true;
@@ -116,9 +111,7 @@ trait ConnectionTrait
                     throw $e;
                 }
             }
-        }
-
-        return $stmt;
+        } while ($retry);
     }
 
     /**
