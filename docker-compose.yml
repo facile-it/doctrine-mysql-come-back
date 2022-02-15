@@ -10,11 +10,14 @@ x-mysql-props: &mysql-props
 
 x-php-props: &php-props
   build:
-    context: .
+    context: ./docker
     args:
       PHP_VERSION: 7.3
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   volumes:
     - ./:/app
+    - ./docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
   working_dir: /app
   command: [ "vendor/bin/phpunit" ]
   environment:
@@ -34,11 +37,12 @@ services:
   php:
     <<: *php-props
     build:
-      context: .
+      context: ./docker
       args:
         PHP_VERSION: 7.3
     depends_on:
       - mysql57
     environment:
+      PHP_IDE_CONFIG: serverName=MySQLComeBack
       MYSQL_HOST: mysql57
       MYSQL_DRIVER: pdo_mysql
