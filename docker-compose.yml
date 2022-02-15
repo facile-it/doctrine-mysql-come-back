@@ -3,8 +3,6 @@ version: "3.5"
 x-mysql-props: &mysql-props
   environment:
     MYSQL_DATABASE: test
-    MYSQL_USER: root
-    MYSQL_PASSWORD: ""
     MYSQL_ROOT_PASSWORD: ""
     MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 

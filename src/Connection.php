@@ -37,6 +37,7 @@ class Connection extends DBALConnection
     ) {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
+            unset($params['driverOptions']['x_reconnect_attempts']);
         }
 
         $this->goneAwayDetector = new MySQLGoneAwayDetector();
