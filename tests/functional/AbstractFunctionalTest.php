@@ -16,7 +16,7 @@ abstract class AbstractFunctionalTest extends TestCase
     protected function getConnectedConnection(int $attempts): Connection
     {
         $connection = $this->createConnection($attempts);
-        $connection->query('SELECT 1');
+        $connection->executeQuery('SELECT 1');
 
         return $connection;
     }
@@ -91,6 +91,7 @@ TABLE
         $this->forceDisconnect($connection);
 
         $connection->executeQuery('SELECT 1')->fetch();
+
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -100,7 +101,8 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->query('SELECT 1')->execute();
+        $connection->executeQuery('SELECT 1');
+
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -111,7 +113,8 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->executeUpdate('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
+        $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
+
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -123,6 +126,7 @@ TABLE
         $this->forceDisconnect($connection);
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
+
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -133,8 +137,8 @@ TABLE
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
-        $statement->execute();
-        $result = $statement->fetchAll();
+        $result = $statement->executeQuery()->fetchAllAssociative();
+
         $this->assertSame([['foo' => 'foo']], $result);
         $this->assertSame(2, $connection->connectCount);
     }
@@ -146,21 +150,19 @@ TABLE
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo', ?, ?, ?, ?");
-        $statement->setFetchMode(\PDO::FETCH_NUM);
-        $statement->bindValue(1, 2);
-        $statement->bindValue(2, 'fooB');
-        $statement->bindValue(3, 'fooC');
-        $param1 = 5;
-        $statement->bindParam(4, $param1);
-        $statement->execute();
-        $result = $statement->fetchAll();
-        $this->assertSame([[
+        $params = [
             0 => 'foo',
             1 => '2',
             2 => 'fooB',
             3 => 'fooC',
             4 => '5',
-        ]], $result);
+        ];
+        $paramsToBind = $params;
+        unset($paramsToBind[0]);
+
+        $result = $statement->executeQuery($paramsToBind)->fetchAllNumeric();
+
+        $this->assertSame([$params], $result);
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -171,8 +173,8 @@ TABLE
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
-        $statement->execute();
-        $result = $statement->fetchAllAssociative();
+        $result = $statement->executeQuery()->fetchAllAssociative();
+
         $this->assertSame([['foo' => 'foo']], $result);
         $this->assertSame(2, $connection->connectCount);
     }
@@ -184,8 +186,8 @@ TABLE
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
-        $statement->execute();
-        $result = $statement->fetchAllNumeric();
+        $result = $statement->executeQuery()->fetchAllNumeric();
+
         $this->assertSame([['0' => 'foo']], $result);
         $this->assertSame(2, $connection->connectCount);
     }

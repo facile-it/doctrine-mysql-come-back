@@ -8,7 +8,7 @@ class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
 {
     public $connectCount = 0;
 
-    public function connect()
+    public function connect(): bool
     {
         if (! $this->isConnected()) {
             ++$this->connectCount;

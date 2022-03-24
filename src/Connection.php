@@ -12,6 +12,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
@@ -25,9 +26,6 @@ class Connection extends DBALConnection
 
     /** @var \ReflectionProperty|null */
     private $selfReflectionNestingLevelProperty;
-
-    /** @var int */
-    protected $defaultFetchMode = FetchMode::ASSOCIATIVE;
 
     public function __construct(
         array $params,
@@ -48,6 +46,34 @@ class Connection extends DBALConnection
     public function setGoneAwayDetector(GoneAwayDetector $goneAwayDetector): void
     {
         $this->goneAwayDetector = $goneAwayDetector;
+    }
+
+    public function prepare(string $sql): DBALStatement
+    {
+        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
+        $attempt = 0;
+
+        do {
+            $retry = false;
+            try {
+                $this->connect();
+                $driverStatement = @$this->_conn->prepare($sql);
+            } catch (\Exception $e) {
+                if ($this->canTryAgain($e, $attempt)) {
+                    $this->close();
+                    ++$attempt;
+                    $retry = true;
+                } else {
+                    throw $e;
+                }
+            }
+        } while ($retry);
+
+        return new Statement($this, $driverStatement, $sql);
+    }
+
+    private function prepareWrapped(string $sql): Statement
+    {
     }
 
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
