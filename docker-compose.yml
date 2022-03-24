@@ -17,7 +17,7 @@ x-php-props: &php-props
     - ./:/app
     - ./docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
   working_dir: /app
-  command: [ "vendor/bin/phpunit" ]
+  command: [ "tail", '-f', '/dev/null' ]
   environment:
     MYSQL_DATABASE: test
     MYSQL_USER: root
