@@ -57,7 +57,7 @@ class Connection extends DBALConnection
         do {
             $retry = false;
             try {
-                return parent::executeQuery($sql, $params, $types, $qcp);
+                return @parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
@@ -77,7 +77,7 @@ class Connection extends DBALConnection
         do {
             $retry = false;
             try {
-                return parent::executeStatement($sql, $params, $types);
+                return @parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
@@ -93,7 +93,7 @@ class Connection extends DBALConnection
     public function beginTransaction()
     {
         if (0 !== $this->getTransactionNestingLevel()) {
-            return parent::beginTransaction();
+            return @parent::beginTransaction();
         }
 
         $attempt = 0;
@@ -101,7 +101,7 @@ class Connection extends DBALConnection
         do {
             $retry = false;
             try {
-                return parent::beginTransaction();
+                return @parent::beginTransaction();
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
