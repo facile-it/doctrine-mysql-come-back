@@ -57,6 +57,8 @@ class Connection extends DBALConnection
             $retry = false;
             try {
                 $this->connect();
+                assert(null !== $this->_conn);
+
                 /** @psalm-suppress InternalMethod */
                 $driverStatement = @$this->_conn->prepare($sql);
 
