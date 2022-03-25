@@ -57,6 +57,8 @@ class Connection extends DBALConnection
             try {
                 $this->connect();
                 $driverStatement = @$this->_conn->prepare($sql);
+
+                return new Statement($this, $driverStatement, $sql);
             } catch (\Exception $e) {
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
@@ -67,8 +69,6 @@ class Connection extends DBALConnection
                 }
             }
         } while ($retry);
-
-        return new Statement($this, $driverStatement, $sql);
     }
 
     private function prepareWrapped(string $sql): Statement
