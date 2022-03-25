@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <files psalm-version="4.22.0@fc2c6ab4d5fa5d644d8617089f012f3bb84b8703">
   <file src="src/Connection.php">
-    <!--    due to https://github.com/vimeo/psalm/issues/7817-->
+    <InternalMethod occurrences="1">
+      <code>connect</code>
+    </InternalMethod>
     <InvalidNullableReturnType occurrences="2">
       <code>beginTransaction</code>
       <code>executeStatement</code>
     </InvalidNullableReturnType>
-    <!--    due to https://github.com/vimeo/psalm/issues/7817-->
     <InvalidReturnType occurrences="2">
       <code>DBALStatement</code>
       <code>Result</code>

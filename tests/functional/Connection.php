@@ -14,6 +14,7 @@ class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
             ++$this->connectCount;
         }
 
+        /** @psalm-suppress InternalMethod */
         return parent::connect();
     }
 }

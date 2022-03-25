@@ -39,6 +39,7 @@ class Connection extends DBALConnection
 
         $this->goneAwayDetector = new MySQLGoneAwayDetector();
 
+        /** @psalm-suppress InternalMethod */
         parent::__construct($params, $driver, $config, $eventManager);
     }
 
@@ -56,6 +57,7 @@ class Connection extends DBALConnection
             $retry = false;
             try {
                 $this->connect();
+                /** @psalm-suppress InternalMethod */
                 $driverStatement = @$this->_conn->prepare($sql);
 
                 return new Statement($this, $driverStatement, $sql);

@@ -18,6 +18,7 @@ class Statement extends \Doctrine\DBAL\Statement
 
     public function __construct(Connection $retriableConnection, Driver\Statement $statement, string $sql)
     {
+        /** @psalm-suppress InternalMethod */
         parent::__construct($retriableConnection, $statement, $sql);
 
         $this->retriableConnection = $retriableConnection;
