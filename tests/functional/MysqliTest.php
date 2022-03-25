@@ -11,7 +11,6 @@ class MysqliTest extends AbstractFunctionalTest
 {
     protected function createConnection(int $attempts): Connection
     {
-        /** @var Connection $connection */
         $connection = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
             [
@@ -22,6 +21,8 @@ class MysqliTest extends AbstractFunctionalTest
                 ],
             ]
         ));
+
+        $this->assertInstanceOf(Connection::class, $connection);
 
         return $connection;
     }

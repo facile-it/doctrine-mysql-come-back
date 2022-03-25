@@ -24,6 +24,9 @@ class MySQLGoneAwayDetectorTest extends TestCase
         $this->assertTrue((new MySQLGoneAwayDetector())->isGoneAwayException($error, 'SELECT 1'));
     }
 
+    /**
+     * @return array{string, bool}[]
+     */
     public function isUpdateQueryDataProvider(): array
     {
         return [

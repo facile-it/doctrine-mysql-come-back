@@ -12,6 +12,12 @@
       <code>DBALStatement</code>
       <code>Result</code>
     </InvalidReturnType>
+    <UnusedVariable occurrences="4">
+      <code>$retry</code>
+      <code>$retry</code>
+      <code>$retry</code>
+      <code>$retry</code>
+    </UnusedVariable>
   </file>
   <file src="src/Statement.php">
     <DeprecatedMethod occurrences="1">
@@ -24,6 +30,20 @@
     <MissingReturnType occurrences="1">
       <code>executeWithRetry</code>
     </MissingReturnType>
+    <MixedArgument occurrences="1">
+      <code>$callable</code>
+    </MixedArgument>
+    <MixedInferredReturnType occurrences="2">
+      <code>Result</code>
+      <code>int</code>
+    </MixedInferredReturnType>
+    <MixedReturnStatement occurrences="2">
+      <code>$this-&gt;executeWithRetry([parent::class, 'executeQuery'], $params)</code>
+      <code>$this-&gt;executeWithRetry([parent::class, 'executeStatement'], $params)</code>
+    </MixedReturnStatement>
+    <UnusedVariable occurrences="1">
+      <code>$retry</code>
+    </UnusedVariable>
   </file>
   <file src="tests/functional/AbstractFunctionalTest.php">
     <DeprecatedMethod occurrences="1">
@@ -39,5 +59,11 @@
       <code>assertSame</code>
       <code>assertSame</code>
     </DocblockTypeContradiction>
+    <MixedAssignment occurrences="1">
+      <code>$id</code>
+    </MixedAssignment>
+    <MixedOperand occurrences="1">
+      <code>$id</code>
+    </MixedOperand>
   </file>
 </files>
