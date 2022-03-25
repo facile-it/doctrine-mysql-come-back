@@ -71,10 +71,6 @@ class Connection extends DBALConnection
         } while ($retry);
     }
 
-    private function prepareWrapped(string $sql): Statement
-    {
-    }
-
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
         $attempt = 0;
