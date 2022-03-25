@@ -13,4 +13,31 @@
       <code>Result</code>
     </InvalidReturnType>
   </file>
+  <file src="src/Statement.php">
+    <DeprecatedMethod occurrences="1">
+      <code>getWrappedConnection</code>
+    </DeprecatedMethod>
+    <MissingParamType occurrences="2">
+      <code>$callable</code>
+      <code>$params</code>
+    </MissingParamType>
+    <MissingReturnType occurrences="1">
+      <code>executeWithRetry</code>
+    </MissingReturnType>
+  </file>
+  <file src="tests/functional/AbstractFunctionalTest.php">
+    <DeprecatedMethod occurrences="1">
+      <code>fetch</code>
+    </DeprecatedMethod>
+    <DocblockTypeContradiction occurrences="8">
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+      <code>assertSame</code>
+    </DocblockTypeContradiction>
+  </file>
 </files>
