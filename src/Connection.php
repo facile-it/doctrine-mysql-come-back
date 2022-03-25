@@ -10,7 +10,6 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;

@@ -151,17 +151,15 @@ TABLE
 
         $statement = $connection->prepare("SELECT 'foo', ?, ?, ?, ?");
         $params = [
-            0 => 'foo',
-            1 => '2',
-            2 => 'fooB',
-            3 => 'fooC',
-            4 => '5',
+            '2',
+            'fooB',
+            'fooC',
+            '5',
         ];
-        $paramsToBind = $params;
-        unset($paramsToBind[0]);
 
-        $result = $statement->executeQuery($paramsToBind)->fetchAllNumeric();
+        $result = $statement->executeQuery($params)->fetchAllNumeric();
 
+        array_unshift($params, 'foo');
         $this->assertSame([$params], $result);
         $this->assertSame(2, $connection->connectCount);
     }
