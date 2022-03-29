@@ -1,5 +1,6 @@
 /vendor
 /composer.phar
 /composer.lock
+/docker-compose.override.yml
 /phpunit.xml
-/.phpunit.result.cache
+/.*.cache

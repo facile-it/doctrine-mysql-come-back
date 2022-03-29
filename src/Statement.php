@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Result;
 use Exception;
 
 /**
@@ -13,88 +13,41 @@ use Exception;
 class Statement extends \Doctrine\DBAL\Statement
 {
     /**
-     * The connection this statement is bound to and executed on.
-     *
-     * @var Connection
+     * Recreates the statement for retry.
      */
-    protected $conn;
-
-    /**
-     * @var mixed[][]
-     */
-    private $boundValues = [];
-
-    /**
-     * @var mixed[][]
-     */
-    private $boundParams = [];
-
-    /**
-     * @var mixed[]|null
-     */
-    private $fetchMode;
-
-    /**
-     * @param $sql
-     * @param Connection $conn
-     */
-    public function __construct($sql, ConnectionInterface $conn)
-    {
-        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
-        $attempt = 0;
-        $retry = true;
-        while ($retry) {
-            $retry = false;
-            try {
-                parent::__construct($sql, $conn);
-            } catch (Exception $e) {
-                if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
-                    $conn->close();
-                    ++$attempt;
-                    $retry = true;
-                } else {
-                    throw $e;
-                }
-            }
-        }
-    }
-
-    /**
-     * Recreate statement for retry.
-     */
-    private function recreateStatement()
+    private function recreateStatement(): void
     {
         $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
-
-        if (null !== $this->fetchMode) {
-            call_user_func_array([$this->stmt, 'setFetchMode'], $this->fetchMode);
-        }
-        foreach ($this->boundValues as $boundValue) {
-            call_user_func_array([$this->stmt, 'bindValue'], $boundValue);
-        }
-        foreach ($this->boundParams as $boundParam) {
-            call_user_func_array([$this->stmt, 'bindParam'], $boundParam);
-        }
     }
 
-    /**
-     * @param array|null $params
-     *
-     * @return bool
-     *
-     * @throws Exception
-     */
-    public function execute($params = null)
+//    public function execute($params = null): Result
+//    {
+//        return $this->executeWithRetry([parent::class, 'execute'], $params);
+//    }
+
+    public function executeQuery(array $params = []): Result
     {
-        $stmt = null;
+        return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
+    }
+
+    public function executeStatement(array $params = []): int
+    {
+        return $this->executeWithRetry([parent::class, 'executeStatement'], $params);
+    }
+
+    private function executeWithRetry($callable, ...$params)
+    {
+        $parentCall = \Closure::fromCallable($callable);
+        $parentCall->bindTo($this, parent::class);
+
         $attempt = 0;
-        $retry = true;
-        while ($retry) {
+
+        do {
             $retry = false;
             try {
-                $stmt = parent::execute($params);
+                return $parentCall(...$params);
             } catch (Exception $e) {
-                if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
+                if ($this->conn->canTryAgain($e, $attempt, $this->sql)) {
                     $this->conn->close();
                     $this->recreateStatement();
                     ++$attempt;
@@ -103,65 +56,6 @@ class Statement extends \Doctrine\DBAL\Statement
                     throw $e;
                 }
             }
-        }
-
-        return $stmt;
-    }
-
-    /**
-     * @param string $param
-     * @param mixed  $value
-     * @param mixed  $type
-     *
-     * @return bool
-     */
-    public function bindValue($param, $value, $type = ParameterType::STRING)
-    {
-        if (parent::bindValue($param, $value, $type)) {
-            $this->boundValues[$param] = [$param, $value, $type];
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param string|int   $param
-     * @param mixed    $variable
-     * @param int      $type
-     * @param int|null $length
-     *
-     * @return bool
-     */
-    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
-    {
-        if (parent::bindParam($param, $variable, $type, $length)) {
-            $this->boundParams[$param] = [$param, &$variable, $type, $length];
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated Use one of the fetch- or iterate-related methods.
-     *
-     * @param int   $fetchMode
-     * @param mixed $arg2
-     * @param mixed $arg3
-     *
-     * @return bool
-     */
-    public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
-    {
-        if (parent::setFetchMode($fetchMode, $arg2, $arg3)) {
-            $this->fetchMode = [$fetchMode, $arg2, $arg3];
-
-            return true;
-        }
-
-        return false;
+        } while ($retry);
     }
 }

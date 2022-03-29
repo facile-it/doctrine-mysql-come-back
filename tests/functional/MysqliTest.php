@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
+use Doctrine\DBAL\Driver\Mysqli\Driver;
 use Doctrine\DBAL\DriverManager;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli\Driver;
 
 class MysqliTest extends AbstractFunctionalTest
 {
@@ -17,9 +17,9 @@ class MysqliTest extends AbstractFunctionalTest
             [
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
-                'driverOptions' => array(
-                    'x_reconnect_attempts' => $attempts
-                )
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
             ]
         ));
 
