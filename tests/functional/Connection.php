@@ -6,6 +6,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
 class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
 {
+    /** @var int */
     public $connectCount = 0;
 
     public function connect(): bool
@@ -14,6 +15,7 @@ class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
             ++$this->connectCount;
         }
 
+        /** @psalm-suppress InternalMethod */
         return parent::connect();
     }
 }

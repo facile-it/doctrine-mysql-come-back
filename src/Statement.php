@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
+use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Result;
 use Exception;
 
@@ -12,6 +13,17 @@ use Exception;
  */
 class Statement extends \Doctrine\DBAL\Statement
 {
+    /** @var Connection */
+    protected $retriableConnection;
+
+    public function __construct(Connection $retriableConnection, Driver\Statement $statement, string $sql)
+    {
+        /** @psalm-suppress InternalMethod */
+        parent::__construct($retriableConnection, $statement, $sql);
+
+        $this->retriableConnection = $retriableConnection;
+    }
+
     /**
      * Recreates the statement for retry.
      */
@@ -47,8 +59,8 @@ class Statement extends \Doctrine\DBAL\Statement
             try {
                 return $parentCall(...$params);
             } catch (Exception $e) {
-                if ($this->conn->canTryAgain($e, $attempt, $this->sql)) {
-                    $this->conn->close();
+                if ($this->retriableConnection->canTryAgain($e, $attempt, $this->sql)) {
+                    $this->retriableConnection->close();
                     $this->recreateStatement();
                     ++$attempt;
                     $retry = true;
