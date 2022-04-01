@@ -41,27 +41,45 @@ class ConnectionTest extends TestCase
         static::assertInstanceOf(Connection::class, $connection);
     }
 
-    /**
-     * @dataProvider publicMethodsDataProvider
-     */
-    public function testAllParentMethodsAreDecorated(string $methodName): void
+    public function testAllParentMethodsAreDecorated(): void
     {
         $connection = new \ReflectionClass(Connection::class);
-        $method = $connection->getMethod($methodName);
+        $missingMethods = [];
 
-        $this->assertEquals($connection, $method->getDeclaringClass(), 'Method not decorated: ' . $method->getName());
+        foreach ($this->getPublicNonFinalMethods() as $methodName) {
+            $method = $connection->getMethod($methodName);
+
+            if (Connection::class !== $method->getDeclaringClass()->getName()) {
+                $missingMethods[] = $methodName;
+            }
+        }
+
+        $this->assertEmpty($missingMethods, 'Some methods are not decorated: ' . PHP_EOL . implode(PHP_EOL, $missingMethods));
     }
 
-    public function publicMethodsDataProvider(): \Generator
+    /**
+     * @return list<string>
+     */
+    public function getPublicNonFinalMethods(): array
     {
         $dbalClass = new \ReflectionClass(\Doctrine\DBAL\Connection::class);
+
+        $methods = [];
 
         foreach ($dbalClass->getMethods() as $method) {
             if (! $method->isPublic()) {
                 continue;
             }
 
-            yield [$method->getName()];
+            if ($method->isFinal()) {
+                continue;
+            }
+
+            $methods[] = $method->getName();
         }
+
+        sort($methods);
+
+        return $methods;
     }
 }
