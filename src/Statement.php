@@ -21,6 +21,12 @@ class Statement extends DBALStatement
     /** @var DBALStatement */
     private $decoratedStatement;
 
+    /** @var array{int|string, mixed, int|mixed}[] */
+    private $boundValues = [];
+
+    /** @var array{int|string, mixed, int, int|null}[] */
+    private $boundParams = [];
+
     public function __construct(Connection $retriableConnection, DBALStatement $statement, string $sql)
     {
         $this->retriableConnection = $retriableConnection;
@@ -34,7 +40,14 @@ class Statement extends DBALStatement
     private function recreateStatement(): void
     {
         $this->decoratedStatement = $this->retriableConnection->prepare($this->sql);
-        // TODO -- rebind parameters?
+
+        foreach ($this->boundValues as $boundValue) {
+            $this->decoratedStatement->bindValue(...$boundValue);
+        }
+
+        foreach ($this->boundParams as $boundParam) {
+            $this->decoratedStatement->bindParam(...$boundParam);
+        }
     }
 
     public function execute($params = null): Result
@@ -80,14 +93,26 @@ class Statement extends DBALStatement
         } while ($retry);
     }
 
-    public function bindValue($param, $value, $type = ParameterType::STRING)
+    public function bindValue($param, $value, $type = ParameterType::STRING): bool
     {
-        return $this->decoratedStatement->bindValue($param, $value, $type);
+        if ($this->decoratedStatement->bindValue($param, $value, $type)) {
+            $this->boundValues[$param] = [$param, $value, $type];
+
+            return true;
+        }
+
+        return false;
     }
 
     public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
     {
-        return $this->decoratedStatement->bindParam($param, $variable, $type, $length);
+        if ($this->decoratedStatement->bindParam($param, $variable, $type, $length)) {
+            $this->boundParams[$param] = [$param, &$variable, $type, $length];
+
+            return true;
+        }
+
+        return false;
     }
 
     public function getWrappedStatement()
