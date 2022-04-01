@@ -181,6 +181,9 @@ TABLE
 
     private function assertConnectionCount(int $expectedConnectionCount, ConnectionUnderTest $connection): void
     {
-        $this->assertSame($expectedConnectionCount, $connection->getDecoratedConnection()->connectCount);
+        $decoratedConnection = $connection->getDecoratedConnection();
+        $this->assertInstanceOf(TestConnection::class, $decoratedConnection);
+
+        $this->assertSame($expectedConnectionCount, $decoratedConnection->connectCount);
     }
 }

@@ -11,6 +11,7 @@ use Exception;
 
 /**
  * @internal
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class Statement extends DBALStatement
 {
@@ -51,6 +52,11 @@ class Statement extends DBALStatement
         return $this->executeWithRetry([$this->decoratedStatement, 'executeStatement'], $params);
     }
 
+    /**
+     * @template T
+     * @psalm-param callable(...mixed):T $callable
+     * @psalm-return T
+     */
     private function executeWithRetry($callable, ...$params)
     {
         $decoratedCall = \Closure::fromCallable($callable);

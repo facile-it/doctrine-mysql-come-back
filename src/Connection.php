@@ -18,6 +18,9 @@ use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class Connection extends DBALConnection
 {
     /** @var DBALConnection */
@@ -202,6 +205,7 @@ class Connection extends DBALConnection
 
     public function connect()
     {
+        /** @psalm-suppress InternalMethod */
         return $this->decoratedConnection->connect();
     }
 
@@ -262,6 +266,7 @@ class Connection extends DBALConnection
 
     public function exec(string $sql): int
     {
+        /** @psalm-suppress DeprecatedMethod */
         return $this->decoratedConnection->exec($sql);
     }
 
@@ -272,6 +277,7 @@ class Connection extends DBALConnection
 
     public function executeUpdate(string $sql, array $params = [], array $types = []): int
     {
+        /** @psalm-suppress DeprecatedMethod */
         return $this->decoratedConnection->executeUpdate($sql, $params, $types);
     }
 
@@ -335,6 +341,9 @@ class Connection extends DBALConnection
         return $this->decoratedConnection->getEventManager();
     }
 
+    /**
+     * @psalm-suppress DeprecatedMethod
+     */
     public function getExpressionBuilder()
     {
         return $this->decoratedConnection->getExpressionBuilder();
@@ -350,11 +359,16 @@ class Connection extends DBALConnection
         return $this->decoratedConnection->getNestTransactionsWithSavepoints();
     }
 
+    /**
+     * @psalm-suppress DeprecatedMethod
+     * @psalm-suppress InternalMethod
+     */
     public function getParams()
     {
         return $this->decoratedConnection->getParams();
     }
 
+    /** @psalm-suppress DeprecatedMethod */
     public function getSchemaManager()
     {
         return $this->decoratedConnection->getSchemaManager();
@@ -370,6 +384,7 @@ class Connection extends DBALConnection
         return $this->decoratedConnection->getTransactionNestingLevel();
     }
 
+    /** @psalm-suppress DeprecatedMethod */
     public function getWrappedConnection()
     {
         return $this->decoratedConnection->getWrappedConnection();
@@ -425,6 +440,7 @@ class Connection extends DBALConnection
         return $this->decoratedConnection->lastInsertId($name);
     }
 
+    /** @psalm-suppress DeprecatedMethod */
     public function query(string $sql): Result
     {
         return $this->decoratedConnection->query($sql);
@@ -442,7 +458,7 @@ class Connection extends DBALConnection
 
     public function releaseSavepoint($savepoint)
     {
-        return $this->decoratedConnection->releaseSavepoint($savepoint);
+        $this->decoratedConnection->releaseSavepoint($savepoint);
     }
 
     public function rollBack()
@@ -457,7 +473,7 @@ class Connection extends DBALConnection
 
     public function setAutoCommit($autoCommit)
     {
-        return $this->decoratedConnection->setAutoCommit($autoCommit);
+        $this->decoratedConnection->setAutoCommit($autoCommit);
     }
 
     public function setNestTransactionsWithSavepoints($nestTransactionsWithSavepoints)
