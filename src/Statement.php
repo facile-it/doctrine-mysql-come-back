@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Statement as DBALStatement;
 use Exception;
 
 /**
  * @internal
  */
-class Statement extends \Doctrine\DBAL\Statement
+class Statement extends DBALStatement
 {
     /** @var Connection */
     protected $retriableConnection;
 
-    public function __construct(Connection $retriableConnection, Driver\Statement $statement, string $sql)
-    {
-        /** @psalm-suppress InternalMethod */
-        parent::__construct($retriableConnection, $statement, $sql);
+    /** @var DBALStatement */
+    private $decoratedStatement;
 
+    public function __construct(Connection $retriableConnection, DBALStatement $statement, string $sql)
+    {
         $this->retriableConnection = $retriableConnection;
+        $this->decoratedStatement = $statement;
+        $this->sql = $sql;
     }
 
     /**
@@ -29,35 +32,35 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function recreateStatement(): void
     {
-        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
+        $this->decoratedStatement = $this->retriableConnection->prepare($this->sql);
+        // TODO -- rebind parameters?
     }
 
-//    public function execute($params = null): Result
-//    {
-//        return $this->executeWithRetry([parent::class, 'execute'], $params);
-//    }
+    public function execute($params = null): Result
+    {
+        return $this->executeWithRetry([$this->decoratedStatement, 'execute'], $params);
+    }
 
     public function executeQuery(array $params = []): Result
     {
-        return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
+        return $this->executeWithRetry([$this->decoratedStatement, 'executeQuery'], $params);
     }
 
     public function executeStatement(array $params = []): int
     {
-        return $this->executeWithRetry([parent::class, 'executeStatement'], $params);
+        return $this->executeWithRetry([$this->decoratedStatement, 'executeStatement'], $params);
     }
 
     private function executeWithRetry($callable, ...$params)
     {
-        $parentCall = \Closure::fromCallable($callable);
-        $parentCall->bindTo($this, parent::class);
+        $decoratedCall = \Closure::fromCallable($callable);
 
         $attempt = 0;
 
         do {
             $retry = false;
             try {
-                return $parentCall(...$params);
+                return @$decoratedCall(...$params);
             } catch (Exception $e) {
                 if ($this->retriableConnection->canTryAgain($e, $attempt, $this->sql)) {
                     $this->retriableConnection->close();
@@ -69,5 +72,20 @@ class Statement extends \Doctrine\DBAL\Statement
                 }
             }
         } while ($retry);
+    }
+
+    public function bindValue($param, $value, $type = ParameterType::STRING)
+    {
+        return $this->decoratedStatement->bindValue($param, $value, $type);
+    }
+
+    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
+    {
+        return $this->decoratedStatement->bindParam($param, $variable, $type, $length);
+    }
+
+    public function getWrappedStatement()
+    {
+        return $this->decoratedStatement->getWrappedStatement();
     }
 }
