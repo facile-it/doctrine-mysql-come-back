@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
-use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
-use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection as ConnectionUnderTest;
 use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTest extends TestCase
 {
-    abstract protected function createConnection(int $attempts): Connection;
+    abstract protected function createConnection(int $attempts): ConnectionUnderTest;
 
-    protected function getConnectedConnection(int $attempts): Connection
+    protected function getConnectedConnection(int $attempts): ConnectionUnderTest
     {
         $connection = $this->createConnection($attempts);
         $connection->executeQuery('SELECT 1');
@@ -21,7 +20,7 @@ abstract class AbstractFunctionalTest extends TestCase
         return $connection;
     }
 
-    protected function createTestTable(Connection $connection): void
+    protected function createTestTable(ConnectionUnderTest $connection): void
     {
         $connection->executeStatement(
             <<<'TABLE'
@@ -53,17 +52,7 @@ TABLE
      */
     protected function forceDisconnect(\Doctrine\DBAL\Connection $connection): void
     {
-        /** @var Connection $connection */
-        $connection2 = DriverManager::getConnection(array_merge(
-            $this->getConnectionParams(),
-            [
-                'wrapperClass' => Connection::class,
-                'driverClass' => Driver::class,
-                'driverOptions' => [
-                    'x_reconnect_attempts' => 1,
-                ],
-            ]
-        ));
+        $connection2 = $this->createConnection(1);
 
         $ids = $connection->fetchFirstColumn('SELECT CONNECTION_ID()');
 
@@ -76,7 +65,7 @@ TABLE
     public function testExecuteQueryShouldNotReconnect(): void
     {
         $connection = $this->getConnectedConnection(0);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $this->expectException(Exception::class);
@@ -87,66 +76,66 @@ TABLE
     public function testExecuteQueryShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeQuery('SELECT 1')->fetch();
 
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testQueryShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeQuery('SELECT 1');
 
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testExecuteUpdateShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
         $this->createTestTable($connection);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testExecuteStatementShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
         $this->createTestTable($connection);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementExecuteError(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldResetStatementOnStatementExecuteError(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo', ?, ?, ?, ?");
@@ -161,32 +150,37 @@ TABLE
 
         array_unshift($params, 'foo');
         $this->assertSame([$params], $result);
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementFetchAllAssociative(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementFetchAllNumeric(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['0' => 'foo']], $result);
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    private function assertConnectionCount(int $expectedConnectionCount, ConnectionUnderTest $connection): void
+    {
+        $this->assertSame($expectedConnectionCount, $connection->getDecoratedConnection()->connectCount);
     }
 }

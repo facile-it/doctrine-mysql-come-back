@@ -6,15 +6,17 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection as ConnectionUnderTest;
 
 class PDOMySqlTest extends AbstractFunctionalTest
 {
-    protected function createConnection(int $attempts): Connection
+    protected function createConnection(int $attempts): ConnectionUnderTest
     {
         $connection = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
             [
-                'wrapperClass' => Connection::class,
+                'wrapperClass' => ConnectionUnderTest::class,
+                'x_decorated_connection_class' => TestConnection::class,
                 'driverClass' => Driver::class,
                 'driverOptions' => [
                     'x_reconnect_attempts' => $attempts,
@@ -22,7 +24,7 @@ class PDOMySqlTest extends AbstractFunctionalTest
             ]
         ));
 
-        $this->assertInstanceOf(Connection::class, $connection);
+        $this->assertInstanceOf(ConnectionUnderTest::class, $connection);
 
         return $connection;
     }

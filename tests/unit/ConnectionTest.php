@@ -40,4 +40,28 @@ class ConnectionTest extends TestCase
 
         static::assertInstanceOf(Connection::class, $connection);
     }
+
+    /**
+     * @dataProvider publicMethodsDataProvider
+     */
+    public function testAllParentMethodsAreDecorated(string $methodName): void
+    {
+        $connection = new \ReflectionClass(Connection::class);
+        $method = $connection->getMethod($methodName);
+
+        $this->assertEquals($connection, $method->getDeclaringClass(), 'Method not decorated: ' . $method->getName());
+    }
+
+    public function publicMethodsDataProvider(): \Generator
+    {
+        $dbalClass = new \ReflectionClass(\Doctrine\DBAL\Connection::class);
+
+        foreach ($dbalClass->getMethods() as $method) {
+            if (! $method->isPublic()) {
+                continue;
+            }
+
+            yield [$method->getName()];
+        }
+    }
 }

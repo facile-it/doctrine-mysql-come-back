@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
-class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
+use Doctrine\DBAL\Connection;
+
+class TestConnection extends Connection
 {
     /** @var int */
     public $connectCount = 0;
