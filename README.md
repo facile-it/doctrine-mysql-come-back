@@ -3,8 +3,7 @@
 [![Total Downloads](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/downloads.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back) 
 
 [![Build status](https://github.com/facile-it/doctrine-mysql-come-back/workflows/Continuous%20Integration/badge.svg)]( https://github.com/facile-it/doctrine-mysql-come-back/actions?query=workflow%3A%22Continuous+Integration%22+branch%3Amaster)
-[![Scrutinizer score](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/?branch=master)
-[![Test coverage](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/facile-it/doctrine-mysql-come-back/?branch=master)
+[![Test coverage](https://codecov.io/gh/facile-it/doctrine-mysql-come-back/branch/master/graph/badge.svg?token=vFz9cWGQ3r)](https://codecov.io/gh/facile-it/doctrine-mysql-come-back)
 
 [![License](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back)
 # DoctrineMySQLComeBack
