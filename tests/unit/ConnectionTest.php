@@ -8,12 +8,16 @@ use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
-class ConnectionTest extends TestCase
+class ConnectionTest extends AbstractDecoratorTestCase
 {
     use ProphecyTrait;
+
+    protected function getClassUnderTest(): string
+    {
+        return Connection::class;
+    }
 
     public function testConstructor(): void
     {
@@ -39,47 +43,5 @@ class ConnectionTest extends TestCase
         );
 
         static::assertInstanceOf(Connection::class, $connection);
-    }
-
-    public function testAllParentMethodsAreDecorated(): void
-    {
-        $connection = new \ReflectionClass(Connection::class);
-        $missingMethods = [];
-
-        foreach ($this->getPublicNonFinalMethods() as $methodName) {
-            $method = $connection->getMethod($methodName);
-
-            if (Connection::class !== $method->getDeclaringClass()->getName()) {
-                $missingMethods[] = $methodName;
-            }
-        }
-
-        $this->assertEmpty($missingMethods, 'Some methods are not decorated: ' . PHP_EOL . implode(PHP_EOL, $missingMethods));
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function getPublicNonFinalMethods(): array
-    {
-        $dbalClass = new \ReflectionClass(\Doctrine\DBAL\Connection::class);
-
-        $methods = [];
-
-        foreach ($dbalClass->getMethods() as $method) {
-            if (! $method->isPublic()) {
-                continue;
-            }
-
-            if ($method->isFinal()) {
-                continue;
-            }
-
-            $methods[] = $method->getName();
-        }
-
-        sort($methods);
-
-        return $methods;
     }
 }
