@@ -48,6 +48,17 @@ class Connection extends DBALConnection
 
         $this->goneAwayDetector = new MySQLGoneAwayDetector();
 
+        $decoratedConnectionClass = $this->getDecoratedConnectionClass($params);
+        $this->decoratedConnection = new $decoratedConnectionClass($params, $driver, $config, $eventManager);
+    }
+
+    /**
+     * For testing purposes only; see TestConnection
+     *
+     * @return class-string<DBALConnection>
+     */
+    private function getDecoratedConnectionClass(array &$params): string
+    {
         $decoratedConnectionClass = $params['x_decorated_connection_class'] ?? DBALConnection::class;
         unset($params['x_decorated_connection_class']);
 
@@ -59,14 +70,14 @@ class Connection extends DBALConnection
             throw new \InvalidArgumentException('Expecting FQCN, got ' . $decoratedConnectionClass);
         }
 
-        if (DBALConnection::class !== $decoratedConnectionClass && ! is_subclass_of(
-            $decoratedConnectionClass,
-            DBALConnection::class
-        )) {
+        if (
+            DBALConnection::class !== $decoratedConnectionClass
+            && ! is_subclass_of($decoratedConnectionClass, DBALConnection::class)
+        ) {
             throw new \InvalidArgumentException('Expecting FQCN extending ' . DBALConnection::class . ', got ' . $decoratedConnectionClass);
         }
 
-        $this->decoratedConnection = new $decoratedConnectionClass($params, $driver, $config, $eventManager);
+        return $decoratedConnectionClass;
     }
 
     public function getDecoratedConnection(): DBALConnection
