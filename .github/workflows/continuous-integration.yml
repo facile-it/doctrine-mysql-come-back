@@ -25,8 +25,6 @@ jobs:
           - "8.0"
         deps:
           - "latest"
-        coverage:
-          - "false"
         include:
           - php-version: "7.3"
             mysql-version: "8.0"
@@ -40,7 +38,6 @@ jobs:
           - deps: "lowest"
             php-version: "7.3"
             mysql-version: "5.7"
-            coverage: "true"
 
     services:
       mysql:
@@ -83,13 +80,8 @@ jobs:
         run: "composer update --no-interaction --no-progress --no-suggest --prefer-dist --prefer-lowest"
         if: "${{ matrix.deps == 'lowest' }}"
 
-      - name: "Run PHPUnit"
-        run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml"
-        if: "${{ matrix.coverage != 'true' }}"
-
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml --coverage-clover=coverage.xml"
-        if: "${{ matrix.coverage == 'true' }}"
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v1
