@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-BETA1] - TBA
+### Added
+* Support DBAL v3
+* Add `GoneAwayDetector` interface and `MySQLGoneAwayDetector` class implementation
+
+### Changed
+* Changed `Connection` constructor and method signatures to follow DBAL v3 changes
+
+### Removed
+* Drop support for DBAL v2
+* Removed Driver classes
+* Removed `ConnectionTrait`, now everything is inside `Connection`
+* Removed `Connection::refresh()` method (due to drop in DBAL v3)
+* Removed `Connection::isUpdateQuery()` method (logic is now behind the `GoneAwayDetector` interface)
+* Removed specialized `MasterSlaveConnection` and `PrimaryReadReplicaConnection` (due to drop of corresponding classes in DBAL v3)
+
 ## [1.10.0] - 2021-03-25
 ### Added
 * Added PHP 8 support
