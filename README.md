@@ -100,7 +100,7 @@ You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
 
 # Usage
 
-Since DBAL v3, `Connection::refresh` does not exist anymore, so you don't need to do anything else to leverage the reconnecton, reconnection will be automagically done.
+Since DBAL v3, `Connection::refresh` does not exist anymore, so you don't need to do anything else to leverage the reconnection, it will be automagically done.
 
 From `v1.6` of this library automagically reconnection is enabled also during `$em->getConnection()->beginTransaction()` calls,
 and this works also during simple `$em->flush()`, if out of a previous transaction.
