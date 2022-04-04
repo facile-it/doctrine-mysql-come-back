@@ -19,14 +19,14 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "doctrine/dbal": "^3.2.0",
-        "symfony/phpunit-bridge": "^6.0"
+        "doctrine/dbal": "^3.2.0"
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.5.1",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.5",
         "psalm/plugin-phpunit": "^0.16.1",
+        "symfony/phpunit-bridge": "^6.0",
         "vimeo/psalm": "^4.20"
     },
     "autoload": {
