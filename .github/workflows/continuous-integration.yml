@@ -100,7 +100,7 @@ jobs:
           composer-options: --prefer-dist
 
       - name: "Run code style check"
-        run: "vendor/bin/php-cs-fixer fix --dry-run --ansy --verbose"
+        run: "vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose"
 
   Psalm:
     name: "Psalm"
