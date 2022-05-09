@@ -9,7 +9,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver;
 
 class PDOMySqlTest extends AbstractFunctionalTest
 {
-    protected function createConnection(int $attempts): Connection
+    protected function createConnection(int $attempts, int $delay): Connection
     {
         /** @var Connection $connection */
         $connection = DriverManager::getConnection(array_merge(
@@ -18,7 +18,8 @@ class PDOMySqlTest extends AbstractFunctionalTest
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
                 'driverOptions' => array(
-                    'x_reconnect_attempts' => $attempts
+                    'x_reconnect_attempts' => $attempts,
+                    'x_reconnect_delay' => $delay,
                 )
             ]
         ));

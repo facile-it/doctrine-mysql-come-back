@@ -53,7 +53,8 @@ class ConnectionTest extends TestCase
 
         $params = [
             'driverOptions' => [
-                'x_reconnect_attempts' => 999
+                'x_reconnect_attempts' => 999,
+                'x_reconnect_delay' => 1000,
             ],
             'platform' => $platform->reveal()
         ];

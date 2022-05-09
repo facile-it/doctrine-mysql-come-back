@@ -49,6 +49,7 @@ class Statement extends \Doctrine\DBAL\Statement
             } catch (\Exception $e) {
                 if ($conn->canTryAgain($attempt) && $conn->isRetryableException($e, $sql)) {
                     $conn->close();
+                    $conn->delayReconnection();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -95,6 +96,7 @@ class Statement extends \Doctrine\DBAL\Statement
             } catch (\Exception $e) {
                 if ($this->conn->canTryAgain($attempt) && $this->conn->isRetryableException($e, $this->sql)) {
                     $this->conn->close();
+                    $this->conn->delayReconnection($attempt);
                     $this->recreateStatement();
                     ++$attempt;
                     $retry = true;

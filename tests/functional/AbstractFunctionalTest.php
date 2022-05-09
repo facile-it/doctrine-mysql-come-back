@@ -12,11 +12,11 @@ use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTest extends TestCase
 {
-    abstract protected function createConnection(int $attempts): Connection;
+    abstract protected function createConnection(int $attempts, int $delay): Connection;
     
-    protected function getConnectedConnection(int $attempts): Connection
+    protected function getConnectedConnection(int $attempts, int $delay = 0): Connection
     {
-        $connection = $this->createConnection($attempts);
+        $connection = $this->createConnection($attempts, $delay);
         $connection->query('SELECT 1');
         
         return $connection;
@@ -51,7 +51,7 @@ TABLE
     /**
      * Disconnect other sessions
      */
-    protected function forceDisconnect(\Doctrine\DBAL\Connection $connection): void
+    protected function forceDisconnect(\Doctrine\DBAL\Connection $connection, int $delay = 0): void
     {
         /** @var Connection $connection */
         $connection2 = DriverManager::getConnection(array_merge(
@@ -60,7 +60,8 @@ TABLE
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
                 'driverOptions' => array(
-                    'x_reconnect_attempts' => 1
+                    'x_reconnect_attempts' => 1,
+                    'x_reconnect_delay' => $delay,
                 )
             ]
         ));
@@ -92,6 +93,27 @@ TABLE
 
         $connection->executeQuery('SELECT 1')->fetch();
         $this->assertSame(2, $connection->connectCount);
+    }
+
+    public function testExecuteQueryShouldReconnectWithDelay(): void
+    {
+        $delay = 2000000;
+
+        $preTiming = microtime(true);
+        $connection = $this->getConnectedConnection(1, $delay);
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection, $delay);
+
+        $connection->executeQuery('SELECT 1')->fetch();
+        $this->assertSame(2, $connection->connectCount);
+        $this->forceDisconnect($connection, $delay);
+
+        $connection->executeQuery('SELECT 1')->fetch();
+        $this->assertSame(3, $connection->connectCount);
+
+        // If
+        $postTiming = microtime(true);
+        $this->assertGreaterThanOrEqual(4, $postTiming - $preTiming);
     }
 
     public function testQueryShouldReconnect(): void

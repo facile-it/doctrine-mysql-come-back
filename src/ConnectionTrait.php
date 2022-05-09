@@ -24,6 +24,9 @@ trait ConnectionTrait
     /** @var int */
     protected $reconnectAttempts = 0;
 
+    /** @var int */
+    private $reconnectDelay = 0;
+
     /** @var ReflectionProperty|null */
     private $selfReflectionNestingLevelProperty;
 
@@ -56,6 +59,10 @@ trait ConnectionTrait
             $this->reconnectAttempts = (int)$params['driverOptions']['x_reconnect_attempts'];
         }
 
+        if (isset($params['driverOptions']['x_reconnect_delay'])) {
+            $this->reconnectDelay = (int)$params['driverOptions']['x_reconnect_delay'];
+        }
+
         parent::__construct($params, $driver, $config, $eventManager);
     }
 
@@ -81,6 +88,7 @@ trait ConnectionTrait
             } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $query)) {
                     $this->close();
+                    $this->delayReconnection();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -109,6 +117,7 @@ trait ConnectionTrait
             } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e, $args[0])) {
                     $this->close();
+                    $this->delayReconnection();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -148,6 +157,7 @@ trait ConnectionTrait
             } catch (Exception $e) {
                 if ($this->canTryAgain($attempt) && $this->isRetryableException($e)) {
                     $this->close();
+                    $this->delayReconnection();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -178,6 +188,7 @@ trait ConnectionTrait
             } catch (Exception $e) {
                 if ($this->canTryAgain($attempt, true) && $this->_driver->isGoneAwayException($e)) {
                     $this->close();
+                    $this->delayReconnection();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
                     }
@@ -277,6 +288,14 @@ trait ConnectionTrait
         }
 
         $this->selfReflectionNestingLevelProperty->setValue($this, 0);
+    }
+
+    /**
+     * @return void
+     */
+    public function delayReconnection()
+    {
+        usleep($this->reconnectDelay);
     }
 
     /**

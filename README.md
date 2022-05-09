@@ -41,7 +41,8 @@ $connectionParams = array(
     'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection',
     'driverClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver',
     'driverOptions' => array(
-        'x_reconnect_attempts' => 3
+        'x_reconnect_attempts' => 3,
+        'x_reconnect_delay' => 1000000 // microseconds
     )
 );
 
@@ -69,6 +70,8 @@ doctrine:
                 driver_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver'
                 options:
                     x_reconnect_attempts: 3
+                    # microseconds
+                    x_reconnect_delay: 1000000
 ```
 
 If you are setting up your database connection using a DSN/`database_url` env variable (like the Doctrine Symfony Flex recipe suggests) **you need to remove the protocol** from your database url.
@@ -87,6 +90,8 @@ doctrine:
                 driver_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySql\Driver'
                 options:
                     x_reconnect_attempts: 3
+                    # microseconds
+                    x_reconnect_delay: 1000000
 
 ``` 
 
@@ -108,6 +113,7 @@ return [
                     'charset' => 'UTF8',
                     'driverOptions' => [
                         'x_reconnect_attempts' => 9,
+                        'x_reconnect_delay' => 1000000 // microseconds
                     ]
                 ],
             ],

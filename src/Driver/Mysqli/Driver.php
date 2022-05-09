@@ -19,6 +19,7 @@ class Driver extends \Doctrine\DBAL\Driver\Mysqli\Driver implements ServerGoneAw
      */
     private $extendedDriverOptions = [
         'x_reconnect_attempts',
+        'x_reconnect_delay'
     ];
 
     /**
