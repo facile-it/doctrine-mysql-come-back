@@ -9,7 +9,7 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Exception;
+use Exception;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
@@ -63,7 +63,7 @@ class Connection extends DBALConnection
                 $driverStatement = @$this->_conn->prepare($sql);
 
                 return new Statement($this, $driverStatement, $sql);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
                     ++$attempt;
