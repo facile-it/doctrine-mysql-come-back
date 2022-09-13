@@ -128,7 +128,7 @@ class Connection extends DBALConnection
             try {
                 return @parent::beginTransaction();
             } catch (Exception $e) {
-                if ($this->canTryAgain($e, $attempt)) {
+                if ($this->canTryAgain($e, $attempt, '', true)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
