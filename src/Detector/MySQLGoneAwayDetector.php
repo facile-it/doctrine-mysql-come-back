@@ -8,11 +8,13 @@ class MySQLGoneAwayDetector implements GoneAwayDetector
     protected $goneAwayExceptions = [
         'MySQL server has gone away',
         'Lost connection to MySQL server during query',
+        'Error while sending QUERY packet',
     ];
 
     /** @var string[] */
     protected $goneAwayInUpdateExceptions = [
         'MySQL server has gone away',
+        'Error while sending QUERY packet',
     ];
 
     public function isGoneAwayException(\Throwable $exception, string $sql = null): bool
