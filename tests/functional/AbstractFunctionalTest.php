@@ -95,6 +95,28 @@ TABLE
         $this->assertSame(2, $connection->connectCount);
     }
 
+    public function testBeginTransactionShouldNotReconnect(): void
+    {
+        $connection = $this->getConnectedConnection(0);
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        $this->expectException(\PDOException::class);
+
+        $connection->beginTransaction();
+    }
+
+    public function testBeginTransactionShouldReconnect(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        $connection->beginTransaction();
+
+        $this->assertSame(2, $connection->connectCount);
+    }
+
     public function testQueryShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);

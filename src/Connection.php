@@ -9,7 +9,8 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Exception;
+use Doctrine\DBAL\Exception;
+use PDOException;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
@@ -63,7 +64,7 @@ class Connection extends DBALConnection
                 $driverStatement = @$this->_conn->prepare($sql);
 
                 return new Statement($this, $driverStatement, $sql);
-            } catch (Exception $e) {
+            } catch (Exception|PDOException $e) {
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
                     ++$attempt;
@@ -83,7 +84,7 @@ class Connection extends DBALConnection
             $retry = false;
             try {
                 return @parent::executeQuery($sql, $params, $types, $qcp);
-            } catch (Exception $e) {
+            } catch (Exception|PDOException $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
@@ -103,7 +104,7 @@ class Connection extends DBALConnection
             $retry = false;
             try {
                 return @parent::executeStatement($sql, $params, $types);
-            } catch (Exception $e) {
+            } catch (Exception|PDOException $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
@@ -127,7 +128,7 @@ class Connection extends DBALConnection
             $retry = false;
             try {
                 return @parent::beginTransaction();
-            } catch (Exception $e) {
+            } catch (Exception|PDOException $e) {
                 if ($this->canTryAgain($e, $attempt, '', true)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
