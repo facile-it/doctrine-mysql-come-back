@@ -209,6 +209,9 @@ TABLE
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['0' => 'foo']], $result);
+        /**
+         * @psalm-suppress DocblockTypeContradiction
+         */
         $this->assertSame(2, $connection->connectCount);
     }
 }
