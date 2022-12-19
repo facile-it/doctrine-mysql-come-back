@@ -98,10 +98,13 @@ TABLE
     public function testBeginTransactionShouldNotReconnect(): void
     {
         $connection = $this->getConnectedConnection(0);
+        $driver = $connection->getDriver();
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $this->expectException(\PDOException::class);
+        if (is_a($driver, Driver::class)) {
+            $this->expectException(\PDOException::class);
+        }
 
         $connection->beginTransaction();
     }
@@ -109,12 +112,17 @@ TABLE
     public function testBeginTransactionShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
+        $driver = $connection->getDriver();
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
         $connection->beginTransaction();
 
-        $this->assertSame(2, $connection->connectCount);
+        if (is_a($driver, Driver::class)) {
+            $this->assertSame(2, $connection->connectCount);
+        } else {
+            $this->assertSame(1, $connection->connectCount);
+        }
     }
 
     public function testQueryShouldReconnect(): void

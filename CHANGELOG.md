@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 * Adedd handling of AWS MySQL RDS connection loss
+* Fixed `beginTransaction` function to have reconnection support
 
 ## [2.0.0-BETA1] - 2022-06-23
 ### Added
