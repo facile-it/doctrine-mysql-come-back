@@ -29,7 +29,7 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function recreateStatement(): void
     {
-        $this->stmt = $this->conn->getNativeConnection()->prepare($this->sql);
+        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
     }
 
 //    public function execute($params = null): Result
@@ -60,6 +60,7 @@ class Statement extends \Doctrine\DBAL\Statement
                 return $parentCall(...$params);
             } catch (Exception $e) {
                 if ($this->retriableConnection->canTryAgain($e, $attempt, $this->sql)) {
+                    $this->retriableConnection->close();
                     $this->recreateStatement();
                     ++$attempt;
                     $retry = true;

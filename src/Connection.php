@@ -65,6 +65,7 @@ class Connection extends DBALConnection
                 return new Statement($this, $driverStatement, $sql);
             } catch (\Exception $e) {
                 if ($this->canTryAgain($e, $attempt)) {
+                    $this->close();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -84,6 +85,7 @@ class Connection extends DBALConnection
                 return @parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
+                    $this->close();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -103,6 +105,7 @@ class Connection extends DBALConnection
                 return @parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
+                    $this->close();
                     ++$attempt;
                     $retry = true;
                 } else {
@@ -126,6 +129,7 @@ class Connection extends DBALConnection
                 return @parent::beginTransaction();
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt)) {
+                    $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();
                     }
