@@ -19,6 +19,8 @@ class ConnectionTest extends TestCase
     {
         $driver = $this->prophesize(Driver::class);
         $configuration = $this->prophesize(Configuration::class);
+        $configuration->getSchemaManagerFactory()
+            ->willReturn();
         $configuration->getAutoCommit()
             ->willReturn(false);
         $eventManager = $this->prophesize(EventManager::class);
