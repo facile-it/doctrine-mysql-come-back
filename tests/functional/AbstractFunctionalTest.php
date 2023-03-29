@@ -36,9 +36,19 @@ TABLE
         $connection->executeStatement('INSERT INTO test (id) VALUES (1);');
     }
 
+    /**
+     * @return array{
+     *     driver: key-of<DriverManager::DRIVER_MAP>,
+     *     dbname: string,
+     *     user: string,
+     *     password: string,
+     *     host: string,
+     *     port: int
+     * }
+     */
     protected function getConnectionParams(): array
     {
-        return [
+        $values = [
             'driver' => getenv('MYSQL_DRIVER') ?: $GLOBALS['db_driver'] ?? 'pdo_mysql',
             'dbname' => getenv('MYSQL_DBNAME') ?: $GLOBALS['db_dbname'] ?? 'test',
             'user' => getenv('MYSQL_USER') ?: $GLOBALS['db_user'] ?? 'root',
@@ -46,6 +56,17 @@ TABLE
             'host' => getenv('MYSQL_HOST') ?: $GLOBALS['db_host'] ?? 'localhost',
             'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3306),
         ];
+
+        $this->assertIsString($values['driver']);
+        if ($values['driver'] !== 'pdo_mysql') {
+            assert($values['driver'] === 'mysqli');
+        }
+        $this->assertIsString($values['dbname']);
+        $this->assertIsString($values['user']);
+        $this->assertIsString($values['password']);
+        $this->assertIsString($values['host']);
+
+        return $values;
     }
 
     /**
@@ -53,7 +74,6 @@ TABLE
      */
     protected function forceDisconnect(\Doctrine\DBAL\Connection $connection): void
     {
-        /** @var Connection $connection */
         $connection2 = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
             [

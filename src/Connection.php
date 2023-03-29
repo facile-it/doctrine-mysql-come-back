@@ -54,10 +54,8 @@ class Connection extends DBALConnection
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 $this->connect();
-                assert(null !== $this->_conn);
 
                 /** @psalm-suppress InternalMethod */
                 $driverStatement = @$this->_conn->prepare($sql);
@@ -67,12 +65,11 @@ class Connection extends DBALConnection
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
@@ -80,19 +77,17 @@ class Connection extends DBALConnection
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 return @parent::executeQuery($sql, $params, $types, $qcp);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 
     public function executeStatement($sql, array $params = [], array $types = [])
@@ -100,19 +95,17 @@ class Connection extends DBALConnection
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 return @parent::executeStatement($sql, $params, $types);
             } catch (Exception $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 
     public function beginTransaction()
@@ -124,7 +117,6 @@ class Connection extends DBALConnection
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 return @parent::beginTransaction();
             } catch (Exception $e) {
@@ -134,12 +126,11 @@ class Connection extends DBALConnection
                         $this->resetTransactionNestingLevel();
                     }
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 
     public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null, bool $ignoreTransactionLevel = false): bool

@@ -55,7 +55,6 @@ class Statement extends \Doctrine\DBAL\Statement
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 return $parentCall(...$params);
             } catch (Exception $e) {
@@ -63,11 +62,10 @@ class Statement extends \Doctrine\DBAL\Statement
                     $this->retriableConnection->close();
                     $this->recreateStatement();
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 }
