@@ -10,9 +10,9 @@ RUN set -ex \
         autoconf \
         make \
         g++ \
-    && pecl install -o xdebug && docker-php-ext-enable xdebug \
+    && pecl install -o xdebug-3.1.6 && docker-php-ext-enable xdebug \
     && apk del build-dependencies
 
-ARG COMPOSER_VERSION=2.2.6
+ARG COMPOSER_VERSION=2.5.5
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION

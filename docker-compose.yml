@@ -9,8 +9,6 @@ x-mysql-props: &mysql-props
 x-php-props: &php-props
   build:
     context: ./docker
-    args:
-      PHP_VERSION: 7.3
   extra_hosts:
     - "host.docker.internal:host-gateway"
   volumes:
@@ -36,8 +34,6 @@ services:
     <<: *php-props
     build:
       context: ./docker
-      args:
-        PHP_VERSION: 7.3
     depends_on:
       - mysql57
     environment:
