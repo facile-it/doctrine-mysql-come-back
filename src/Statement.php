@@ -32,11 +32,6 @@ class Statement extends \Doctrine\DBAL\Statement
         $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
     }
 
-//    public function execute($params = null): Result
-//    {
-//        return $this->executeWithRetry([parent::class, 'execute'], $params);
-//    }
-
     public function executeQuery(array $params = []): Result
     {
         return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
