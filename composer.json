@@ -23,6 +23,7 @@
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.5.2",
+        "phpdocumentor/reflection-docblock": "^5",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.6",
         "psalm/plugin-phpunit": "^0.18.4",
