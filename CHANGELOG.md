@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 * Adedd handling of AWS MySQL RDS connection loss
+### Fixed
+* Fixed `beginTransaction` function to have reconnection support
+### Removed
+* Drop support for DBAL < 3.6
+* Drop support for PHP 7.3
 
 ## [2.0.0-BETA1] - 2022-06-23
 ### Added
