@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
 {
     /** @var int */

@@ -13,10 +13,13 @@ use Exception;
  */
 class Statement extends \Doctrine\DBAL\Statement
 {
-    /** @var Connection */
-    protected $retriableConnection;
+    /** @var Connection|PrimaryReadReplicaConnection */
+    protected \Doctrine\DBAL\Connection $retriableConnection;
 
-    public function __construct(Connection $retriableConnection, Driver\Statement $statement, string $sql)
+    /**
+     * @param Connection|PrimaryReadReplicaConnection $retriableConnection
+     */
+    public function __construct(\Doctrine\DBAL\Connection $retriableConnection, Driver\Statement $statement, string $sql)
     {
         /** @psalm-suppress InternalMethod */
         parent::__construct($retriableConnection, $statement, $sql);
