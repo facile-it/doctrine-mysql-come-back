@@ -112,6 +112,7 @@ TABLE
 
         $connection->executeQuery('SELECT 1')->fetch();
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -123,6 +124,7 @@ TABLE
 
         $connection->executeQuery('SELECT 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -135,6 +137,7 @@ TABLE
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -147,6 +150,7 @@ TABLE
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -160,6 +164,7 @@ TABLE
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -181,6 +186,7 @@ TABLE
 
         array_unshift($params, 'foo');
         $this->assertSame([$params], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -194,6 +200,7 @@ TABLE
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -207,18 +214,40 @@ TABLE
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['0' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
-    public function testShouldReconnectOnBeginTransaction(): void
+    public function testBeginTransactionShouldNotReconnect(): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection(0);
+        $driver = $connection->getDriver();
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $this->assertSame(0, $connection->getTransactionNestingLevel());
-        $this->assertTrue($connection->beginTransaction());
-        $this->assertSame(1, $connection->getTransactionNestingLevel());
+        if (is_a($driver, Driver::class)) {
+            $this->expectException(\PDOException::class);
+        }
+
+        $connection->beginTransaction();
+    }
+
+    public function testBeginTransactionShouldReconnect(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $driver = $connection->getDriver();
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        $connection->beginTransaction();
+
+        if (is_a($driver, Driver::class)) {
+            /** @psalm-suppress DocblockTypeContradiction */
+            $this->assertSame(2, $connection->connectCount);
+        } else {
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
+            $this->assertSame(1, $connection->connectCount);
+        }
     }
 
     public function testShouldReconnectOnExecutePreparedStatement(): void
@@ -230,6 +259,7 @@ TABLE
         $this->forceDisconnect($connection);
 
         $this->assertSame(1, $statement->executeStatement());
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -242,6 +272,7 @@ TABLE
         $this->forceDisconnect($connection);
 
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 }

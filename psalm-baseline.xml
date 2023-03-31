@@ -32,18 +32,6 @@
     <DeprecatedMethod>
       <code>fetch</code>
     </DeprecatedMethod>
-    <DocblockTypeContradiction>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-      <code>assertSame</code>
-    </DocblockTypeContradiction>
     <MixedAssignment>
       <code>$id</code>
     </MixedAssignment>
