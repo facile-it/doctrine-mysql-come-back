@@ -7,17 +7,16 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
+class PrimaryReadReplicaConnection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\PrimaryReadReplicaConnection
 {
     public int $connectCount = 0;
 
-    public function connect($connectionName = null): bool
+    protected function connectTo($connectionName)
     {
         if (! $this->isConnected()) {
             ++$this->connectCount;
         }
 
-        /** @psalm-suppress InternalMethod */
-        return parent::connect($connectionName);
+        return parent::connectTo($connectionName);
     }
 }

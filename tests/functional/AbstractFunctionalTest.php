@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
@@ -11,9 +12,15 @@ use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTest extends TestCase
 {
-    abstract protected function createConnection(int $attempts): Connection;
+    /**
+     * @return Connection|PrimaryReadReplicaConnection
+     */
+    abstract protected function createConnection(int $attempts): DBALConnection;
 
-    protected function getConnectedConnection(int $attempts): Connection
+    /**
+     * @return Connection|PrimaryReadReplicaConnection
+     */
+    protected function getConnectedConnection(int $attempts): DBALConnection
     {
         $connection = $this->createConnection($attempts);
         $connection->executeQuery('SELECT 1');
@@ -21,7 +28,10 @@ abstract class AbstractFunctionalTest extends TestCase
         return $connection;
     }
 
-    protected function createTestTable(Connection $connection): void
+    /**
+     * @param Connection|PrimaryReadReplicaConnection $connection
+     */
+    protected function createTestTable(DBALConnection $connection): void
     {
         $connection->executeStatement(
             <<<'TABLE'
@@ -72,7 +82,7 @@ TABLE
     /**
      * Disconnect other sessions
      */
-    protected function forceDisconnect(\Doctrine\DBAL\Connection $connection): void
+    protected function forceDisconnect(DBALConnection $connection): void
     {
         $connection2 = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
