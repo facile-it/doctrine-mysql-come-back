@@ -209,4 +209,22 @@ TABLE
         $this->assertSame([['0' => 'foo']], $result);
         $this->assertSame(2, $connection->connectCount);
     }
+
+    public function testShouldReconnectOnBeginTransaction(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        $this->assertSame(0, $connection->getTransactionNestingLevel());
+        $this->assertTrue($connection->beginTransaction());
+        $this->assertSame(1, $connection->getTransactionNestingLevel());
+
+        $this->forceDisconnect($connection);
+
+        $this->assertSame(0, $connection->getTransactionNestingLevel());
+        $this->assertTrue($connection->beginTransaction());
+        $this->assertSame(1, $connection->getTransactionNestingLevel());
+
+    }
 }

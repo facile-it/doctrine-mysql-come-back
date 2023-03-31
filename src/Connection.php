@@ -9,7 +9,8 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Driver\Exception as DriverException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
@@ -79,7 +80,7 @@ class Connection extends DBALConnection
         do {
             try {
                 return @parent::executeQuery($sql, $params, $types, $qcp);
-            } catch (Exception $e) {
+            } catch (DBALException $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
@@ -97,7 +98,7 @@ class Connection extends DBALConnection
         do {
             try {
                 return @parent::executeStatement($sql, $params, $types);
-            } catch (Exception $e) {
+            } catch (DBALException $e) {
                 if ($this->canTryAgain($e, $attempt, $sql)) {
                     $this->close();
                     ++$attempt;
@@ -118,8 +119,8 @@ class Connection extends DBALConnection
 
         do {
             try {
-                return @parent::beginTransaction();
-            } catch (Exception $e) {
+                return parent::beginTransaction();
+            } catch (\Throwable $e) {
                 if ($this->canTryAgain($e, $attempt)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
