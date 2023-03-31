@@ -52,11 +52,11 @@ class ConnectionTest extends TestCase
         $goneAwayDetector = $this->prophesize(GoneAwayDetector::class);
         $goneAwayDetector->isGoneAwayException(Argument::cetera())
             ->willReturn(false);
-        
+
         $connection->setGoneAwayDetector($goneAwayDetector->reveal());
-        
+
         $this->expectException(\LogicException::class);
-        
+
         $connection->prepare('THIS SHOULD FAIL');
     }
 

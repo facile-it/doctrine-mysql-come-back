@@ -9,7 +9,6 @@ use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Driver\Exception as DriverException;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
@@ -121,7 +120,7 @@ class Connection extends DBALConnection
             try {
                 return parent::beginTransaction();
             } catch (\Throwable $e) {
-                if ($this->canTryAgain($e, $attempt)) {
+                if ($this->canTryAgain($e, $attempt, '', true)) {
                     $this->close();
                     if (0 < $this->getTransactionNestingLevel()) {
                         $this->resetTransactionNestingLevel();

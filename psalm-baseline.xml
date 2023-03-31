@@ -1,55 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="4.22.0@fc2c6ab4d5fa5d644d8617089f012f3bb84b8703">
+<files psalm-version="5.8.0@9cf4f60a333f779ad3bc704a555920e81d4fdcda">
   <file src="src/Connection.php">
-    <InternalMethod occurrences="1">
+    <InternalMethod>
       <code>connect</code>
     </InternalMethod>
-    <InvalidNullableReturnType occurrences="2">
-      <code>beginTransaction</code>
-      <code>executeStatement</code>
-    </InvalidNullableReturnType>
-    <InvalidReturnType occurrences="2">
-      <code>DBALStatement</code>
-      <code>Result</code>
-    </InvalidReturnType>
-    <UnusedVariable occurrences="4">
-      <code>$retry</code>
-      <code>$retry</code>
-      <code>$retry</code>
-      <code>$retry</code>
-    </UnusedVariable>
   </file>
   <file src="src/Statement.php">
-    <DeprecatedMethod occurrences="1">
+    <DeprecatedMethod>
       <code>getWrappedConnection</code>
     </DeprecatedMethod>
-    <MissingParamType occurrences="2">
+    <MissingParamType>
       <code>$callable</code>
       <code>$params</code>
     </MissingParamType>
-    <MissingReturnType occurrences="1">
+    <MissingReturnType>
       <code>executeWithRetry</code>
     </MissingReturnType>
-    <MixedArgument occurrences="1">
+    <MixedArgument>
       <code>$callable</code>
     </MixedArgument>
-    <MixedInferredReturnType occurrences="2">
+    <MixedInferredReturnType>
       <code>Result</code>
       <code>int</code>
     </MixedInferredReturnType>
-    <MixedReturnStatement occurrences="2">
-      <code>$this-&gt;executeWithRetry([parent::class, 'executeQuery'], $params)</code>
-      <code>$this-&gt;executeWithRetry([parent::class, 'executeStatement'], $params)</code>
+    <MixedReturnStatement>
+      <code><![CDATA[$this->executeWithRetry([parent::class, 'executeQuery'], $params)]]></code>
+      <code><![CDATA[$this->executeWithRetry([parent::class, 'executeStatement'], $params)]]></code>
     </MixedReturnStatement>
-    <UnusedVariable occurrences="1">
-      <code>$retry</code>
-    </UnusedVariable>
   </file>
   <file src="tests/functional/AbstractFunctionalTest.php">
-    <DeprecatedMethod occurrences="1">
+    <DeprecatedMethod>
       <code>fetch</code>
     </DeprecatedMethod>
-    <DocblockTypeContradiction occurrences="8">
+    <DocblockTypeContradiction>
+      <code>assertSame</code>
+      <code>assertSame</code>
       <code>assertSame</code>
       <code>assertSame</code>
       <code>assertSame</code>
@@ -59,10 +44,10 @@
       <code>assertSame</code>
       <code>assertSame</code>
     </DocblockTypeContradiction>
-    <MixedAssignment occurrences="1">
+    <MixedAssignment>
       <code>$id</code>
     </MixedAssignment>
-    <MixedOperand occurrences="1">
+    <MixedOperand>
       <code>$id</code>
     </MixedOperand>
   </file>

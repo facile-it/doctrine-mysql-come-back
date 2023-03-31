@@ -80,7 +80,7 @@ TABLE
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
                 'driverOptions' => [
-                    'x_reconnect_attempts' => 1,
+                    'x_reconnect_attempts' => 0,
                 ],
             ]
         ));
@@ -219,12 +219,29 @@ TABLE
         $this->assertSame(0, $connection->getTransactionNestingLevel());
         $this->assertTrue($connection->beginTransaction());
         $this->assertSame(1, $connection->getTransactionNestingLevel());
+    }
+
+    public function testShouldReconnectOnExecutePreparedStatement(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $statement = $connection->prepare('SELECT 1');
 
         $this->forceDisconnect($connection);
 
-        $this->assertSame(0, $connection->getTransactionNestingLevel());
-        $this->assertTrue($connection->beginTransaction());
-        $this->assertSame(1, $connection->getTransactionNestingLevel());
+        $this->assertSame(1, $statement->executeStatement());
+        $this->assertSame(2, $connection->connectCount);
+    }
 
+    public function testShouldReconnectOnExecuteQueryPreparedStatement(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
+        $this->assertSame(2, $connection->connectCount);
     }
 }
