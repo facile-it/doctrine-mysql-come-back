@@ -10,7 +10,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
 use PHPUnit\Framework\TestCase;
 
-abstract class AbstractFunctionalTest extends TestCase
+abstract class AbstractFunctionalTestCase extends TestCase
 {
     /**
      * @return Connection|PrimaryReadReplicaConnection

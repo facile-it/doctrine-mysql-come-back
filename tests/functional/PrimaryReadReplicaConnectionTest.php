@@ -5,7 +5,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
 
-class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTest
+class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
 {
     protected function createConnection(int $attempts): PrimaryReadReplicaConnection
     {
