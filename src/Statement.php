@@ -32,11 +32,6 @@ class Statement extends \Doctrine\DBAL\Statement
         $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
     }
 
-//    public function execute($params = null): Result
-//    {
-//        return $this->executeWithRetry([parent::class, 'execute'], $params);
-//    }
-
     public function executeQuery(array $params = []): Result
     {
         return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
@@ -55,7 +50,6 @@ class Statement extends \Doctrine\DBAL\Statement
         $attempt = 0;
 
         do {
-            $retry = false;
             try {
                 return $parentCall(...$params);
             } catch (Exception $e) {
@@ -63,11 +57,10 @@ class Statement extends \Doctrine\DBAL\Statement
                     $this->retriableConnection->close();
                     $this->recreateStatement();
                     ++$attempt;
-                    $retry = true;
                 } else {
                     throw $e;
                 }
             }
-        } while ($retry);
+        } while (true);
     }
 }

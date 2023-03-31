@@ -36,9 +36,19 @@ TABLE
         $connection->executeStatement('INSERT INTO test (id) VALUES (1);');
     }
 
+    /**
+     * @return array{
+     *     driver: key-of<DriverManager::DRIVER_MAP>,
+     *     dbname: string,
+     *     user: string,
+     *     password: string,
+     *     host: string,
+     *     port: int
+     * }
+     */
     protected function getConnectionParams(): array
     {
-        return [
+        $values = [
             'driver' => getenv('MYSQL_DRIVER') ?: $GLOBALS['db_driver'] ?? 'pdo_mysql',
             'dbname' => getenv('MYSQL_DBNAME') ?: $GLOBALS['db_dbname'] ?? 'test',
             'user' => getenv('MYSQL_USER') ?: $GLOBALS['db_user'] ?? 'root',
@@ -46,6 +56,17 @@ TABLE
             'host' => getenv('MYSQL_HOST') ?: $GLOBALS['db_host'] ?? 'localhost',
             'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3306),
         ];
+
+        $this->assertIsString($values['driver']);
+        if ($values['driver'] !== 'pdo_mysql') {
+            assert($values['driver'] === 'mysqli');
+        }
+        $this->assertIsString($values['dbname']);
+        $this->assertIsString($values['user']);
+        $this->assertIsString($values['password']);
+        $this->assertIsString($values['host']);
+
+        return $values;
     }
 
     /**
@@ -53,14 +74,13 @@ TABLE
      */
     protected function forceDisconnect(\Doctrine\DBAL\Connection $connection): void
     {
-        /** @var Connection $connection */
         $connection2 = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
             [
                 'wrapperClass' => Connection::class,
                 'driverClass' => Driver::class,
                 'driverOptions' => [
-                    'x_reconnect_attempts' => 1,
+                    'x_reconnect_attempts' => 0,
                 ],
             ]
         ));
@@ -92,6 +112,7 @@ TABLE
 
         $connection->executeQuery('SELECT 1')->fetch();
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -103,6 +124,7 @@ TABLE
 
         $connection->executeQuery('SELECT 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -115,6 +137,7 @@ TABLE
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -127,6 +150,7 @@ TABLE
 
         $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
 
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -140,6 +164,7 @@ TABLE
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -161,6 +186,7 @@ TABLE
 
         array_unshift($params, 'foo');
         $this->assertSame([$params], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -174,6 +200,7 @@ TABLE
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 
@@ -187,6 +214,65 @@ TABLE
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['0' => 'foo']], $result);
+        /** @psalm-suppress DocblockTypeContradiction */
+        $this->assertSame(2, $connection->connectCount);
+    }
+
+    public function testBeginTransactionShouldNotReconnect(): void
+    {
+        $connection = $this->getConnectedConnection(0);
+        $driver = $connection->getDriver();
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        if (is_a($driver, Driver::class)) {
+            $this->expectException(\PDOException::class);
+        }
+
+        $connection->beginTransaction();
+    }
+
+    public function testBeginTransactionShouldReconnect(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $driver = $connection->getDriver();
+        $this->assertSame(1, $connection->connectCount);
+        $this->forceDisconnect($connection);
+
+        $connection->beginTransaction();
+
+        if (is_a($driver, Driver::class)) {
+            /** @psalm-suppress DocblockTypeContradiction */
+            $this->assertSame(2, $connection->connectCount);
+        } else {
+            /** @psalm-suppress RedundantConditionGivenDocblockType */
+            $this->assertSame(1, $connection->connectCount);
+        }
+    }
+
+    public function testShouldReconnectOnExecutePreparedStatement(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->assertSame(1, $statement->executeStatement());
+        /** @psalm-suppress DocblockTypeContradiction */
+        $this->assertSame(2, $connection->connectCount);
+    }
+
+    public function testShouldReconnectOnExecuteQueryPreparedStatement(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $this->assertSame(1, $connection->connectCount);
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
+        /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
     }
 }

@@ -17,7 +17,6 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "7.3"
           - "7.4"
           - "8.0"
         mysql-version:
@@ -26,7 +25,7 @@ jobs:
         dependencies:
           - "highest"
         include:
-          - php-version: "7.3"
+          - php-version: "7.4"
             mysql-version: "8.0"
             custom-entrypoint: >-
               --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
@@ -36,7 +35,7 @@ jobs:
             custom-entrypoint: >-
               --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
           - dependencies: "lowest"
-            php-version: "7.3"
+            php-version: "7.4"
             mysql-version: "5.7"
 
     services:
