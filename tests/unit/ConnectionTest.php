@@ -5,18 +5,13 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\Common\EventManager;
-use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
 
-class ConnectionTest extends TestCase
+class ConnectionTest extends BaseUnitTestCase
 {
-    use ProphecyTrait;
-
     public function testConstructor(): void
     {
         $params = [
@@ -58,16 +53,5 @@ class ConnectionTest extends TestCase
         $this->expectException(\LogicException::class);
 
         $connection->prepare('THIS SHOULD FAIL');
-    }
-
-    private function mockConfiguration(): Configuration
-    {
-        $configuration = $this->prophesize(Configuration::class);
-        $configuration->getSchemaManagerFactory()
-            ->willReturn();
-        $configuration->getAutoCommit()
-            ->willReturn(false);
-
-        return $configuration->reveal();
     }
 }

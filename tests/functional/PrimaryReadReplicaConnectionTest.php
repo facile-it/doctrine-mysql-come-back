@@ -14,13 +14,13 @@ class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
             [
                 'primary' => $this->getConnectionParams(),
                 'replica' => [$this->getConnectionParams()],
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
             ],
             [
                 'wrapperClass' => PrimaryReadReplicaConnection::class,
                 'driverClass' => Driver::class,
-                'driverOptions' => [
-                    'x_reconnect_attempts' => $attempts,
-                ],
             ]
         ));
 
