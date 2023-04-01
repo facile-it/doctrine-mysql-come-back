@@ -16,6 +16,9 @@ use Doctrine\DBAL\Types\Type;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
+/**
+ * @psalm-require-extends \Doctrine\DBAL\Connection
+ */
 trait ConnectionTrait
 {
     protected GoneAwayDetector $goneAwayDetector;
@@ -47,8 +50,6 @@ trait ConnectionTrait
     {
         $this->goneAwayDetector = $goneAwayDetector;
     }
-
-    abstract public function connect();
 
     public function prepare(string $sql): DBALStatement
     {
