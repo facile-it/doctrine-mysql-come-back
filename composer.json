@@ -23,6 +23,7 @@
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.5.2",
+        "infection/infection": "^0.26.6",
         "phpdocumentor/reflection-docblock": ">=4.0.1",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.6",
@@ -45,7 +46,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "facile-it/facile-coding-standard": true,
-            "composer/package-versions-deprecated": true
+            "composer/package-versions-deprecated": true,
+            "infection/extension-installer": true
         }
     },
     "minimum-stability": "stable",
