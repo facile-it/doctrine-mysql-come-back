@@ -95,7 +95,29 @@ return [
 ];
 ```
 
-You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection` if you are using a primary/replica Doctrine configuration.
+You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection` if you are using a primary/replica Doctrine configuration:
+```php
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\DriverManager;
+
+$config = new Configuration();
+
+//..
+
+$connectionParams = [
+    'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\PrimaryReadReplicaConnection',
+    'primary' => [
+        // ...
+        'driverOptions' => [
+            'x_reconnect_attempts' => 3
+        ],
+    ],   
+];
+
+$conn = DriverManager::getConnection($connectionParams, $config);
+
+//..
+```
 
 # Usage
 

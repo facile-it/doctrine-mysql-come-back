@@ -1,8 +1,12 @@
 # UPGRADE FROM 1.x to 2.0
+## Configuration changes
 If you were using this library without extending the code in it, the upgrade path is pretty smooth; you just have to change the following connection options: 
- * change `driverClass` option: it's no longer required to be set to `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\*` classes (which no longer exists); you can fall back to the normal DBAL corresponding classes
- * replace usages of `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` with `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection`: this follows the same rename happened in DBAL v2 vs v3, and you have to follow [the DBAL upgrade instructions](https:\\github.com\doctrine\dbal\blob\3.3.x\UPGRADE.md#deprecated-masterslaveconnection-use-primaryreadreplicaconnection), since driver options were renamed too.
+ * change `driverClass` option: it's no longer required to be set to `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\*` classes (which no longer exists); you can fall back to the normal DBAL corresponding classes (which are not `final` and cannot be extended anyway)
+ * if you use a primary/replica connection:
+   * replace usages of `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` with `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection`: this follows the same rename happened in DBAL v2 vs v3, and you have to follow [the DBAL upgrade instructions](https:\\github.com\doctrine\dbal\blob\3.3.x\UPGRADE.md#deprecated-masterslaveconnection-use-primaryreadreplicaconnection), since some driver options were renamed too.
+   * move `driverOptions` under the `primary` key: having it in the root of `$params` was a bug that got fixed in DoctrineBundle 2.6.3, see [doctrine/DoctrineBundle#1541](https://github.com/doctrine/DoctrineBundle/issues/1541)
 
+## Internal changes
 If you were instead extending the code inside this library, you should proceed with caution, because you can expect multiple breaking changes; here's a summary:
 
 ### Added
@@ -51,6 +55,9 @@ class Statement extends \Doctrine\DBAL\Statement
 // ...
 }
 ```
+
+### Fixed
+* In `PrimaryReadReplicaConnection`, fetch `driverOptions` from under the `primary` key
 
 ### Removed
 * Drop support for DBAL v2
