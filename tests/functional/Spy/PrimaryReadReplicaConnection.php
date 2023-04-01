@@ -7,7 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class PrimaryReadReplicaConnection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\PrimaryReadReplicaConnection
+class PrimaryReadReplicaConnection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection
 {
     public int $connectCount = 0;
 

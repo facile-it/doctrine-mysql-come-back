@@ -7,6 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Result;
 use Exception;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection;
 
 /**
  * @internal
