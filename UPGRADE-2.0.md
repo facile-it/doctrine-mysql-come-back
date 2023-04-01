@@ -14,6 +14,7 @@ If you were instead extending the code inside this library, you should proceed w
 * Add `GoneAwayDetector` interface and `MySQLGoneAwayDetector` class implementation
 * Add `setGoneAwayDetector` method to the connections
 * Added handling of AWS MySQL RDS connection loss
+* Add validation to `x_reconnect_attempts`
 
 ### Changed
 * Changed `Connection` method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
