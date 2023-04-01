@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 * ...
 
+## [2.0.0-BETA3] - 2023-04-02
+### Added
+* Add validation to `x_reconnect_attempts`
+### Fixed
+* In `PrimaryReadReplicaConnection`, fetch `driverOptions` from under the `primary` key
+
 ## [2.0.0-BETA2] - 2023-04-01
 ### Added
 * Added `PrimaryReadReplicaConnection` and `ConnectionTrait` back 

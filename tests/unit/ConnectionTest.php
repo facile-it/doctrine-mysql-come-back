@@ -9,13 +9,30 @@ use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
 
-class ConnectionTest extends TestCase
+class ConnectionTest extends BaseUnitTestCase
 {
-    use ProphecyTrait;
+    /**
+     * @dataProvider invalidAttemptsDataProvider
+     *
+     * @param mixed $invalidValue
+     */
+    public function testDriverOptionsValidation($invalidValue): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new Connection(
+            [
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $invalidValue,
+                ],
+            ],
+            $this->prophesize(Driver::class)->reveal(),
+            $this->prophesize(Configuration::class)->reveal(),
+            $this->prophesize(EventManager::class)->reveal()
+        );
+    }
 
     public function testConstructor(): void
     {
@@ -58,16 +75,5 @@ class ConnectionTest extends TestCase
         $this->expectException(\LogicException::class);
 
         $connection->prepare('THIS SHOULD FAIL');
-    }
-
-    private function mockConfiguration(): Configuration
-    {
-        $configuration = $this->prophesize(Configuration::class);
-        $configuration->getSchemaManagerFactory()
-            ->willReturn();
-        $configuration->getAutoCommit()
-            ->willReturn(false);
-
-        return $configuration->reveal();
     }
 }
