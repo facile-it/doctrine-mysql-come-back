@@ -2,9 +2,9 @@
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
-use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\PrimaryReadReplicaConnection;
 
 class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
 {
@@ -29,9 +29,10 @@ class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
         return $connection;
     }
 
-    protected function getConnectedConnection(int $attempts): DBALConnection
+    protected function getConnectedConnection(int $attempts): PrimaryReadReplicaConnection
     {
         $connection = parent::getConnectedConnection($attempts);
+        $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
         $connection->ensureConnectedToPrimary();
 
         return $connection;
@@ -47,6 +48,7 @@ class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
 
         $connection->beginTransaction();
 
+        /** @psalm-suppress RedundantConditionGivenDocblockType */
         $this->assertSame(1, $connection->connectCount);
         $this->assertTrue($connection->isConnectedToPrimary());
     }

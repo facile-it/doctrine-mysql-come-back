@@ -8,6 +8,8 @@ use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\Connection;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTestCase extends TestCase
