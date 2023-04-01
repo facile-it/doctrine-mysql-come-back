@@ -40,7 +40,8 @@ trait ConnectionTrait
 
         $this->goneAwayDetector = new MySQLGoneAwayDetector();
 
-        /** @psalm-suppress InternalMethod
+        /**
+         * @psalm-suppress InternalMethod
          * @psalm-suppress MixedArgumentTypeCoercion
          */
         parent::__construct($params, $driver, $config, $eventManager);
@@ -106,6 +107,7 @@ trait ConnectionTrait
      * @param string $sql
      * @param list<mixed>|array<string, mixed>                                     $params
      * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types
+     *
      * @psalm-suppress MoreSpecificImplementedParamType
      */
     public function executeStatement($sql, array $params = [], array $types = [])
