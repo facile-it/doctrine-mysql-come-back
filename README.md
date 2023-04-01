@@ -39,18 +39,17 @@ $config = new Configuration();
 
 //..
 
-$connectionParams = array(
+$connectionParams = [
     'dbname' => 'mydb',
     'user' => 'user',
     'password' => 'secret',
     'host' => 'localhost',
     // [doctrine-mysql-come-back] settings
     'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection',
-    'driverClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDO\MySQL\Driver',
-    'driverOptions' => array(
+    'driverOptions' => [
         'x_reconnect_attempts' => 3
-    )
-);
+    ],
+];
 
 $conn = DriverManager::getConnection($connectionParams, $config);
 
@@ -96,7 +95,7 @@ return [
 ];
 ```
 
-You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` if you are using master / slave Doctrine configuration.
+You can use wrapper class `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection` if you are using a primary/replica Doctrine configuration.
 
 # Usage
 

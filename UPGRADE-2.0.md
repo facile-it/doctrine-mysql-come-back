@@ -1,13 +1,15 @@
 # UPGRADE FROM 1.x to 2.0
 If you were using this library without extending the code in it, the upgrade path is pretty smooth; you just have to change the following connection options: 
- * `driverClass` is no longer required to be set to `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\*` classes (which no longer exists); you can fall back to the normal DBAL corresponding classes
- * in if you were using `MasterSlaveConnection` or `PrimaryReadReplicaConnection`, you can fall back to DBAL classes too, but you have to follow [the DBAL upgrade instructions](https:\\github.com\doctrine\dbal\blob\3.3.x\UPGRADE.md#deprecated-masterslaveconnection-use-primaryreadreplicaconnection), since `MasterSlaveConnection` was deprecated and removed, and driver options were renamed.
+ * change `driverClass` option: it's no longer required to be set to `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\*` classes (which no longer exists); you can fall back to the normal DBAL corresponding classes
+ * replace usages of `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` with `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection`: this follows the same rename happened in DBAL v2 vs v3, and you have to follow [the DBAL upgrade instructions](https:\\github.com\doctrine\dbal\blob\3.3.x\UPGRADE.md#deprecated-masterslaveconnection-use-primaryreadreplicaconnection), since driver options were renamed too.
 
 If you were instead extending the code inside this library, you should proceed with caution, because you can expect multiple breaking changes; here's a summary:
 
 ### Added
-* Support DBAL v3
+* Support DBAL v3.6+
 * Add `GoneAwayDetector` interface and `MySQLGoneAwayDetector` class implementation
+* Add `setGoneAwayDetector` method to the connections
+* Added handling of AWS MySQL RDS connection loss
 
 ### Changed
 * Changed `Connection` method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
@@ -52,9 +54,7 @@ class Statement extends \Doctrine\DBAL\Statement
 
 ### Removed
 * Drop support for DBAL v2
-* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\ConnectionTrait` trait, now everything is inside `Connection`
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` class
-* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection` class
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface` interface
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait` trait
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli\Driver` class
