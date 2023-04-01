@@ -3,6 +3,7 @@
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection;
@@ -11,6 +12,29 @@ use Prophecy\Argument;
 
 class PrimaryReadReplicaConnectionTest extends BaseUnitTestCase
 {
+    /**
+     * @dataProvider invalidAttemptsDataProvider
+     *
+     * @param mixed $invalidValue
+     */
+    public function testDriverOptionsValidation($invalidValue): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new PrimaryReadReplicaConnection(
+            [
+                'primary' => [
+                    'driverOptions' => [
+                        'x_reconnect_attempts' => $invalidValue,
+                    ],
+                ],
+            ],
+            $this->prophesize(Driver::class)->reveal(),
+            $this->prophesize(Configuration::class)->reveal(),
+            $this->prophesize(EventManager::class)->reveal()
+        );
+    }
+
     public function testPrimaryReceivesAttemptOption(): void
     {
         $driver = $this->prophesize(Driver::class);

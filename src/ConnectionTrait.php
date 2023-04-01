@@ -56,6 +56,10 @@ trait ConnectionTrait
             throw new \InvalidArgumentException('Invalid x_reconnect_attempts option: expecting int, got ' . gettype($attempts));
         }
 
+        if ($attempts < 0) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_attempts option, it must not be negative');
+        }
+
         return $attempts;
     }
 

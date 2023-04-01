@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
@@ -12,6 +13,27 @@ use Prophecy\Argument;
 
 class ConnectionTest extends BaseUnitTestCase
 {
+    /**
+     * @dataProvider invalidAttemptsDataProvider
+     *
+     * @param mixed $invalidValue
+     */
+    public function testDriverOptionsValidation($invalidValue): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new Connection(
+            [
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $invalidValue,
+                ],
+            ],
+            $this->prophesize(Driver::class)->reveal(),
+            $this->prophesize(Configuration::class)->reveal(),
+            $this->prophesize(EventManager::class)->reveal()
+        );
+    }
+
     public function testConstructor(): void
     {
         $params = [

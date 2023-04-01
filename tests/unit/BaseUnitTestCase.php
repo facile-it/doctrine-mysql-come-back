@@ -10,6 +10,18 @@ class BaseUnitTestCase extends TestCase
 {
     use ProphecyTrait;
 
+    /**
+     * @return array{mixed}[]
+     */
+    public function invalidAttemptsDataProvider(): array
+    {
+        return [
+            ['1'],
+            [-1],
+            [1.0],
+        ];
+    }
+
     protected function mockConfiguration(): Configuration
     {
         $configuration = $this->prophesize(Configuration::class);
