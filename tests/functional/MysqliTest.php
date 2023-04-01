@@ -6,8 +6,9 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
 
 use Doctrine\DBAL\Driver\Mysqli\Driver;
 use Doctrine\DBAL\DriverManager;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\Connection;
 
-class MysqliTest extends AbstractFunctionalTest
+class MysqliTest extends AbstractFunctionalTestCase
 {
     protected function createConnection(int $attempts): Connection
     {
