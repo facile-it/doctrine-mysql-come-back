@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-* Adedd handling of AWS MySQL RDS connection loss
+* Added `PrimaryReadReplicaConnection` and `ConnectionTrait` back 
+* Added handling of AWS MySQL RDS connection loss
 ### Fixed
 * Fixed `beginTransaction` function to have reconnection support
 ### Removed
