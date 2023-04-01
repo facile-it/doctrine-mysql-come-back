@@ -33,9 +33,10 @@ class ConnectionTest extends ConnectionTraitTestCase
      *
      * @param mixed $invalidValue
      */
-    public function testDriverOptionsValidation($invalidValue): void
+    public function testDriverOptionsValidation($invalidValue, string $errorMessage): void
     {
         $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid x_reconnect_attempts option: ' . $errorMessage);
 
         new Connection(
             [

@@ -48,14 +48,14 @@ trait ConnectionTrait
     /**
      * @param mixed $attempts
      */
-    protected function validateAttemptsOption($attempts): int
+    private function validateAttemptsOption($attempts): int
     {
         if (! is_int($attempts)) {
             throw new \InvalidArgumentException('Invalid x_reconnect_attempts option: expecting int, got ' . gettype($attempts));
         }
 
         if ($attempts < 0) {
-            throw new \InvalidArgumentException('Invalid x_reconnect_attempts option, it must not be negative');
+            throw new \InvalidArgumentException('Invalid x_reconnect_attempts option: it must not be negative');
         }
 
         return $attempts;
