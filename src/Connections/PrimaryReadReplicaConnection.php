@@ -16,7 +16,7 @@ class PrimaryReadReplicaConnection extends \Doctrine\DBAL\Connections\PrimaryRea
     public function __construct(array $params, Driver $driver, ?Configuration $config = null, ?EventManager $eventManager = null)
     {
         if (isset($params['primary']['driverOptions']['x_reconnect_attempts'])) {
-            $params['driverOptions']['x_reconnect_attempts'] = $params['primary']['driverOptions']['x_reconnect_attempts'];
+            $params['driverOptions']['x_reconnect_attempts'] = $this->validateAttemptsOption($params['primary']['driverOptions']['x_reconnect_attempts']);
             unset($params['primary']['driverOptions']['x_reconnect_attempts']);
         }
 

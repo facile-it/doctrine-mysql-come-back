@@ -34,7 +34,7 @@ trait ConnectionTrait
         ?EventManager $eventManager = null
     ) {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
-            $this->reconnectAttempts = (int) $params['driverOptions']['x_reconnect_attempts'];
+            $this->reconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
             unset($params['driverOptions']['x_reconnect_attempts']);
         }
 
@@ -45,6 +45,18 @@ trait ConnectionTrait
          * @psalm-suppress MixedArgumentTypeCoercion
          */
         parent::__construct($params, $driver, $config, $eventManager);
+    }
+
+    /**
+     * @param mixed $attempts
+     */
+    protected function validateAttemptsOption($attempts): int
+    {
+        if (! is_int($attempts)) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_attempts option: expecting int, got ' . gettype($attempts));
+        }
+
+        return $attempts;
     }
 
     public function setGoneAwayDetector(GoneAwayDetector $goneAwayDetector): void
