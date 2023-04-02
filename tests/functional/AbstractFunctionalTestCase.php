@@ -260,6 +260,8 @@ TABLE
             /** @psalm-suppress RedundantConditionGivenDocblockType */
             $this->assertSame(1, $connection->connectCount);
         }
+
+        $this->assertSame(1, $connection->getTransactionNestingLevel());
     }
 
     public function testShouldReconnectOnExecutePreparedStatement(): void
