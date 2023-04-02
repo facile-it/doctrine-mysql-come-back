@@ -10,7 +10,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaCon
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Prophecy\Argument;
 
-class PrimaryReadReplicaConnectionTest extends BaseUnitTestCase
+class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
 {
     /**
      * @dataProvider invalidAttemptsDataProvider
@@ -39,7 +39,7 @@ class PrimaryReadReplicaConnectionTest extends BaseUnitTestCase
     {
         $driver = $this->prophesize(Driver::class);
         $goneAwayDetector = $this->prophesize(GoneAwayDetector::class);
-        $connection = $this->createConnection($driver->reveal());
+        $connection = $this->createConnection($driver->reveal(), 1);
 
         $connection->setGoneAwayDetector($goneAwayDetector->reveal());
         $driver->connect(Argument::cetera())
@@ -53,14 +53,14 @@ class PrimaryReadReplicaConnectionTest extends BaseUnitTestCase
         $connection->prepare('SELECT 1');
     }
 
-    private function createConnection(Driver $driver): PrimaryReadReplicaConnection
+    protected function createConnection(Driver $driver, int $attempts = 0): PrimaryReadReplicaConnection
     {
         $replicaConfig = [
             'platform' => $this->prophesize(AbstractPlatform::class)->reveal(),
         ];
         $primaryConfig = $replicaConfig;
         $primaryConfig['driverOptions'] = [
-            'x_reconnect_attempts' => 1,
+            'x_reconnect_attempts' => $attempts,
         ];
 
         return new PrimaryReadReplicaConnection(

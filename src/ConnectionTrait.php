@@ -117,7 +117,7 @@ trait ConnectionTrait
     {
         return $this->doWithRetry(function () use ($sql, $params, $types, $qcp): Result {
             return @parent::executeQuery($sql, $params, $types, $qcp);
-        });
+        }, $sql);
     }
 
     /**
@@ -131,7 +131,7 @@ trait ConnectionTrait
     {
         return $this->doWithRetry(function () use ($sql, $params, $types) {
             return @parent::executeStatement($sql, $params, $types);
-        });
+        }, $sql);
     }
 
     public function beginTransaction()
