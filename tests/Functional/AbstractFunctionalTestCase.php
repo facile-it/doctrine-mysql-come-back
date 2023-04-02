@@ -225,6 +225,26 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
+    public function testBeginTransactionShouldNotReconnectIfNested(): void
+    {
+        $connection = $this->getConnectedConnection(1);
+        $driver = $connection->getDriver();
+        $this->assertConnectionCount(1, $connection);
+
+        $connection->beginTransaction();
+        $this->assertConnectionCount(1, $connection);
+        $this->forceDisconnect($connection);
+
+        if (is_a($driver, Driver::class)) {
+            $this->expectException(\PDOException::class);
+            $this->expectExceptionMessage('MySQL server has gone away');
+        }
+
+        $connection->beginTransaction();
+        $connection->executeQuery('SELECT 1')->fetchAllNumeric();
+        $this->assertConnectionCount(2, $connection);
+    }
+
     public function testBeginTransactionShouldNotReconnect(): void
     {
         $connection = $this->getConnectedConnection(0);

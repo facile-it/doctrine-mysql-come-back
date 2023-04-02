@@ -24,6 +24,7 @@ class PDOMySqlTest extends AbstractFunctionalTestCase
         ));
 
         $this->assertInstanceOf(Connection::class, $connection);
+        $connection->setNestTransactionsWithSavepoints(true);
 
         return $connection;
     }
