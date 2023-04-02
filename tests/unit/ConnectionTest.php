@@ -11,8 +11,22 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Prophecy\Argument;
 
-class ConnectionTest extends BaseUnitTestCase
+class ConnectionTest extends ConnectionTraitTestCase
 {
+    protected function createConnection(Driver $driver, int $attempts = 0): \Doctrine\DBAL\Connection
+    {
+        return new Connection(
+            [
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
+            ],
+            $driver,
+            $this->mockConfiguration(),
+            $this->prophesize(EventManager::class)->reveal()
+        );
+    }
+
     /**
      * @dataProvider invalidAttemptsDataProvider
      *
@@ -59,12 +73,7 @@ class ConnectionTest extends BaseUnitTestCase
         $driver->connect(Argument::cetera())
             ->willThrow(new \LogicException('This cannot be retried'));
 
-        $connection = new Connection(
-            [],
-            $driver->reveal(),
-            $this->mockConfiguration(),
-            $this->prophesize(EventManager::class)->reveal()
-        );
+        $connection = $this->createConnection($driver->reveal());
 
         $goneAwayDetector = $this->prophesize(GoneAwayDetector::class);
         $goneAwayDetector->isGoneAwayException(Argument::cetera())

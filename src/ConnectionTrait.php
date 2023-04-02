@@ -7,9 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
-use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver;
-use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Doctrine\DBAL\Types\Type;
@@ -68,32 +66,46 @@ trait ConnectionTrait
         $this->goneAwayDetector = $goneAwayDetector;
     }
 
-    public function prepare(string $sql): DBALStatement
+    /**
+     * @template R
+     *
+     * @param callable():R $callable
+     *
+     * @return R
+     */
+    private function doWithRetry(callable $callable, string $sql = null, bool $tolerateOneTransactionLevel = false)
     {
-        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
         $attempt = 0;
 
         do {
             try {
-                /** @psalm-suppress InternalMethod */
-                $this->connect();
-
-                /**
-                 * @psalm-suppress InternalMethod
-                 * @psalm-suppress PossiblyNullReference
-                 */
-                $driverStatement = @$this->_conn->prepare($sql);
-
-                return new Statement($this, $driverStatement, $sql);
+                return $callable();
             } catch (\Exception $e) {
-                if ($this->canTryAgain($e, $attempt)) {
-                    $this->close();
-                    ++$attempt;
-                } else {
+                if (! $this->canTryAgain($e, $attempt, $sql, $tolerateOneTransactionLevel)) {
                     throw $e;
                 }
+
+                $this->close();
+                ++$attempt;
             }
         } while (true);
+    }
+
+    public function prepare(string $sql): DBALStatement
+    {
+        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
+        return $this->doWithRetry(function () use ($sql): Statement {
+            /** @psalm-suppress InternalMethod */
+            $this->connect();
+
+            /**
+             * @psalm-suppress InternalMethod
+             * @psalm-suppress PossiblyNullReference
+             */
+            $driverStatement = @$this->_conn->prepare($sql);
+
+            return new Statement($this, $driverStatement, $sql);
+        });
     }
 
     /**
@@ -103,20 +115,9 @@ trait ConnectionTrait
      */
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
-        $attempt = 0;
-
-        do {
-            try {
-                return @parent::executeQuery($sql, $params, $types, $qcp);
-            } catch (DBALException $e) {
-                if ($this->canTryAgain($e, $attempt, $sql)) {
-                    $this->close();
-                    ++$attempt;
-                } else {
-                    throw $e;
-                }
-            }
-        } while (true);
+        return $this->doWithRetry(function () use ($sql, $params, $types, $qcp): Result {
+            return @parent::executeQuery($sql, $params, $types, $qcp);
+        }, $sql);
     }
 
     /**
@@ -128,20 +129,9 @@ trait ConnectionTrait
      */
     public function executeStatement($sql, array $params = [], array $types = [])
     {
-        $attempt = 0;
-
-        do {
-            try {
-                return @parent::executeStatement($sql, $params, $types);
-            } catch (DBALException $e) {
-                if ($this->canTryAgain($e, $attempt, $sql)) {
-                    $this->close();
-                    ++$attempt;
-                } else {
-                    throw $e;
-                }
-            }
-        } while (true);
+        return $this->doWithRetry(function () use ($sql, $params, $types) {
+            return @parent::executeStatement($sql, $params, $types);
+        }, $sql);
     }
 
     public function beginTransaction()
@@ -150,52 +140,26 @@ trait ConnectionTrait
             return @parent::beginTransaction();
         }
 
-        $attempt = 0;
-
-        do {
-            try {
-                return parent::beginTransaction();
-            } catch (\Throwable $e) {
-                if ($this->canTryAgain($e, $attempt, '', true)) {
-                    $this->close();
-                    if (0 < $this->getTransactionNestingLevel()) {
-                        $this->resetTransactionNestingLevel();
-                    }
-                    ++$attempt;
-                } else {
-                    throw $e;
-                }
-            }
-        } while (true);
+        return $this->doWithRetry(function (): bool {
+            return parent::beginTransaction();
+        }, null, true);
     }
 
-    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null, bool $ignoreTransactionLevel = false): bool
+    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null, bool $tolerateOneTransactionLevel = false): bool
     {
         if ($attempt >= $this->reconnectAttempts) {
             return false;
         }
 
-        if (! $ignoreTransactionLevel && $this->getTransactionNestingLevel() > 0) {
+        $toleratedLevel = 0;
+        if ($tolerateOneTransactionLevel) {
+            $toleratedLevel = 1;
+        }
+
+        if ($this->getTransactionNestingLevel() > $toleratedLevel) {
             return false;
         }
 
         return $this->goneAwayDetector->isGoneAwayException($throwable, $sql);
-    }
-
-    /**
-     * This is required because beginTransaction increment transactionNestingLevel
-     * before the real query is executed, and results incremented also on gone away error.
-     * This should be safe for a new established connection.
-     */
-    private function resetTransactionNestingLevel(): void
-    {
-        if (! $this->selfReflectionNestingLevelProperty instanceof \ReflectionProperty) {
-            $reflection = new \ReflectionClass(DBALConnection::class);
-            $this->selfReflectionNestingLevelProperty = $reflection->getProperty('transactionNestingLevel');
-        }
-
-        $this->selfReflectionNestingLevelProperty->setAccessible(true);
-        $this->selfReflectionNestingLevelProperty->setValue($this, 0);
-        $this->selfReflectionNestingLevelProperty->setAccessible(false);
     }
 }
