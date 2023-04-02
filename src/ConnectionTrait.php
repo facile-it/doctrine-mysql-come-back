@@ -73,7 +73,7 @@ trait ConnectionTrait
      *
      * @return R
      */
-    private function doWithRetry(callable $callable, string $sql = null, bool $tolerateOneTransactionLevel = false)
+    private function doWithRetry(callable $callable, string $sql = null)
     {
         $attempt = 0;
 
@@ -81,7 +81,7 @@ trait ConnectionTrait
             try {
                 return $callable();
             } catch (\Exception $e) {
-                if (! $this->canTryAgain($e, $attempt, $sql, $tolerateOneTransactionLevel)) {
+                if (! $this->canTryAgain($e, $attempt, $sql)) {
                     throw $e;
                 }
 
@@ -142,21 +142,12 @@ trait ConnectionTrait
 
         return $this->doWithRetry(function (): bool {
             return parent::beginTransaction();
-        }, null, true);
+        }, null);
     }
 
-    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null, bool $tolerateOneTransactionLevel = false): bool
+    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null): bool
     {
         if ($attempt >= $this->reconnectAttempts) {
-            return false;
-        }
-
-        $toleratedLevel = 0;
-        if ($tolerateOneTransactionLevel) {
-            $toleratedLevel = 1;
-        }
-
-        if ($this->getTransactionNestingLevel() > $toleratedLevel) {
             return false;
         }
 
