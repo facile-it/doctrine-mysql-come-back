@@ -1,10 +1,10 @@
 <?php
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
+namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\PrimaryReadReplicaConnection;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 
 class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
 {

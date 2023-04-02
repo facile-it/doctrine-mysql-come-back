@@ -1,10 +1,12 @@
 <?php
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;

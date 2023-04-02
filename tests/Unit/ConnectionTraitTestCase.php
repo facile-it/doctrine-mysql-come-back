@@ -1,11 +1,12 @@
 <?php
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy;
+namespace Facile\DoctrineMySQLComeBack\Tests\Functional\Spy;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor

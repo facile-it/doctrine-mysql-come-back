@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Prophecy\Argument;
 
 class ConnectionTest extends ConnectionTraitTestCase

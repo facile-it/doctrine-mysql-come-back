@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
+namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\Connection;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\PrimaryReadReplicaConnection;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTestCase extends TestCase
@@ -97,6 +97,7 @@ TABLE
             ]
         ));
 
+        /** @var list<numeric-string|int> $ids */
         $ids = $connection->fetchFirstColumn('SELECT CONNECTION_ID()');
 
         foreach ($ids as $id) {
@@ -122,7 +123,7 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->executeQuery('SELECT 1')->fetch();
+        $connection->executeQuery('SELECT 1')->fetchAllNumeric();
 
         /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);

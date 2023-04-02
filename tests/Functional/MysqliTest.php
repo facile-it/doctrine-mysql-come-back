@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest;
+namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
-use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
+use Doctrine\DBAL\Driver\Mysqli\Driver;
 use Doctrine\DBAL\DriverManager;
-use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\FunctionalTest\Spy\Connection;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 
-class PDOMySqlTest extends AbstractFunctionalTestCase
+class MysqliTest extends AbstractFunctionalTestCase
 {
     protected function createConnection(int $attempts): Connection
     {

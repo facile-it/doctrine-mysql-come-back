@@ -37,8 +37,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\FunctionalTest\\": "tests/functional/",
-            "Facile\\DoctrineMySQLComeBack\\Doctrine\\DBAL\\": "tests/unit/"
+            "Facile\\DoctrineMySQLComeBack\\Tests\\": "tests/"
         }
     },
     "config": {
