@@ -13,6 +13,16 @@ RUN set -ex \
     && pecl install -o xdebug-3.1.6 && docker-php-ext-enable xdebug \
     && apk del build-dependencies
 
+# custom user
+RUN adduser -D -u 1000 facile -G www-data \
+    && mkdir -p /home/facile \
+    && chown -R facile /home/facile
+# zsh / OhMyZsh
+RUN apk --no-cache add git zsh
+
 ARG COMPOSER_VERSION=2.5.5
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
+
+USER facile
+RUN sh -c "$(curl -fsSLv https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

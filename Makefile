@@ -2,7 +2,7 @@
 setup: start composer-install
 
 shell: start
-	@docker-compose exec php sh
+	@docker-compose exec php zsh
 
 start:
 	@docker-compose up -d
