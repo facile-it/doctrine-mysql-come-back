@@ -11,7 +11,7 @@ on:
 
 jobs:
   phpunit-mysql:
-    name: "PHPUnit with MySQL"
+    name: ${{ matrix.job }}${{ matrix.name }} (PHP ${{ matrix.php-version }} / MySQL ${{ matrix.mysql-version }})
     runs-on: "ubuntu-20.04"
 
     strategy:
@@ -19,24 +19,34 @@ jobs:
         php-version:
           - "7.4"
           - "8.0"
+          - "8.1"
+          - "8.2"
         mysql-version:
           - "5.7"
           - "8.0"
         dependencies:
           - "highest"
+        job:
+          - Tests
+        # https://stackoverflow.com/questions/60902904/how-to-pass-mysql-native-password-to-mysql-service-in-github-actions
+        custom-entrypoint:
+          - --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         include:
           - php-version: "7.4"
             mysql-version: "8.0"
-            custom-entrypoint: >-
-              --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
-          - mysql-version: "5.7"
-          - mysql-version: "8.0"
-            # https://stackoverflow.com/questions/60902904/how-to-pass-mysql-native-password-to-mysql-service-in-github-actions
-            custom-entrypoint: >-
-              --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+            custom-entrypoint: ~
+            job: Tests
+          - php-version: "7.4"
+            mysql-version: "5.7"
+            custom-entrypoint: ~
+            job: Tests
+          - php-version: "8.1"
+            mysql-version: "8.0"
+            job: Infection
           - dependencies: "lowest"
             php-version: "7.4"
             mysql-version: "5.7"
+            name: Lowest deps
 
     services:
       mysql:
@@ -72,23 +82,39 @@ jobs:
 
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml --coverage-clover=coverage.xml"
+        if: matrix.job == 'Tests'
+
+      - name: "Run mutation testing with Infection"
+        run: "vendor/bin/infection --ansi --show-mutations"
+        if: matrix.job == 'infection'
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v1
         with:
           file: coverage.xml
+        if: matrix.job == 'Tests'
 
-  code-style:
-    name: "Code style"
-    runs-on: "ubuntu-20.04"
+  quality-checks:
+    runs-on: ubuntu-20.04
+    name: ${{ matrix.name }}
+    strategy:
+      matrix:
+        include:
+          - name: Code style
+            commandName: Run code style check
+            command: vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose
+          - name: Psalm
+            commandName: Run Psalm analysis
+            command: vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose
+
     steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           fetch-depth: 2
 
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: "8.1"
 
@@ -98,28 +124,5 @@ jobs:
           dependency-versions: highest
           composer-options: --prefer-dist
 
-      - name: "Run code style check"
-        run: "vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose"
-
-  Psalm:
-    name: "Psalm"
-    runs-on: "ubuntu-20.04"
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
-        with:
-          fetch-depth: 2
-
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
-        with:
-          php-version: "8.1"
-
-      - name: Install dependencies
-        uses: ramsey/composer-install@v1
-        with:
-          dependency-versions: highest
-          composer-options: --prefer-dist
-
-      - name: "Run code style check"
-        run: "vendor/bin/psalm"
+      - name: ${{ matrix.commandName }}
+        run: ${{ matrix.command }}

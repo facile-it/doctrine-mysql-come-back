@@ -68,14 +68,14 @@ abstract class ConnectionTraitTestCase extends TestCase
     }
 
     /**
-     * @return array{mixed}[]
+     * @return array{mixed, string}[]
      */
     public function invalidAttemptsDataProvider(): array
     {
         return [
-            ['1'],
-            [-1],
-            [1.0],
+            ['1', 'expecting int, got string'],
+            [-1, 'it must not be negative'],
+            [1.0, 'expecting int, got double'],
         ];
     }
 

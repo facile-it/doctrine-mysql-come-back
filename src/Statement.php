@@ -58,7 +58,6 @@ class Statement extends \Doctrine\DBAL\Statement
                 return $parentCall(...$params);
             } catch (Exception $e) {
                 if ($this->retriableConnection->canTryAgain($e, $attempt, $this->sql)) {
-                    $this->retriableConnection->close();
                     $this->recreateStatement();
                     ++$attempt;
                 } else {

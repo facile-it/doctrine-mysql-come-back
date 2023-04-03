@@ -14,6 +14,8 @@ use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTestCase extends TestCase
 {
+    private const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
+
     /**
      * @return Connection|PrimaryReadReplicaConnection
      */
@@ -148,7 +150,7 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
+        $connection->executeStatement(self::UPDATE_QUERY);
 
         /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
@@ -161,7 +163,7 @@ TABLE
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);
 
-        $connection->executeStatement('UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1');
+        $connection->executeStatement(self::UPDATE_QUERY);
 
         /** @psalm-suppress DocblockTypeContradiction */
         $this->assertSame(2, $connection->connectCount);
@@ -240,6 +242,7 @@ TABLE
 
         if (is_a($driver, Driver::class)) {
             $this->expectException(\PDOException::class);
+            $this->expectExceptionMessage('MySQL server has gone away');
         }
 
         $connection->beginTransaction();
