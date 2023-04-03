@@ -5,6 +5,8 @@
             "src"
         ]
     },
+    "minCoveredMsi": 90,
+    "minMsi": 90,
     "mutators": {
         "@default": true
     }
