@@ -41,7 +41,7 @@ class StatementTest extends TestCase
         $databasePlatform->getName()
             ->shouldNotBeCalled();
 
-        $connection->canTryAgain(Argument::type(\LogicException::class), Argument::cetera())
+        $connection->canTryAgain(Argument::type(\LogicException::class), 'SELECT 1')
             ->shouldBeCalledOnce()
             ->willReturn(false);
 

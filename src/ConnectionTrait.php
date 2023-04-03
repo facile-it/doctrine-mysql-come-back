@@ -21,7 +21,9 @@ trait ConnectionTrait
 {
     protected GoneAwayDetector $goneAwayDetector;
 
-    protected int $reconnectAttempts = 0;
+    protected int $maxReconnectAttempts = 0;
+
+    protected int $currentAttempts = 0;
 
     private ?\ReflectionProperty $selfReflectionNestingLevelProperty = null;
 
@@ -32,7 +34,7 @@ trait ConnectionTrait
         ?EventManager $eventManager = null
     ) {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
-            $this->reconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
+            $this->maxReconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
             unset($params['driverOptions']['x_reconnect_attempts']);
         }
 
@@ -75,20 +77,29 @@ trait ConnectionTrait
      */
     private function doWithRetry(callable $callable, string $sql = null)
     {
-        $attempt = 0;
-
-        do {
-            try {
-                return $callable();
-            } catch (\Exception $e) {
-                if (! $this->canTryAgain($e, $attempt, $sql)) {
-                    throw $e;
-                }
-
-                $this->close();
-                ++$attempt;
+        try {
+            attempt:
+            $result = $callable();
+        } catch (\Exception $e) {
+            if (! $this->canTryAgain($e, $sql)) {
+                throw $e;
             }
-        } while (true);
+
+            $this->close();
+            ++$this->currentAttempts;
+
+            goto attempt;
+        }
+
+        $this->resetAttemptCount();
+
+        /** @psalm-suppress PossiblyUndefinedVariable */
+        return $result;
+    }
+
+    public function resetAttemptCount(): void
+    {
+        $this->currentAttempts = 0;
     }
 
     public function prepare(string $sql): DBALStatement
@@ -142,12 +153,12 @@ trait ConnectionTrait
 
         return $this->doWithRetry(function (): bool {
             return parent::beginTransaction();
-        }, null);
+        });
     }
 
-    public function canTryAgain(\Throwable $throwable, int $attempt, string $sql = null): bool
+    public function canTryAgain(\Throwable $throwable, string $sql = null): bool
     {
-        if ($attempt >= $this->reconnectAttempts) {
+        if ($this->currentAttempts >= $this->maxReconnectAttempts) {
             return false;
         }
 
