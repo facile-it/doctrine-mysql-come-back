@@ -11,7 +11,7 @@ on:
 
 jobs:
   phpunit-mysql:
-    name: "PHPUnit with MySQL"
+    name: ${{ matrix.job }}${{ matrix.name }} (PHP ${{ matrix.php-version }} / MySQL ${{ matrix.mysql-version }})
     runs-on: "ubuntu-20.04"
 
     strategy:
@@ -27,7 +27,7 @@ jobs:
         dependencies:
           - "highest"
         job:
-          - tests
+          - Tests
         # https://stackoverflow.com/questions/60902904/how-to-pass-mysql-native-password-to-mysql-service-in-github-actions
         custom-entrypoint:
           - --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
@@ -35,15 +35,18 @@ jobs:
           - php-version: "7.4"
             mysql-version: "8.0"
             custom-entrypoint: ~
+            job: Tests
           - php-version: "7.4"
             mysql-version: "5.7"
             custom-entrypoint: ~
+            job: Tests
           - php-version: "8.1"
             mysql-version: "8.0"
-            job: infection
+            job: Infection
           - dependencies: "lowest"
             php-version: "7.4"
             mysql-version: "5.7"
+            name: Lowest deps
 
     services:
       mysql:
@@ -79,7 +82,7 @@ jobs:
 
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml --coverage-clover=coverage.xml"
-        if: matrix.job == 'test'
+        if: matrix.job == 'Tests'
 
       - name: "Run mutation testing with Infection"
         run: "vendor/bin/infection --ansi --show-mutations"
@@ -89,10 +92,11 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: coverage.xml
-        if: matrix.job == 'test'
+        if: matrix.job == 'Tests'
 
   quality-checks:
     runs-on: ubuntu-20.04
+    name: ${{ matrix.name }}
     strategy:
       matrix:
         include:
