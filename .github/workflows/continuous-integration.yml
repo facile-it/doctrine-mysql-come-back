@@ -78,8 +78,16 @@ jobs:
         with:
           file: coverage.xml
 
-  code-style:
-    name: "Code style"
+  quality-checks:
+    strategy:
+      matrix:
+        include:
+          - name: "Code style"
+            commandName: "Run code style check"
+            command: "vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose"
+          - name: "Psalm"
+            commandName: "Run Psalm analysis"
+            command: "vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose"
     runs-on: "ubuntu-20.04"
     steps:
       - name: "Checkout"
@@ -98,28 +106,5 @@ jobs:
           dependency-versions: highest
           composer-options: --prefer-dist
 
-      - name: "Run code style check"
-        run: "vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose"
-
-  Psalm:
-    name: "Psalm"
-    runs-on: "ubuntu-20.04"
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
-        with:
-          fetch-depth: 2
-
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
-        with:
-          php-version: "8.1"
-
-      - name: Install dependencies
-        uses: ramsey/composer-install@v1
-        with:
-          dependency-versions: highest
-          composer-options: --prefer-dist
-
-      - name: "Run code style check"
-        run: "vendor/bin/psalm"
+      - name: ${{ matrix.commandName }}
+        run: ${{ matrix.command }}
