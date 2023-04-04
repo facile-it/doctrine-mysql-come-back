@@ -180,6 +180,10 @@ trait ConnectionTrait
 
     public function canTryAgain(\Throwable $throwable, string $sql = null): bool
     {
+        if ($this->hasBeenClosedWithAnOpenTransaction) {
+            return false;
+        }
+
         if ($this->currentAttempts >= $this->maxReconnectAttempts) {
             return false;
         }
