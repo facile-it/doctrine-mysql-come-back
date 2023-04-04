@@ -2,13 +2,18 @@
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
-use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
+use Doctrine\DBAL\Connection as DBALConnection;
+use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\DriverManager;
+use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 
-class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
+class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
 {
-    protected function createConnection(int $attempts): PrimaryReadReplicaConnection
+    /**
+     * @param class-string<Driver> $driver
+     */
+    protected function createConnection(string $driver, int $attempts, bool $enableSavepoints): PrimaryReadReplicaConnection
     {
         $connection = DriverManager::getConnection(array_merge(
             [
@@ -20,28 +25,38 @@ class PrimaryReadReplicaConnectionTest extends AbstractFunctionalTestCase
             ],
             [
                 'wrapperClass' => PrimaryReadReplicaConnection::class,
-                'driverClass' => Driver::class,
+                'driverClass' => $driver,
             ]
         ));
 
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
+        $connection->setNestTransactionsWithSavepoints($enableSavepoints);
 
         return $connection;
     }
 
-    protected function getConnectedConnection(int $attempts): PrimaryReadReplicaConnection
+    /**
+     * @param class-string<Driver> $driver
+     *
+     * @return Connection|PrimaryReadReplicaConnection
+     */
+    protected function getConnectedConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
     {
-        $connection = parent::getConnectedConnection($attempts);
+        $connection = parent::getConnectedConnection($driver, $attempts, $enableSavepoints);
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
         $connection->ensureConnectedToPrimary();
 
         return $connection;
     }
 
-    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver, bool $enableSavepoints): void
     {
-        $connection = parent::getConnectedConnection(0);
-        $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
+        $connection = $this->createConnection($driver, 0, $enableSavepoints);
         $this->assertFalse($connection->isConnectedToPrimary());
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);

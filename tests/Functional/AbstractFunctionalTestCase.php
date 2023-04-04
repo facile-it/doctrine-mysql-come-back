@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
 use Doctrine\DBAL\Connection as DBALConnection;
-use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Mysqli\Driver as MysqliDriver;
+use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
@@ -17,16 +19,37 @@ abstract class AbstractFunctionalTestCase extends TestCase
     private const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
 
     /**
+     * @param class-string<Driver> $driver
+     *
      * @return Connection|PrimaryReadReplicaConnection
      */
-    abstract protected function createConnection(int $attempts): DBALConnection;
+    protected function createConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
+    {
+        $connection = DriverManager::getConnection(array_merge(
+            $this->getConnectionParams(),
+            [
+                'wrapperClass' => Connection::class,
+                'driverClass' => $driver,
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
+            ]
+        ));
+
+        $this->assertInstanceOf(Connection::class, $connection);
+        $connection->setNestTransactionsWithSavepoints($enableSavepoints);
+
+        return $connection;
+    }
 
     /**
+     * @param class-string<Driver> $driver
+     *
      * @return Connection|PrimaryReadReplicaConnection
      */
-    protected function getConnectedConnection(int $attempts): DBALConnection
+    protected function getConnectedConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
     {
-        $connection = $this->createConnection($attempts);
+        $connection = $this->createConnection($driver, $attempts, $enableSavepoints);
         $connection->executeQuery('SELECT 1');
 
         return $connection;
@@ -92,7 +115,7 @@ TABLE
             $this->getConnectionParams(),
             [
                 'wrapperClass' => Connection::class,
-                'driverClass' => Driver::class,
+                'driverClass' => PDODriver::class,
                 'driverOptions' => [
                     'x_reconnect_attempts' => 0,
                 ],
@@ -108,9 +131,27 @@ TABLE
         $connection2->close();
     }
 
-    public function testExecuteQueryShouldNotReconnect(): void
+    /**
+     * @return array<string, array{class-string<Driver>, bool}>
+     */
+    public static function driverDataProvider(): array
     {
-        $connection = $this->getConnectedConnection(0);
+        return [
+            'Mysqli with savepoints' => [MysqliDriver::class, true],
+            'Mysqli with no savepoints' => [MysqliDriver::class, false],
+            'PDO with savepoints' => [PDODriver::class, true],
+            'PDO with no savepoints' => [PDODriver::class, false],
+        ];
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testExecuteQueryShouldNotReconnect(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 0, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -119,9 +160,14 @@ TABLE
         $connection->executeQuery('SELECT 1');
     }
 
-    public function testExecuteQueryShouldReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testExecuteQueryShouldReconnect(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -130,9 +176,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testQueryShouldReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testQueryShouldReconnect(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -141,9 +192,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testExecuteUpdateShouldReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testExecuteUpdateShouldReconnect(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->createTestTable($connection);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
@@ -153,9 +209,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testExecuteStatementShouldReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testExecuteStatementShouldReconnect(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->createTestTable($connection);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
@@ -165,9 +226,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testShouldReconnectOnStatementExecuteError(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldReconnectOnStatementExecuteError(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -178,9 +244,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testShouldResetStatementOnStatementExecuteError(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldResetStatementOnStatementExecuteError(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -199,9 +270,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testShouldReconnectOnStatementFetchAllAssociative(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldReconnectOnStatementFetchAllAssociative(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -212,9 +288,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testShouldReconnectOnStatementFetchAllNumeric(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldReconnectOnStatementFetchAllNumeric(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
@@ -225,14 +306,44 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testBeginTransactionShouldNotReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBeginTransactionShouldNotReconnectIfNested(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(0);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+
+        $connection->beginTransaction();
+        $this->assertConnectionCount(1, $connection);
+        $this->forceDisconnect($connection);
+
+        $this->expectExceptionMessage('MySQL server has gone away');
+
+        $connection->beginTransaction();
+
+        if ($enableSavepoints) {
+            $this->fail('With savepoints enabled, test should fail without having to trigger a further query');
+        }
+
+        $connection->executeStatement('SELECT 1');
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBeginTransactionShouldNotReconnect(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 0, $enableSavepoints);
         $driver = $connection->getDriver();
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
-        if (is_a($driver, Driver::class)) {
+        if (is_a($driver, PDODriver::class)) {
             $this->expectException(\PDOException::class);
             $this->expectExceptionMessage('MySQL server has gone away');
         }
@@ -240,16 +351,21 @@ TABLE
         $connection->beginTransaction();
     }
 
-    public function testBeginTransactionShouldReconnect(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBeginTransactionShouldReconnect(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $driver = $connection->getDriver();
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->beginTransaction();
 
-        if (is_a($driver, Driver::class)) {
+        if (is_a($driver, PDODriver::class)) {
             $this->assertConnectionCount(2, $connection);
         } else {
             $this->assertConnectionCount(1, $connection);
@@ -258,9 +374,14 @@ TABLE
         $this->assertSame(1, $connection->getTransactionNestingLevel());
     }
 
-    public function testShouldReconnectOnExecutePreparedStatement(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldReconnectOnExecutePreparedStatement(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
@@ -270,9 +391,14 @@ TABLE
         $this->assertConnectionCount(2, $connection);
     }
 
-    public function testShouldReconnectOnExecuteQueryPreparedStatement(): void
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldReconnectOnExecuteQueryPreparedStatement(string $driver, bool $enableSavepoints): void
     {
-        $connection = $this->getConnectedConnection(1);
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
