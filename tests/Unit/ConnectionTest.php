@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
-use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -24,7 +23,6 @@ class ConnectionTest extends ConnectionTraitTestCase
             ],
             $driver,
             $this->mockConfiguration(),
-            $this->prophesize(EventManager::class)->reveal()
         );
     }
 
@@ -46,7 +44,6 @@ class ConnectionTest extends ConnectionTraitTestCase
             ],
             $this->prophesize(Driver::class)->reveal(),
             $this->prophesize(Configuration::class)->reveal(),
-            $this->prophesize(EventManager::class)->reveal()
         );
     }
 
@@ -63,7 +60,6 @@ class ConnectionTest extends ConnectionTraitTestCase
             $params,
             $this->prophesize(Driver::class)->reveal(),
             $this->mockConfiguration(),
-            $this->prophesize(EventManager::class)->reveal()
         );
 
         static::assertInstanceOf(Connection::class, $connection);
