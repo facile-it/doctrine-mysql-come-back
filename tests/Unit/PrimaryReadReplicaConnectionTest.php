@@ -2,7 +2,6 @@
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
-use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -32,7 +31,6 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
             ],
             $this->prophesize(Driver::class)->reveal(),
             $this->prophesize(Configuration::class)->reveal(),
-            $this->prophesize(EventManager::class)->reveal()
         );
     }
 
@@ -73,7 +71,6 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
             ],
             $driver,
             $this->mockConfiguration(),
-            $this->prophesize(EventManager::class)->reveal()
         );
     }
 }

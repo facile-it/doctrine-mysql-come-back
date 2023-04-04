@@ -23,6 +23,36 @@ abstract class ConnectionTraitTestCase extends TestCase
      */
     abstract protected function createConnection(Driver $driver, int $attempts = 0): \Doctrine\DBAL\Connection;
 
+    public function testAttemptCountMustBeRespected(): void
+    {
+        $driver = $this->prophesize(Driver::class);
+        $driverConnection = $this->prophesize(Driver\Connection::class);
+        $goneAwayException = new \Exception('MySQL server has gone away');
+
+        $driver->connect(Argument::cetera())
+            ->will(function () use ($driver, $goneAwayException, $driverConnection): Driver\Connection {
+                // will return successfuly at first attempt, but throw next time to avoid loop
+                $driver->connect(Argument::cetera())
+                    ->willThrow($goneAwayException);
+
+                return $driverConnection->reveal();
+            });
+        $driverConnection->beginTransaction()
+            ->willThrow($goneAwayException);
+        $driverConnection->prepare(Argument::cetera())
+            ->willThrow($goneAwayException);
+
+        $connection = $this->createConnection($driver->reveal(), 1);
+        try {
+            $connection->prepare('SELECT 1');
+        } catch (\Throwable $throwable) {
+            $this->assertEquals($goneAwayException, $throwable);
+        }
+
+        $driver->connect(Argument::cetera())
+            ->shouldHaveBeenCalledTimes(2);
+    }
+
     public function testExecuteQueryMustPassSqlToGoneAwayDetector(): void
     {
         $driver = $this->prophesize(Driver::class);
@@ -84,6 +114,8 @@ abstract class ConnectionTraitTestCase extends TestCase
         $configuration = $this->prophesize(Configuration::class);
         $configuration->getSchemaManagerFactory()
             ->willReturn();
+        $configuration->getSQLLogger()
+            ->willReturn(null);
         $configuration->getAutoCommit()
             ->willReturn(false);
 
