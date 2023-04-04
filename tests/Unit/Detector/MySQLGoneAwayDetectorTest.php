@@ -27,8 +27,20 @@ class MySQLGoneAwayDetectorTest extends TestCase
     {
         $error = new \Exception(self::RETRYABLE_ERROR_OUTSIDE_UPDATE);
 
-        $this->assertSame(! $isUpdate, (new MySQLGoneAwayDetector())->isGoneAwayException($error, $query));
-        $this->assertTrue((new MySQLGoneAwayDetector())->isGoneAwayException($error, 'SELECT 1'));
+        $goneAwayDetector = new MySQLGoneAwayDetector();
+
+        $this->assertSame(! $isUpdate, $goneAwayDetector->isGoneAwayException($error, $query));
+        $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
+    }
+
+    public function testSavepointShouldNotBeRetried(): void
+    {
+        $error = new \Exception(self::RETRYABLE_ERROR_ON_SERVER_GONE);
+
+        $goneAwayDetector = new MySQLGoneAwayDetector();
+
+        $this->assertFalse($goneAwayDetector->isGoneAwayException($error, 'SAVEPOINT foo'));
+        $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
     }
 
     /**
