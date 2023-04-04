@@ -25,6 +25,8 @@ trait ConnectionTrait
 
     protected int $currentAttempts = 0;
 
+    private bool $hasBeenClosedWithAnOpenTransaction = false;
+
     private ?\ReflectionProperty $selfReflectionNestingLevelProperty = null;
 
     public function __construct(
@@ -102,6 +104,22 @@ trait ConnectionTrait
         $this->currentAttempts = 0;
     }
 
+    public function connect($connectionName = null)
+    {
+        $this->hasBeenClosedWithAnOpenTransaction = false;
+
+        return parent::connect($connectionName);
+    }
+
+    public function close()
+    {
+        if ($this->getTransactionNestingLevel() > 0) {
+            $this->hasBeenClosedWithAnOpenTransaction = true;
+        }
+
+        parent::close();
+    }
+
     public function prepare(string $sql): DBALStatement
     {
         // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
@@ -147,7 +165,7 @@ trait ConnectionTrait
 
     public function beginTransaction()
     {
-        if (0 !== $this->getTransactionNestingLevel()) {
+        if ($this->hasBeenClosedWithAnOpenTransaction || 0 !== $this->getTransactionNestingLevel()) {
             return @parent::beginTransaction();
         }
 

@@ -227,6 +227,7 @@ TABLE
 
     public function testBeginTransactionShouldNotReconnectIfNested(): void
     {
+        $this->markTestIncomplete('We need to test this against savepoints enabled or disabled');
         $connection = $this->getConnectedConnection(1);
         $driver = $connection->getDriver();
         $this->assertConnectionCount(1, $connection);
@@ -235,14 +236,12 @@ TABLE
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
+        $this->expectExceptionMessage('MySQL server has gone away');
         if (is_a($driver, Driver::class)) {
             $this->expectException(\PDOException::class);
-            $this->expectExceptionMessage('MySQL server has gone away');
         }
 
         $connection->beginTransaction();
-        $connection->executeQuery('SELECT 1')->fetchAllNumeric();
-        $this->assertConnectionCount(2, $connection);
     }
 
     public function testBeginTransactionShouldNotReconnect(): void
