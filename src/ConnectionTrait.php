@@ -104,10 +104,14 @@ trait ConnectionTrait
         $this->currentAttempts = 0;
     }
 
+    /**
+     * @param string $connectionName
+     */
     public function connect($connectionName = null)
     {
         $this->hasBeenClosedWithAnOpenTransaction = false;
 
+        /** @psalm-suppress InternalMethod */
         return parent::connect($connectionName);
     }
 
