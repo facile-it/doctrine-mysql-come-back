@@ -3,12 +3,14 @@
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit\Detector;
 
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
+use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 class MySQLGoneAwayDetectorTest extends TestCase
 {
     use ProphecyTrait;
+    use DeprecationTrait;
 
     private const RETRYABLE_ERROR = 'Lost connection to MySQL server during query is an error not retryable on UPDATE queries';
 

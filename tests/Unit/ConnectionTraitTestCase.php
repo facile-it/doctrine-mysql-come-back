@@ -5,6 +5,7 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
+use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
@@ -14,6 +15,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 abstract class ConnectionTraitTestCase extends TestCase
 {
     use ProphecyTrait;
+    use DeprecationTrait;
 
     /**
      * @param Driver $driver

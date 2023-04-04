@@ -11,6 +11,11 @@ use Psr\Log\Test\TestLogger;
 trait DeprecationTrait
 {
     private ?TestLogger $deprecationLogger = null;
+    
+    private array $ignoredDeprecations = [
+        'https://github.com/doctrine/dbal/pull/5699', # use driver middleware to instantiate platform 
+        'https://github.com/doctrine/dbal/issues/5812', # declare SchemaManagerFactory in config
+    ];
 
     protected function setUp(): void
     {
@@ -21,9 +26,14 @@ trait DeprecationTrait
 
     protected function tearDown(): void
     {
+        
         $message = '';
-        /** @var array{message: string, context: string[]} $deprecation */
+        /** @var array{message: string, context: {file: string, line: int, package: string, link: string}} $deprecation $deprecation */
         foreach ($this->deprecationLogger->records ?? [] as $deprecation) {
+            if (in_array($deprecation['context']['link'], $this->ignoredDeprecations, true)) {
+                continue;
+            }
+
             $message .= $deprecation['message'] . PHP_EOL . print_r($deprecation['context'], true) . PHP_EOL . PHP_EOL;
         }
 
