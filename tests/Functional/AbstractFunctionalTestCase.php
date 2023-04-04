@@ -111,7 +111,7 @@ TABLE
     public function testExecuteQueryShouldNotReconnect(): void
     {
         $connection = $this->getConnectedConnection(0);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $this->expectException(Exception::class);
@@ -122,71 +122,66 @@ TABLE
     public function testExecuteQueryShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeQuery('SELECT 1')->fetchAllNumeric();
 
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testQueryShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeQuery('SELECT 1');
 
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testExecuteUpdateShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
         $this->createTestTable($connection);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeStatement(self::UPDATE_QUERY);
 
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testExecuteStatementShouldReconnect(): void
     {
         $connection = $this->getConnectedConnection(1);
         $this->createTestTable($connection);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->executeStatement(self::UPDATE_QUERY);
 
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementExecuteError(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldResetStatementOnStatementExecuteError(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo', ?, ?, ?, ?");
@@ -201,43 +196,40 @@ TABLE
 
         array_unshift($params, 'foo');
         $this->assertSame([$params], $result);
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementFetchAllAssociative(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
 
         $this->assertSame([['foo' => 'foo']], $result);
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnStatementFetchAllNumeric(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['0' => 'foo']], $result);
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testBeginTransactionShouldNotReconnect(): void
     {
         $connection = $this->getConnectedConnection(0);
         $driver = $connection->getDriver();
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         if (is_a($driver, Driver::class)) {
@@ -252,17 +244,15 @@ TABLE
     {
         $connection = $this->getConnectedConnection(1);
         $driver = $connection->getDriver();
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
         $connection->beginTransaction();
 
         if (is_a($driver, Driver::class)) {
-            /** @psalm-suppress DocblockTypeContradiction */
-            $this->assertSame(2, $connection->connectCount);
+            $this->assertConnectionCount(2, $connection);
         } else {
-            /** @psalm-suppress RedundantConditionGivenDocblockType */
-            $this->assertSame(1, $connection->connectCount);
+            $this->assertConnectionCount(1, $connection);
         }
 
         $this->assertSame(1, $connection->getTransactionNestingLevel());
@@ -271,26 +261,37 @@ TABLE
     public function testShouldReconnectOnExecutePreparedStatement(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
         $this->forceDisconnect($connection);
 
         $this->assertSame(1, $statement->executeStatement());
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
     }
 
     public function testShouldReconnectOnExecuteQueryPreparedStatement(): void
     {
         $connection = $this->getConnectedConnection(1);
-        $this->assertSame(1, $connection->connectCount);
+        $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
         $this->forceDisconnect($connection);
 
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
-        /** @psalm-suppress DocblockTypeContradiction */
-        $this->assertSame(2, $connection->connectCount);
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @param Connection|PrimaryReadReplicaConnection $connection
+     */
+    protected function assertConnectionCount(int $expected, DBALConnection $connection): void
+    {
+        $this->assertTrue(
+            property_exists($connection, 'connectCount'),
+            'Expecting connection that implements ConnectionTraint, got ' . get_class($connection)
+        );
+
+        $this->assertSame($expected, $connection->connectCount);
     }
 }
