@@ -38,11 +38,19 @@ class Statement extends \Doctrine\DBAL\Statement
 
     public function executeQuery(array $params = []): Result
     {
+        if ($params === []) {
+            return $this->executeWithRetry([parent::class, 'executeQuery']);
+        }
+
         return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
     }
 
     public function executeStatement(array $params = []): int
     {
+        if ($params === []) {
+            return $this->executeWithRetry([parent::class, 'executeStatement']);
+        }
+
         return $this->executeWithRetry([parent::class, 'executeStatement'], $params);
     }
 
