@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * ...
 ### Added
 * Centralize reconnect attempts counter
+* Add `Statement::fromDBALStatement` for simpler creation
+* Add mutation testing with Infection
+### Fixed
+* Avoid reconnection attempts if a transaction was opened (and not closed) before the "gone away" error
+* Avoid retrying `SAVEPOINT` statements
+* Handle `Statement::bindParam` and `Statement::bindValue` correctly on reconnection  
+### Changed
+* Refactor `Connection` retry logic into a single method
+* Make `Statement::__construct` private
 
 ## [2.0.0-BETA3] - 2023-04-02
 ### Added
