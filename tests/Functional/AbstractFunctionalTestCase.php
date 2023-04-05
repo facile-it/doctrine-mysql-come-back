@@ -263,12 +263,12 @@ TABLE
         $param = 'baz';
         /** @psalm-suppress DeprecatedMethod */
         $statement->bindParam(2, $param);
-        // TODO - change param by ref
-        //        $param = 'baz2';
+        // change param by ref
+        $param = 'baz2';
 
         $result = $statement->executeQuery()->fetchAllNumeric();
 
-        $this->assertSame([['foo', 'bar', 'baz']], $result);
+        $this->assertSame([['foo', 'bar', $param]], $result);
         $this->assertConnectionCount(2, $connection);
     }
 

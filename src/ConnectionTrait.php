@@ -77,7 +77,7 @@ trait ConnectionTrait
      *
      * @return R
      */
-    public function doWithRetry(callable $callable, string $sql = null)
+    private function doWithRetry(callable $callable, string $sql = null)
     {
         try {
             attempt:
