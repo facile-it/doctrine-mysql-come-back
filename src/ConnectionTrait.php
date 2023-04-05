@@ -77,7 +77,7 @@ trait ConnectionTrait
      *
      * @return R
      */
-    private function doWithRetry(callable $callable, string $sql = null)
+    public function doWithRetry(callable $callable, string $sql = null)
     {
         try {
             attempt:
@@ -88,7 +88,7 @@ trait ConnectionTrait
             }
 
             $this->close();
-            ++$this->currentAttempts;
+            $this->increaseAttemptCount();
 
             goto attempt;
         }
@@ -99,6 +99,17 @@ trait ConnectionTrait
         return $result;
     }
 
+    /**
+     * @internal
+     */
+    public function increaseAttemptCount(): void
+    {
+        ++$this->currentAttempts;
+    }
+
+    /**
+     * @internal
+     */
     public function resetAttemptCount(): void
     {
         $this->currentAttempts = 0;

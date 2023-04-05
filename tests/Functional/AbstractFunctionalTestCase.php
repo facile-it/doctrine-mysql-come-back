@@ -10,6 +10,7 @@ use Doctrine\DBAL\Driver\Mysqli\Driver as MysqliDriver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
+use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
@@ -17,6 +18,8 @@ use PHPUnit\Framework\TestCase;
 abstract class AbstractFunctionalTestCase extends TestCase
 {
     private const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
+
+    use DeprecationTrait;
 
     /**
      * @param class-string<Driver> $driver
@@ -255,18 +258,17 @@ TABLE
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
-        $statement = $connection->prepare("SELECT 'foo', ?, ?, ?, ?");
-        $params = [
-            '2',
-            'fooB',
-            'fooC',
-            '5',
-        ];
+        $statement = $connection->prepare("SELECT 'foo', ?, ?");
+        $statement->bindValue(1, 'bar');
+        $param = 'baz';
+        /** @psalm-suppress DeprecatedMethod */
+        $statement->bindParam(2, $param);
+        // TODO - change param by ref
+        //        $param = 'baz2';
 
-        $result = $statement->executeQuery($params)->fetchAllNumeric();
+        $result = $statement->executeQuery()->fetchAllNumeric();
 
-        array_unshift($params, 'foo');
-        $this->assertSame([$params], $result);
+        $this->assertSame([['foo', 'bar', 'baz']], $result);
         $this->assertConnectionCount(2, $connection);
     }
 
