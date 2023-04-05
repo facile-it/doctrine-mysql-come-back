@@ -35,13 +35,16 @@ class MySQLGoneAwayDetectorTest extends TestCase
         $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
     }
 
-    public function testSavepointShouldNotBeRetried(): void
+    /**
+     * @dataProvider savepointDataProvider
+     */
+    public function testSavepointShouldNotBeRetried(string $sql): void
     {
         $error = new \Exception(self::RETRYABLE_ERROR_ON_SERVER_GONE);
 
         $goneAwayDetector = new MySQLGoneAwayDetector();
 
-        $this->assertFalse($goneAwayDetector->isGoneAwayException($error, 'SAVEPOINT foo'));
+        $this->assertFalse($goneAwayDetector->isGoneAwayException($error, $sql));
         $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
     }
 
@@ -78,6 +81,19 @@ class MySQLGoneAwayDetectorTest extends TestCase
             [' UPDATE WHERE (SELECT ', true],
             [' UPDATE WHERE 
             (select ', true],
+        ];
+    }
+
+    /**
+     * @return array{string}[]
+     */
+    public function savepointDataProvider(): array
+    {
+        return [
+            ['SAVEPOINT foo'],
+            ['   SAVEPOINT foo'],
+            ['
+            SAVEPOINT foo'],
         ];
     }
 

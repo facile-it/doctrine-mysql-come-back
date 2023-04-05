@@ -3,6 +3,7 @@
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
 use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Statement as DriverStatement;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
@@ -28,6 +29,64 @@ class StatementTest extends TestCase
         $this->expectException(\LogicException::class);
 
         $statement->executeStatement();
+    }
+
+    /**
+     * TODO - BaseUnitTestCase
+     */
+    protected function mockConfiguration(): Configuration
+    {
+        $configuration = $this->prophesize(Configuration::class);
+        $configuration->getSchemaManagerFactory()
+            ->willReturn();
+        $configuration->getSQLLogger()
+            ->willReturn(null);
+        $configuration->getAutoCommit()
+            ->willReturn(false);
+
+        return $configuration->reveal();
+    }
+
+    /**
+     * @dataProvider attemptsDataProvider
+     */
+    public function testReconnectionAttempsShouldRunOut(int $attempts): void
+    {
+        $driver = $this->prophesize(Driver::class);
+        $goneAwayException = new \Exception('MySQL server has gone away');
+        $driver->connect(Argument::cetera())
+            ->willThrow($goneAwayException);
+
+        $connection = new \Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection(
+            [
+                'driverOptions' => [
+                    'x_reconnect_attempts' => $attempts,
+                ],
+            ],
+            $driver->reveal(),
+            $this->mockConfiguration(),
+        );
+
+        try {
+            $connection->prepare('SELECT 1');
+        } catch (\Throwable $throwable) {
+            $this->assertEquals($goneAwayException, $throwable, 'Got unexpected exception');
+        }
+
+        $driver->connect(Argument::cetera())
+            ->shouldHaveBeenCalledTimes($attempts + 1);
+    }
+
+    /**
+     * @return array{int}[]
+     */
+    public function attemptsDataProvider(): array
+    {
+        return[
+            [0],
+            [1],
+            [5],
+        ];
     }
 
     private function mockConnection(): Connection
