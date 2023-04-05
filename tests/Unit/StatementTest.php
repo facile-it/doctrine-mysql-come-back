@@ -9,11 +9,10 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
 use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
-class StatementTest extends TestCase
+class StatementTest extends BaseUnitTestCase
 {
     use ProphecyTrait;
     use DeprecationTrait;
@@ -29,22 +28,6 @@ class StatementTest extends TestCase
         $this->expectException(\LogicException::class);
 
         $statement->executeStatement();
-    }
-
-    /**
-     * TODO - BaseUnitTestCase
-     */
-    protected function mockConfiguration(): Configuration
-    {
-        $configuration = $this->prophesize(Configuration::class);
-        $configuration->getSchemaManagerFactory()
-            ->willReturn();
-        $configuration->getSQLLogger()
-            ->willReturn(null);
-        $configuration->getAutoCommit()
-            ->willReturn(false);
-
-        return $configuration->reveal();
     }
 
     /**

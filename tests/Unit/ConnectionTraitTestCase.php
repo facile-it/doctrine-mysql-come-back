@@ -2,21 +2,14 @@
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
-use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
-use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
-use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
 
-abstract class ConnectionTraitTestCase extends TestCase
+abstract class ConnectionTraitTestCase extends BaseUnitTestCase
 {
-    use ProphecyTrait;
-    use DeprecationTrait;
-
     /**
      * @param Driver $driver
      * @param int $attempts
@@ -109,18 +102,5 @@ abstract class ConnectionTraitTestCase extends TestCase
             [-1, 'it must not be negative'],
             [1.0, 'expecting int, got double'],
         ];
-    }
-
-    protected function mockConfiguration(): Configuration
-    {
-        $configuration = $this->prophesize(Configuration::class);
-        $configuration->getSchemaManagerFactory()
-            ->willReturn();
-        $configuration->getSQLLogger()
-            ->willReturn(null);
-        $configuration->getAutoCommit()
-            ->willReturn(false);
-
-        return $configuration->reveal();
     }
 }
