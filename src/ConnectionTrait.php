@@ -88,7 +88,7 @@ trait ConnectionTrait
             }
 
             $this->close();
-            ++$this->currentAttempts;
+            $this->increaseAttemptCount();
 
             goto attempt;
         }
@@ -99,6 +99,17 @@ trait ConnectionTrait
         return $result;
     }
 
+    /**
+     * @internal
+     */
+    public function increaseAttemptCount(): void
+    {
+        ++$this->currentAttempts;
+    }
+
+    /**
+     * @internal
+     */
     public function resetAttemptCount(): void
     {
         $this->currentAttempts = 0;
@@ -126,18 +137,10 @@ trait ConnectionTrait
 
     public function prepare(string $sql): DBALStatement
     {
-        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
         return $this->doWithRetry(function () use ($sql): Statement {
-            /** @psalm-suppress InternalMethod */
-            $this->connect();
+            $dbalStatement = parent::prepare($sql);
 
-            /**
-             * @psalm-suppress InternalMethod
-             * @psalm-suppress PossiblyNullReference
-             */
-            $driverStatement = @$this->_conn->prepare($sql);
-
-            return new Statement($this, $driverStatement, $sql);
+            return Statement::fromDBALStatement($this, $dbalStatement);
         });
     }
 

@@ -5,6 +5,7 @@
             "src"
         ]
     },
+    "timeout": 2,
     "minCoveredMsi": 90,
     "minMsi": 90,
     "mutators": {

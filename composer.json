@@ -23,6 +23,7 @@
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.5.2",
+        "fig/log-test": "^1.0",
         "infection/infection": "^0.26.6",
         "phpdocumentor/reflection-docblock": ">=4.0.1",
         "phpspec/prophecy-phpunit": "^2.0",
