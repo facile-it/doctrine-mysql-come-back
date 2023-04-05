@@ -19,10 +19,10 @@ class StatementTest extends TestCase
 
     public function testExecuteStatementShouldThrowWhenItsNotRetriable(): void
     {
-        $statement = new Statement(
-            $this->mockConnection(),
-            $this->mockDriverStatement(),
-            'SELECT 1'
+        $connection = $this->mockConnection();
+        $statement = Statement::fromDBALStatement(
+            $connection,
+            $this->createDriverStatement($connection),
         );
 
         $this->expectException(\LogicException::class);
@@ -57,5 +57,22 @@ class StatementTest extends TestCase
             ->willThrow(new \LogicException('This should not be retried'));
 
         return $statement->reveal();
+    }
+
+    /**
+     * @param Connection $connection
+     *
+     * @throws \Doctrine\DBAL\Exception
+     *
+     * @return \Doctrine\DBAL\Statement
+     */
+    protected function createDriverStatement(Connection $connection): \Doctrine\DBAL\Statement
+    {
+        /** @psalm-suppress InternalMethod */
+        return new \Doctrine\DBAL\Statement(
+            $connection,
+            $this->mockDriverStatement(),
+            'SELECT 1'
+        );
     }
 }

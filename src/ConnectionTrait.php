@@ -137,18 +137,10 @@ trait ConnectionTrait
 
     public function prepare(string $sql): DBALStatement
     {
-        // Mysqli executes statement on Statement constructor, so we should retry to reconnect here too
         return $this->doWithRetry(function () use ($sql): Statement {
-            /** @psalm-suppress InternalMethod */
-            $this->connect();
+            $dbalStatement = parent::prepare($sql);
 
-            /**
-             * @psalm-suppress InternalMethod
-             * @psalm-suppress PossiblyNullReference
-             */
-            $driverStatement = @$this->_conn->prepare($sql);
-
-            return new Statement($this, $driverStatement, $sql);
+            return Statement::fromDBALStatement($this, $dbalStatement);
         });
     }
 

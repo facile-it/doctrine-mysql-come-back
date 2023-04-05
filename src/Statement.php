@@ -23,7 +23,15 @@ class Statement extends \Doctrine\DBAL\Statement
     /**
      * @param Connection|PrimaryReadReplicaConnection $retriableConnection
      */
-    public function __construct(\Doctrine\DBAL\Connection $retriableConnection, Driver\Statement $statement, string $sql)
+    public static function fromDBALStatement(\Doctrine\DBAL\Connection $retriableConnection, \Doctrine\DBAL\Statement $statement): self
+    {
+        return new self($retriableConnection, $statement->stmt, $statement->sql);
+    }
+
+    /**
+     * @param Connection|PrimaryReadReplicaConnection $retriableConnection
+     */
+    private function __construct(\Doctrine\DBAL\Connection $retriableConnection, Driver\Statement $statement, string $sql)
     {
         /** @psalm-suppress InternalMethod */
         parent::__construct($retriableConnection, $statement, $sql);
