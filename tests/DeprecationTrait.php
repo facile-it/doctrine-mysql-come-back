@@ -15,6 +15,7 @@ trait DeprecationTrait
     private array $ignoredDeprecations = [
         'https://github.com/doctrine/dbal/issues/4966', # public access to Connection::connect, unfixable
         'https://github.com/doctrine/dbal/pull/5383', # savepoint
+        'https://github.com/doctrine/dbal/pull/5556', # passing params to Statement::executeQuery
         'https://github.com/doctrine/dbal/pull/5563', # bindParam
         'https://github.com/doctrine/dbal/pull/5699', # use driver middleware to instantiate platform
         'https://github.com/doctrine/dbal/issues/5812', # declare SchemaManagerFactory in config

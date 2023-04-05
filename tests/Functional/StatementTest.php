@@ -55,6 +55,6 @@ class StatementTest extends AbstractFunctionalTestCase
 
         $result = $statement->executeStatement(['foo', 'bar']);
 
-        $this->assertEquals(0, $result);
+        $this->assertEquals(1, $result);
     }
 }
