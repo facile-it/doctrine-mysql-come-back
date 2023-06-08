@@ -4,11 +4,13 @@
 
 [![Build status](https://github.com/facile-it/doctrine-mysql-come-back/workflows/Continuous%20Integration/badge.svg)]( https://github.com/facile-it/doctrine-mysql-come-back/actions?query=workflow%3A%22Continuous+Integration%22+branch%3Amaster)
 [![Test coverage](https://codecov.io/gh/facile-it/doctrine-mysql-come-back/branch/master/graph/badge.svg?token=vFz9cWGQ3r)](https://codecov.io/gh/facile-it/doctrine-mysql-come-back)
-
 [![License](https://poser.pugx.org/facile-it/doctrine-mysql-come-back/license.svg)](https://packagist.org/packages/facile-it/doctrine-mysql-come-back)
+
 # DoctrineMySQLComeBack
 
-Auto reconnect on Doctrine MySql has gone away exceptions on `doctrine/dbal`.
+This library tries to solve the infamous "MySQL has gone away" issue, and similar ones. 
+
+It does so by providing a `doctrine/dbal` driver wrapper that automatically reconnects to the database server when applicable; to avoid consistency issues, the reconnection is not attempted when writes are concerned (i.e. open transaction, timeout on write queries).
 
 # Installation
 
@@ -25,7 +27,7 @@ $ composer require facile-it/doctrine-mysql-come-back ^1.0
 # Configuration
 
 In order to use DoctrineMySQLComeBack you have to set the `wrapperClass` connection parameter.
-You can choose how many times Doctrine should be able to reconnect, setting `x_reconnect_attempts` driver option. Its value should be an int.
+You can choose how many times Doctrine should be able to reconnect, setting `x_reconnect_attempts` driver option. Its value must be an int.
 
 If you're using DBAL v2, you also need to set the `driverClass` parameter too; please refer to the [previous version of this readme](https://github.com/facile-it/doctrine-mysql-come-back/blob/1.10.1/README.md#configuration) for that.
 
