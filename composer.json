@@ -13,6 +13,10 @@
     "license": "Apache-2.0",
     "authors": [
         {
+            "name": "Alessandro Lai",
+            "email": "alessandro.lai85@gmail.com"
+        },
+        {
             "name": "Luca Bo",
             "email": "luca.boeri@facile.it"
         }

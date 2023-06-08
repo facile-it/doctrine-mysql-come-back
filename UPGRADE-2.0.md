@@ -13,11 +13,12 @@ If you were instead extending the code inside this library, you should proceed w
 * Support DBAL v3.6+
 * Add `GoneAwayDetector` interface and `MySQLGoneAwayDetector` class implementation
 * Add `setGoneAwayDetector` method to the connections
-* Added handling of AWS MySQL RDS connection loss
+* Add handling of AWS MySQL RDS connection loss
 * Add validation to `x_reconnect_attempts`
+* Add mutation testing with Infection
 
 ### Changed
-* Changed `Connection` method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
+* Change `Connection` method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
 
 ```diff
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
@@ -37,7 +38,7 @@ class Connection extends DBALConnection
 // ...
 }
 ```
-* Changed `Statement` constructor and method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
+* Change `Statement` constructor and method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
 ```diff
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
@@ -62,6 +63,7 @@ class Statement extends \Doctrine\DBAL\Statement
 
 ### Removed
 * Drop support for DBAL v2
+* Drop support for PHP 7.3
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` class
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface` interface
 * Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait` trait

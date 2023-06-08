@@ -8,6 +8,82 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 * ...
 
+## [2.0.0] - 2023-06-08
+This is the final, stable release of the new version of this library, supporting DBAL 3.6+; unfortunately, DBAL 3.0 to 3.5 is unsupported (but upgrading to 3.6 should not be an issue).
+
+If you're upgrading from a 1.x version, please refer to the [UPGRADE-2.0.md](./UPGRADE-2.0.md) document.
+
+The version has no changes from 2.0.0-BETA4; the following is the detailed changelog from the 1.x series:
+
+### Added
+* Support DBAL v3.6+
+* Add `GoneAwayDetector` interface and `MySQLGoneAwayDetector` class implementation
+* Add `setGoneAwayDetector` method to the connections
+* Add handling of AWS MySQL RDS connection loss
+* Add validation to `x_reconnect_attempts`
+* Add mutation testing with Infection
+
+### Changed
+* Change `Connection` method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
+
+```diff
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+
+use Doctrine\DBAL\Cache\QueryCacheProfile;
+use Doctrine\DBAL\Connection as DBALConnection;
++use Doctrine\DBAL\Result;
+
+class Connection extends DBALConnection
+{
+// ...
+-    public function prepare($sql)
++    public function prepare(string $sql): DBALStatement
+// ...
+-    public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
++    public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
+// ...
+}
+```
+* Change `Statement` constructor and method signatures to follow [DBAL v3 changes](https://github.com/doctrine/dbal/blob/3.3.x/UPGRADE.md#upgrade-to-30):
+```diff
+namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
+
+use Doctrine\DBAL\Cache\QueryCacheProfile;
+use Doctrine\DBAL\Connection as DBALConnection;
++use Doctrine\DBAL\Result;
+
+class Statement extends \Doctrine\DBAL\Statement
+{
+// ...
+-    public function __construct($sql, ConnectionInterface $conn)
++    public function __construct(Connection $retriableConnection, Driver\Statement $statement, string $sql)
+// ...
+-    public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
++    public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
+// ...
+}
+```
+
+### Fixed
+* In `PrimaryReadReplicaConnection`, fetch `driverOptions` from under the `primary` key
+
+### Removed
+* Drop support for DBAL v2
+* Drop support for PHP 7.3
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\MasterSlaveConnection` class
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareInterface` interface
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\ServerGoneAwayExceptionsAwareTrait` trait
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\Mysqli\Driver` class
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDOMySQL\Driver` class
+* Removed `Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Driver\PDO\MySQL\Driver` class
+* Removed `Connection::query()` method (due to drop in DBAL v3)
+* Removed `Connection::refresh()` method (due to drop in DBAL v3)
+* Removed `Connection::isUpdateQuery()` method (logic is now behind the `GoneAwayDetector` interface)
+* Removed `Statement::bindValue()` method
+* Removed `Statement::bindParam()` method
+* Removed `Statement::execute()` method
+* Removed `Statement::setFetchMode()` method
+
 ## [2.0.0-BETA4] - 2023-04-05
 ### Added
 * Centralize reconnect attempts counter

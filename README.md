@@ -12,7 +12,7 @@ Auto reconnect on Doctrine MySql has gone away exceptions on `doctrine/dbal`.
 
 # Installation
 
-If you're using DBAL 3
+If you're using DBAL 3.6+
 ```console
 $ composer require facile-it/doctrine-mysql-come-back ^2.0
 ```
