@@ -21,6 +21,8 @@ abstract class BaseUnitTestCase extends TestCase
             ->willReturn(null);
         $configuration->getAutoCommit()
             ->willReturn(false);
+        $configuration->getDisableTypeComments()
+            ->willReturn(false);
 
         return $configuration->reveal();
     }
