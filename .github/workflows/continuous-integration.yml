@@ -77,7 +77,7 @@ jobs:
           extensions: "mysqli, pdo_mysql"
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v1
+        uses: ramsey/composer-install@v2
         with:
           dependency-versions: ${{ matrix.dependencies }}
           composer-options: --prefer-dist
@@ -121,7 +121,7 @@ jobs:
           php-version: "8.1"
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v1
+        uses: ramsey/composer-install@v2
         with:
           dependency-versions: highest
           composer-options: --prefer-dist
