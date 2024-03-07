@@ -62,6 +62,7 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
             'x_reconnect_attempts' => $attempts,
         ];
 
+        /** @psalm-suppress InvalidArgument */
         return new PrimaryReadReplicaConnection(
             [
                 'primary' => $primaryConfig,

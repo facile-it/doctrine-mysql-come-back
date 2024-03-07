@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Exception;
@@ -45,6 +46,8 @@ class Statement extends \Doctrine\DBAL\Statement
     private function recreateStatement(): void
     {
         $ref = new \ReflectionMethod($this->conn, 'connect');
+
+        /** @var DriverConnection $wrappedConnection */
         $wrappedConnection = $ref->invoke($this->conn);
 
         $this->stmt = $wrappedConnection->prepare($this->sql);
@@ -61,22 +64,14 @@ class Statement extends \Doctrine\DBAL\Statement
         parent::bindValue($param, $value, $type);
     }
 
-    public function executeQuery(array $params = []): Result
+    public function executeQuery(): Result
     {
-        if ($params === []) {
-            return $this->executeWithRetry([parent::class, 'executeQuery']);
-        }
-
-        return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
+        return $this->executeWithRetry(fn () => parent::executeQuery());
     }
 
-    public function executeStatement(array $params = []): int
+    public function executeStatement(): int|string
     {
-        if ($params === []) {
-            return $this->executeWithRetry([parent::class, 'executeStatement']);
-        }
-
-        return $this->executeWithRetry([parent::class, 'executeStatement'], $params);
+        return $this->executeWithRetry(fn () => parent::executeStatement());
     }
 
     /**

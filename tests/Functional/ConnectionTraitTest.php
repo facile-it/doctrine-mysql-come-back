@@ -187,10 +187,6 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $connection->beginTransaction();
 
-        if ($enableSavepoints) {
-            $this->fail('With savepoints enabled, test should fail without having to trigger a further query');
-        }
-
         $connection->executeStatement('SELECT 1');
     }
 

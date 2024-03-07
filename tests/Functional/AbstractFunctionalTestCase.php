@@ -87,16 +87,21 @@ TABLE
      */
     protected function getConnectionParams(): array
     {
+        /** @var key-of<DriverManager::DRIVER_MAP> $driver */
+        $driver = (string) (getenv('MYSQL_DRIVER') !== false ? getenv('MYSQL_DRIVER') : ($GLOBALS['db_driver'] ?? 'pdo_mysql'));
+        if (!in_array($driver, DriverManager::getAvailableDrivers(), true)) {
+            $this->fail(sprintf('Invalid driver class: %s', $driver));
+        }
+
         $values = [
-            'driver' => getenv('MYSQL_DRIVER') ?: $GLOBALS['db_driver'] ?? 'pdo_mysql',
-            'dbname' => getenv('MYSQL_DBNAME') ?: $GLOBALS['db_dbname'] ?? 'test',
-            'user' => getenv('MYSQL_USER') ?: $GLOBALS['db_user'] ?? 'root',
-            'password' => getenv('MYSQL_PASS') ?: $GLOBALS['db_pass'] ?? '',
-            'host' => getenv('MYSQL_HOST') ?: $GLOBALS['db_host'] ?? 'localhost',
-            'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3306),
+            'driver' => $driver,
+            'dbname' => getenv('MYSQL_DBNAME') !== false ? getenv('MYSQL_DBNAME') : ($GLOBALS['db_dbname'] ?? 'test'),
+            'user' => getenv('MYSQL_USER') !== false ? getenv('MYSQL_USER') : ($GLOBALS['db_user'] ?? 'root'),
+            'password' => getenv('MYSQL_PASS') !== false ? getenv('MYSQL_PASS') : ($GLOBALS['db_pass'] ?? ''),
+            'host' => getenv('MYSQL_HOST') !== false ? getenv('MYSQL_HOST') : ($GLOBALS['db_host'] ?? 'localhost'),
+            'port' => (int) (getenv('MYSQL_PORT') !== false ? getenv('MYSQL_PORT') : ($GLOBALS['db_port'] ?? 3306)),
         ];
 
-        $this->assertIsString($values['driver']);
         if ($values['driver'] !== 'pdo_mysql') {
             assert($values['driver'] === 'mysqli');
         }
@@ -105,6 +110,7 @@ TABLE
         $this->assertIsString($values['password']);
         $this->assertIsString($values['host']);
 
+        /** @psalm-suppress LessSpecificReturnStatement */
         return $values;
     }
 
@@ -134,7 +140,7 @@ TABLE
     }
 
     /**
-     * @return array<string, array{class-string<Driver>, bool}>
+     * @return array<string, array{class-string<Driver>}>
      */
     public static function driverDataProvider(): array
     {

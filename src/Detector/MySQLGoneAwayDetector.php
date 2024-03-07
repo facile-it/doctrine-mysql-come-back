@@ -42,7 +42,7 @@ class MySQLGoneAwayDetector implements GoneAwayDetector
 
     private function isUpdateQuery(?string $sql): bool
     {
-        return $sql && ! preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $sql);
+        return $sql !== null && ! preg_match('/^[\s\n\r\t(]*(select|show|describe)[\s\n\r\t(]+/i', $sql);
     }
 
     /**
@@ -50,6 +50,6 @@ class MySQLGoneAwayDetector implements GoneAwayDetector
      */
     private function isSavepoint(?string $sql): bool
     {
-        return $sql && str_starts_with(trim($sql), 'SAVEPOINT');
+        return $sql !== null && str_starts_with(trim($sql), 'SAVEPOINT');
     }
 }
