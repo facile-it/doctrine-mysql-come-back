@@ -22,10 +22,12 @@
         }
     ],
     "require": {
-        "php": "^7.4 || ^8.0",
-        "doctrine/dbal": "^3.6.0"
+        "php": "^8.0",
+        "doctrine/common": "^3.4",
+        "doctrine/dbal": "^4.0.0"
     },
     "require-dev": {
+        "ext-pdo": "*",
         "facile-it/facile-coding-standard": "^0.5.2",
         "fig/log-test": "^1.0",
         "infection/infection": "^0.26.6",
@@ -58,7 +60,7 @@
     "minimum-stability": "stable",
     "scripts": {
         "test": "phpunit",
-        "phpcs": "php-cs-fixer fix --level=psr2 -v --diff --dry-run src/",
-        "phpcs-fix": "php-cs-fixer fix --level=psr2 -v --diff src/"
+        "phpcs": "php-cs-fixer fix --dry-run --diff",
+        "phpcs-fix": "php-cs-fixer fix --diff"
     }
 }

@@ -34,9 +34,11 @@ services:
     <<: *php-props
     build:
       context: ./docker
+      args:
+        PHP_VERSION: "8.0"
     depends_on:
-      - mysql57
+      - mysql80
     environment:
       PHP_IDE_CONFIG: serverName=MySQLComeBack
-      MYSQL_HOST: mysql57
+      MYSQL_HOST: mysql80
       MYSQL_DRIVER: pdo_mysql

@@ -80,10 +80,9 @@ class StatementTest extends BaseUnitTestCase
 
         $connection->getConfiguration()
             ->willReturn($configuration->reveal());
+
         $connection->getDatabasePlatform()
             ->willReturn($databasePlatform->reveal());
-        $databasePlatform->getName()
-            ->shouldNotBeCalled();
 
         $connection->canTryAgain(Argument::type(\LogicException::class), 'SELECT 1')
             ->shouldBeCalledOnce()

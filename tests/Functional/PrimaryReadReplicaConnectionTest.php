@@ -13,7 +13,7 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
     /**
      * @param class-string<Driver> $driver
      */
-    protected function createConnection(string $driver, int $attempts, bool $enableSavepoints): PrimaryReadReplicaConnection
+    protected function createConnection(string $driver, int $attempts): PrimaryReadReplicaConnection
     {
         $connection = DriverManager::getConnection(array_merge(
             [
@@ -30,7 +30,6 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
         ));
 
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
-        $connection->setNestTransactionsWithSavepoints($enableSavepoints);
 
         return $connection;
     }
@@ -40,9 +39,9 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
      *
      * @return Connection|PrimaryReadReplicaConnection
      */
-    protected function getConnectedConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
+    protected function getConnectedConnection(string $driver, int $attempts): DBALConnection
     {
-        $connection = parent::getConnectedConnection($driver, $attempts, $enableSavepoints);
+        $connection = parent::getConnectedConnection($driver, $attempts);
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
         $connection->ensureConnectedToPrimary();
 
@@ -54,9 +53,11 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
      *
      * @param class-string<Driver> $driver
      */
-    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver, bool $enableSavepoints): void
+    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver): void
     {
-        $connection = $this->createConnection($driver, 0, $enableSavepoints);
+        $connection = $this->createConnection($driver, 0);
+        $connection->connect();
+
         $this->assertFalse($connection->isConnectedToPrimary());
         $this->assertSame(1, $connection->connectCount);
         $this->forceDisconnect($connection);

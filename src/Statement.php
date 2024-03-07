@@ -44,8 +44,10 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function recreateStatement(): void
     {
-        /** @psalm-suppress DeprecatedMethod */
-        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
+        $ref = new \ReflectionMethod($this->conn, 'connect');
+        $wrappedConnection = $ref->invoke($this->conn);
+
+        $this->stmt = $wrappedConnection->prepare($this->sql);
 
         /** @var mixed $value */
         foreach ($this->boundValues as $param => $value) {
@@ -53,22 +55,10 @@ class Statement extends \Doctrine\DBAL\Statement
         }
     }
 
-    public function bindValue($param, $value, $type = ParameterType::STRING)
+    public function bindValue($param, $value, $type = ParameterType::STRING): void
     {
         $this->boundValues[$param] = $value;
-
-        return parent::bindValue($param, $value, $type);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
-    {
-        $this->boundValues[$param] =&$variable;
-
-        /** @psalm-suppress DeprecatedMethod */
-        return parent::bindParam($param, $variable, $type, $length);
+        parent::bindValue($param, $value, $type);
     }
 
     public function executeQuery(array $params = []): Result

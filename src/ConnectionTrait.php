@@ -8,6 +8,7 @@ use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Doctrine\DBAL\Types\Type;
@@ -118,7 +119,7 @@ trait ConnectionTrait
     /**
      * @param string $connectionName
      */
-    public function connect($connectionName = null)
+    public function connect(?string $connectionName = null): DriverConnection
     {
         $this->hasBeenClosedWithAnOpenTransaction = false;
 
@@ -126,7 +127,7 @@ trait ConnectionTrait
         return parent::connect($connectionName);
     }
 
-    public function close()
+    public function close(): void
     {
         if ($this->getTransactionNestingLevel() > 0) {
             $this->hasBeenClosedWithAnOpenTransaction = true;
@@ -163,21 +164,25 @@ trait ConnectionTrait
      *
      * @psalm-suppress MoreSpecificImplementedParamType
      */
-    public function executeStatement($sql, array $params = [], array $types = [])
+    public function executeStatement(string $sql, array $params = [], array $types = []): int|string
     {
         return $this->doWithRetry(function () use ($sql, $params, $types) {
             return @parent::executeStatement($sql, $params, $types);
         }, $sql);
     }
 
-    public function beginTransaction()
+    public function beginTransaction(): void
     {
         if ($this->hasBeenClosedWithAnOpenTransaction || 0 !== $this->getTransactionNestingLevel()) {
-            return @parent::beginTransaction();
+            @parent::beginTransaction();
+
+            return;
         }
 
-        return $this->doWithRetry(function (): bool {
-            return parent::beginTransaction();
+        $this->doWithRetry(function (): bool {
+            parent::beginTransaction();
+
+            return true;
         });
     }
 

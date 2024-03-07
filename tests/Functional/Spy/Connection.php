@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional\Spy;
 
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
+
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
@@ -14,7 +16,7 @@ class Connection extends \Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection
     /**
      * @param string|null $connectionName
      */
-    public function connect($connectionName = null): bool
+    public function connect(?string $connectionName = null): DriverConnection
     {
         if (! $this->isConnected()) {
             ++$this->connectCount;

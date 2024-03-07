@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.4
+ARG PHP_VERSION=8.0
 FROM php:${PHP_VERSION}-cli-alpine
 
 RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
@@ -7,10 +7,11 @@ RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
 
 RUN set -ex \
     && apk add --no-cache --virtual build-dependencies \
+        linux-headers \
         autoconf \
         make \
         g++ \
-    && pecl install -o xdebug-3.1.6 && docker-php-ext-enable xdebug \
+    && pecl install -o xdebug && docker-php-ext-enable xdebug \
     && apk del build-dependencies
 
 # custom user

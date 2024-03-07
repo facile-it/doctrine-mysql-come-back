@@ -17,8 +17,6 @@ abstract class BaseUnitTestCase extends TestCase
         $configuration = $this->prophesize(Configuration::class);
         $configuration->getSchemaManagerFactory()
             ->willReturn();
-        $configuration->getSQLLogger()
-            ->willReturn(null);
         $configuration->getAutoCommit()
             ->willReturn(false);
         $configuration->getDisableTypeComments()
