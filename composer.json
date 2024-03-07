@@ -23,7 +23,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "doctrine/dbal": "^3.6.0"
+        "doctrine/dbal": "^3.6.0 || ^4.0.0"
     },
     "require-dev": {
         "facile-it/facile-coding-standard": "^0.5.2",
@@ -59,6 +59,8 @@
     "scripts": {
         "test": "phpunit",
         "phpcs": "php-cs-fixer fix --level=psr2 -v --diff --dry-run src/",
-        "phpcs-fix": "php-cs-fixer fix --level=psr2 -v --diff src/"
+        "phpcs-fix": "php-cs-fixer fix --level=psr2 -v --diff src/",
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix --diff"
     }
 }
