@@ -89,7 +89,7 @@ TABLE
     {
         /** @var key-of<DriverManager::DRIVER_MAP> $driver */
         $driver = (string) (getenv('MYSQL_DRIVER') !== false ? getenv('MYSQL_DRIVER') : ($GLOBALS['db_driver'] ?? 'pdo_mysql'));
-        if (!in_array($driver, DriverManager::getAvailableDrivers(), true)) {
+        if (! in_array($driver, DriverManager::getAvailableDrivers(), true)) {
             $this->fail(sprintf('Invalid driver class: %s', $driver));
         }
 
