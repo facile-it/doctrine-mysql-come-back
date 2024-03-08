@@ -7,6 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
@@ -129,6 +130,35 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         // change param by ref
         $param = 'baz2';
 
+        $result = $statement->executeQuery()->fetchAllNumeric();
+
+        $this->assertSame([['foo', 'bar', $param]], $result);
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+
+        $statement = $connection->prepare("SELECT 'foo', ?, ?");
+        $statement->bindValue(1, 'bar');
+        $param = 1;
+        /** @psalm-suppress DeprecatedMethod */
+        $statement->bindParam(2, $param, ParameterType::INTEGER);
+        // change param by ref
+        $param = 2;
+        if (PDODriver::class === $driver) {
+            // PDO driver returns result always as string
+            $param = (string) $param;
+        }
+
+        $this->forceDisconnect($connection);
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['foo', 'bar', $param]], $result);
