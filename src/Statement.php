@@ -104,8 +104,6 @@ class Statement extends \Doctrine\DBAL\Statement
             goto attempt;
         }
 
-        $this->retriableConnection->resetAttemptCount();
-
         /** @psalm-suppress PossiblyUndefinedVariable */
         return $result;
     }

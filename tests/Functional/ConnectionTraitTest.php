@@ -7,6 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
@@ -130,6 +131,27 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['foo', 'bar', $param]], $result);
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1);
+        $this->assertConnectionCount(1, $connection);
+
+        $statement = $connection->prepare("SELECT 'foo', ?");
+        $param = 1;
+        $statement->bindValue(1, $param, ParameterType::INTEGER);
+
+        $this->forceDisconnect($connection);
+        $result = $statement->executeQuery()->fetchAllNumeric();
+
+        $this->assertSame([['foo', $param]], $result);
         $this->assertConnectionCount(2, $connection);
     }
 
@@ -265,5 +287,24 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
         $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldNotReconnectOnBrokenTransaction(string $driver): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1);
+        $this->assertConnectionCount(1, $connection);
+
+        $connection->beginTransaction();
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->expectException(Exception\ConnectionLost::class);
+        $statement->executeQuery();
     }
 }
