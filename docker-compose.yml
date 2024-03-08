@@ -32,10 +32,11 @@ services:
 
   php:
     <<: *php-props
+    image: facile.example.com/php:${PHP_VERSION}
     build:
       context: ./docker
       args:
-        PHP_VERSION: "8.1"
+        PHP_VERSION: ${PHP_VERSION}
     depends_on:
       - mysql80
     environment:
