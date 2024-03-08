@@ -30,24 +30,11 @@ jobs:
         custom-entrypoint:
           - --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         include:
-          - php-version: "8.3"
-            mysql-version: "8.0"
-            custom-entrypoint: ~
-            job: Tests
-
-          - php-version: "8.3"
+          - php-version: "8.2"
             mysql-version: "5.7"
-            custom-entrypoint: ~
-            job: Tests
-
-          - php-version: "8.3"
-            mysql-version: "5.7"
-            job: Tests
-
           - php-version: "8.3"
             mysql-version: "8.0"
             job: Infection
-
           - dependencies: "lowest"
             php-version: "8.1"
             mysql-version: "5.7"
