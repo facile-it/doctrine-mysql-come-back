@@ -7,6 +7,7 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\ParameterType;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
@@ -129,6 +130,35 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         // change param by ref
         $param = 'baz2';
 
+        $result = $statement->executeQuery()->fetchAllNumeric();
+
+        $this->assertSame([['foo', 'bar', $param]], $result);
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+
+        $statement = $connection->prepare("SELECT 'foo', ?, ?");
+        $statement->bindValue(1, 'bar');
+        $param = 1;
+        /** @psalm-suppress DeprecatedMethod */
+        $statement->bindParam(2, $param, ParameterType::INTEGER);
+        // change param by ref
+        $param = 2;
+        if (PDODriver::class === $driver && PHP_VERSION_ID < 80100) {
+            // PDO driver before PHP 8.1 returns result always as string, ignoring parameter type
+            $param = (string) $param;
+        }
+
+        $this->forceDisconnect($connection);
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['foo', 'bar', $param]], $result);
@@ -271,5 +301,24 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
         $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldNotReconnectOnBrokenTransaction(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+
+        $this->assertTrue($connection->beginTransaction());
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->expectException(Exception\ConnectionLost::class);
+        $statement->executeQuery();
     }
 }
