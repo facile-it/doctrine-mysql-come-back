@@ -9,6 +9,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Mysqli\Driver as MysqliDriver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\DriverManager;
+use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\ConnectionTrait;
 use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
@@ -25,7 +26,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
      *
      * @return Connection|PrimaryReadReplicaConnection
      */
-    protected function createConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
+    protected function createConnection(string $driver, int $attempts): DBALConnection
     {
         $connection = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
@@ -39,7 +40,6 @@ abstract class AbstractFunctionalTestCase extends TestCase
         ));
 
         $this->assertInstanceOf(Connection::class, $connection);
-        $connection->setNestTransactionsWithSavepoints($enableSavepoints);
 
         return $connection;
     }
@@ -49,9 +49,9 @@ abstract class AbstractFunctionalTestCase extends TestCase
      *
      * @return Connection|PrimaryReadReplicaConnection
      */
-    protected function getConnectedConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
+    protected function getConnectedConnection(string $driver, int $attempts): DBALConnection
     {
-        $connection = $this->createConnection($driver, $attempts, $enableSavepoints);
+        $connection = $this->createConnection($driver, $attempts);
         $connection->executeQuery('SELECT 1');
 
         return $connection;
@@ -89,16 +89,21 @@ TABLE
      */
     protected function getConnectionParams(): array
     {
+        /** @var key-of<DriverManager::DRIVER_MAP> $driver */
+        $driver = (string) (getenv('MYSQL_DRIVER') !== false ? getenv('MYSQL_DRIVER') : ($GLOBALS['db_driver'] ?? 'pdo_mysql'));
+        if (! in_array($driver, DriverManager::getAvailableDrivers(), true)) {
+            $this->fail(sprintf('Invalid driver class: %s', $driver));
+        }
+
         $values = [
-            'driver' => getenv('MYSQL_DRIVER') ?: $GLOBALS['db_driver'] ?? 'pdo_mysql',
-            'dbname' => getenv('MYSQL_DBNAME') ?: $GLOBALS['db_dbname'] ?? 'test',
-            'user' => getenv('MYSQL_USER') ?: $GLOBALS['db_user'] ?? 'root',
-            'password' => getenv('MYSQL_PASS') ?: $GLOBALS['db_pass'] ?? '',
-            'host' => getenv('MYSQL_HOST') ?: $GLOBALS['db_host'] ?? 'localhost',
-            'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3306),
+            'driver' => $driver,
+            'dbname' => getenv('MYSQL_DBNAME') !== false ? getenv('MYSQL_DBNAME') : ($GLOBALS['db_dbname'] ?? 'test'),
+            'user' => getenv('MYSQL_USER') !== false ? getenv('MYSQL_USER') : ($GLOBALS['db_user'] ?? 'root'),
+            'password' => getenv('MYSQL_PASS') !== false ? getenv('MYSQL_PASS') : ($GLOBALS['db_pass'] ?? ''),
+            'host' => getenv('MYSQL_HOST') !== false ? getenv('MYSQL_HOST') : ($GLOBALS['db_host'] ?? 'localhost'),
+            'port' => (int) (getenv('MYSQL_PORT') !== false ? getenv('MYSQL_PORT') : ($GLOBALS['db_port'] ?? 3306)),
         ];
 
-        $this->assertIsString($values['driver']);
         if ($values['driver'] !== 'pdo_mysql') {
             assert($values['driver'] === 'mysqli');
         }
@@ -107,6 +112,7 @@ TABLE
         $this->assertIsString($values['password']);
         $this->assertIsString($values['host']);
 
+        /** @psalm-suppress LessSpecificReturnStatement */
         return $values;
     }
 
@@ -136,15 +142,13 @@ TABLE
     }
 
     /**
-     * @return array<string, array{class-string<Driver>, bool}>
+     * @return array<string, array{class-string<Driver>}>
      */
     public static function driverDataProvider(): array
     {
         return [
-            'Mysqli with savepoints' => [MysqliDriver::class, true],
-            'Mysqli with no savepoints' => [MysqliDriver::class, false],
-            'PDO with savepoints' => [PDODriver::class, true],
-            'PDO with no savepoints' => [PDODriver::class, false],
+            'Mysqli' => [MysqliDriver::class],
+            'PDO' => [PDODriver::class],
         ];
     }
 
@@ -155,7 +159,7 @@ TABLE
     {
         $this->assertTrue(
             property_exists($connection, 'connectCount'),
-            'Expecting connection that implements ConnectionTraint, got ' . get_class($connection)
+            sprintf('Expecting connection that implements %s, got %s', ConnectionTrait::class, get_class($connection))
         );
 
         $this->assertSame($expected, $connection->connectCount);

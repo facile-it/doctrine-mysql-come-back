@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Exception;
@@ -44,49 +45,38 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function recreateStatement(): void
     {
-        /** @psalm-suppress DeprecatedMethod */
-        $this->stmt = $this->conn->getWrappedConnection()->prepare($this->sql);
+        $ref = new \ReflectionMethod($this->conn, 'connect');
+
+        /** @var DriverConnection $wrappedConnection */
+        $wrappedConnection = $ref->invoke($this->conn);
+
+        $this->stmt = $wrappedConnection->prepare($this->sql);
 
         /** @var mixed $value */
         foreach ($this->boundValues as $param => $value) {
-            parent::bindValue($param, $value, $this->types[$param] ?? ParameterType::STRING);
+            $type = ParameterType::STRING;
+            if (isset($this->types[$param])) {
+                $type = $this->types[$param];
+            }
+
+            parent::bindValue($param, $value, $type);
         }
     }
 
-    public function bindValue($param, $value, $type = ParameterType::STRING)
+    public function bindValue($param, $value, $type = ParameterType::STRING): void
     {
         $this->boundValues[$param] = $value;
-
-        return parent::bindValue($param, $value, $type);
+        parent::bindValue($param, $value, $type);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function bindParam($param, &$variable, $type = ParameterType::STRING, $length = null)
+    public function executeQuery(): Result
     {
-        $this->boundValues[$param] =&$variable;
-
-        /** @psalm-suppress DeprecatedMethod */
-        return parent::bindParam($param, $variable, $type, $length);
+        return $this->executeWithRetry(fn () => parent::executeQuery());
     }
 
-    public function executeQuery(array $params = []): Result
+    public function executeStatement(): int|string
     {
-        if ($params === []) {
-            return $this->executeWithRetry([parent::class, 'executeQuery']);
-        }
-
-        return $this->executeWithRetry([parent::class, 'executeQuery'], $params);
-    }
-
-    public function executeStatement(array $params = []): int
-    {
-        if ($params === []) {
-            return $this->executeWithRetry([parent::class, 'executeStatement']);
-        }
-
-        return $this->executeWithRetry([parent::class, 'executeStatement'], $params);
+        return $this->executeWithRetry(fn () => parent::executeStatement());
     }
 
     /**
@@ -100,12 +90,9 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function executeWithRetry(callable $callable, ...$params)
     {
-        $parentCall = \Closure::fromCallable($callable);
-        $parentCall->bindTo($this, parent::class);
-
         try {
             attempt:
-            $result = $parentCall(...$params);
+            $result = $callable(...$params);
         } catch (Exception $e) {
             if (! $this->retriableConnection->canTryAgain($e, $this->sql)) {
                 throw $e;

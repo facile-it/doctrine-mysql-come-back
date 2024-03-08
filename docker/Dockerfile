@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.4
+ARG PHP_VERSION=8.1
 FROM php:${PHP_VERSION}-cli-alpine
 
 RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
@@ -7,6 +7,7 @@ RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
 
 RUN set -ex \
     && apk add --no-cache --virtual build-dependencies \
+        linux-headers \
         autoconf \
         make \
         g++ \

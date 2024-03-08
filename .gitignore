@@ -4,3 +4,4 @@
 /docker-compose.override.yml
 /phpunit.xml
 /.*.cache
+.env

@@ -32,11 +32,14 @@ services:
 
   php:
     <<: *php-props
+    image: facile.example.com/php:${PHP_VERSION}
     build:
       context: ./docker
+      args:
+        PHP_VERSION: ${PHP_VERSION}
     depends_on:
-      - mysql57
+      - mysql80
     environment:
       PHP_IDE_CONFIG: serverName=MySQLComeBack
-      MYSQL_HOST: mysql57
+      MYSQL_HOST: mysql80
       MYSQL_DRIVER: pdo_mysql

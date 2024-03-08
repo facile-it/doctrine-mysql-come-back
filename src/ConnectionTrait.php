@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
-use Doctrine\Common\EventManager;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Doctrine\DBAL\Types\Type;
@@ -16,6 +18,9 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 
 /**
  * @psalm-require-extends \Doctrine\DBAL\Connection
+ *
+ * @psalm-type WrapperParameterType = string|Type|ParameterType|ArrayParameterType
+ * @psalm-type WrapperParameterTypeArray = array<int<0, max>, WrapperParameterType>|array<string, WrapperParameterType>
  */
 trait ConnectionTrait
 {
@@ -32,8 +37,7 @@ trait ConnectionTrait
     public function __construct(
         array $params,
         Driver $driver,
-        ?Configuration $config = null,
-        ?EventManager $eventManager = null
+        ?Configuration $config = null
     ) {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->maxReconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
@@ -46,7 +50,7 @@ trait ConnectionTrait
          * @psalm-suppress InternalMethod
          * @psalm-suppress MixedArgumentTypeCoercion
          */
-        parent::__construct($params, $driver, $config, $eventManager);
+        parent::__construct($params, $driver, $config);
     }
 
     /**
@@ -82,7 +86,7 @@ trait ConnectionTrait
         try {
             attempt:
             $result = $callable();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if (! $this->canTryAgain($e, $sql)) {
                 throw $e;
             }
@@ -118,7 +122,7 @@ trait ConnectionTrait
     /**
      * @param string $connectionName
      */
-    public function connect($connectionName = null)
+    public function connect(?string $connectionName = null): DriverConnection
     {
         $this->hasBeenClosedWithAnOpenTransaction = false;
 
@@ -126,7 +130,7 @@ trait ConnectionTrait
         return parent::connect($connectionName);
     }
 
-    public function close()
+    public function close(): void
     {
         if ($this->getTransactionNestingLevel() > 0) {
             $this->hasBeenClosedWithAnOpenTransaction = true;
@@ -147,37 +151,37 @@ trait ConnectionTrait
     /**
      * @param string $sql
      * @param list<mixed>|array<string, mixed>                                     $params
-     * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types
+     *
+     * @psalm-param WrapperParameterTypeArray $types
      */
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
         return $this->doWithRetry(function () use ($sql, $params, $types, $qcp): Result {
-            return @parent::executeQuery($sql, $params, $types, $qcp);
+            return parent::executeQuery($sql, $params, $types, $qcp);
         }, $sql);
     }
 
     /**
      * @param string $sql
-     * @param list<mixed>|array<string, mixed>                                     $params
-     * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types
+     * @param list<mixed>|array<string, mixed> $params
+     *
+     * @psalm-param WrapperParameterTypeArray $types
+     *
+     * @return int|numeric-string
      *
      * @psalm-suppress MoreSpecificImplementedParamType
      */
-    public function executeStatement($sql, array $params = [], array $types = [])
+    public function executeStatement(string $sql, array $params = [], array $types = []): int|string
     {
         return $this->doWithRetry(function () use ($sql, $params, $types) {
-            return @parent::executeStatement($sql, $params, $types);
+            return parent::executeStatement($sql, $params, $types);
         }, $sql);
     }
 
-    public function beginTransaction()
+    public function beginTransaction(): void
     {
-        if ($this->hasBeenClosedWithAnOpenTransaction || 0 !== $this->getTransactionNestingLevel()) {
-            return @parent::beginTransaction();
-        }
-
-        return $this->doWithRetry(function (): bool {
-            return parent::beginTransaction();
+        $this->doWithRetry(function (): void {
+            parent::beginTransaction();
         });
     }
 

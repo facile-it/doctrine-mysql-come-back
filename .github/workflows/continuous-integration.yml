@@ -17,8 +17,6 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "7.4"
-          - "8.0"
           - "8.1"
           - "8.2"
           - "8.3"
@@ -32,22 +30,13 @@ jobs:
         custom-entrypoint:
           - --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
         include:
-          - php-version: "7.4"
-            mysql-version: "8.0"
-            custom-entrypoint: ~
-            job: Tests
-          - php-version: "7.4"
-            mysql-version: "5.7"
-            custom-entrypoint: ~
-            job: Tests
           - php-version: "8.2"
             mysql-version: "5.7"
-            job: Tests
-          - php-version: "8.1"
+          - php-version: "8.3"
             mysql-version: "8.0"
             job: Infection
           - dependencies: "lowest"
-            php-version: "7.4"
+            php-version: "8.1"
             mysql-version: "5.7"
             name: Lowest deps
 
@@ -120,7 +109,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: ${{ matrix.php-version }}
 
       - name: Install dependencies
         uses: ramsey/composer-install@v3
