@@ -154,7 +154,7 @@ trait ConnectionTrait
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
         return $this->doWithRetry(function () use ($sql, $params, $types, $qcp): Result {
-            return @parent::executeQuery($sql, $params, $types, $qcp);
+            return parent::executeQuery($sql, $params, $types, $qcp);
         }, $sql);
     }
 
@@ -171,17 +171,12 @@ trait ConnectionTrait
     public function executeStatement(string $sql, array $params = [], array $types = []): int|string
     {
         return $this->doWithRetry(function () use ($sql, $params, $types) {
-            return @parent::executeStatement($sql, $params, $types);
+            return parent::executeStatement($sql, $params, $types);
         }, $sql);
     }
 
     public function beginTransaction(): void
     {
-        if ($this->getTransactionNestingLevel() > 1) {
-            parent::beginTransaction();
-            return;
-        }
-
         $this->doWithRetry(function (): void {
             parent::beginTransaction();
         });
