@@ -132,7 +132,10 @@ trait ConnectionTrait
 
     public function close(): void
     {
-        $this->hasBeenClosedWithAnOpenTransaction = $this->getTransactionNestingLevel() > 1;
+        if ($this->getTransactionNestingLevel() > 0) {
+            $this->hasBeenClosedWithAnOpenTransaction = true;
+        }
+
         parent::close();
     }
 
