@@ -19,8 +19,7 @@ RUN adduser -D -u 1000 facile -G www-data \
     && mkdir -p /home/facile \
     && chown -R facile /home/facile
 
-ARG COMPOSER_VERSION=2.5.5
 RUN curl -sS https://getcomposer.org/installer | php -- \
-    --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
+    --install-dir=/usr/local/bin --filename=composer
 
 USER facile
