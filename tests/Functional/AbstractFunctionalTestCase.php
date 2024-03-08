@@ -76,8 +76,10 @@ TABLE
     }
 
     /**
+     * @psalm-suppress LessSpecificReturnStatement, MoreSpecificReturnType, RiskyTruthyFalsyComparison
+     *
      * @return array{
-     *     driver: key-of<DriverManager::DRIVER_MAP>,
+     *     driver: 'mysqli'|'pdo_mysql',
      *     dbname: string,
      *     user: string,
      *     password: string,
