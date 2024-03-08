@@ -18,8 +18,11 @@ RUN set -ex \
 RUN adduser -D -u 1000 facile -G www-data \
     && mkdir -p /home/facile \
     && chown -R facile /home/facile
+# zsh / OhMyZsh
+RUN apk --no-cache add git zsh
 
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer
 
 USER facile
+RUN sh -c "$(curl -fsSLv https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
