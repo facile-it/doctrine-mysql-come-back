@@ -35,7 +35,7 @@ services:
     build:
       context: ./docker
       args:
-        PHP_VERSION: "8.0"
+        PHP_VERSION: "8.1"
     depends_on:
       - mysql80
     environment:

@@ -86,7 +86,7 @@ trait ConnectionTrait
         try {
             attempt:
             $result = $callable();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if (! $this->canTryAgain($e, $sql)) {
                 throw $e;
             }
@@ -132,10 +132,7 @@ trait ConnectionTrait
 
     public function close(): void
     {
-        if ($this->getTransactionNestingLevel() > 0) {
-            $this->hasBeenClosedWithAnOpenTransaction = true;
-        }
-
+        $this->hasBeenClosedWithAnOpenTransaction = $this->getTransactionNestingLevel() > 1;
         parent::close();
     }
 
@@ -180,16 +177,13 @@ trait ConnectionTrait
 
     public function beginTransaction(): void
     {
-        if ($this->hasBeenClosedWithAnOpenTransaction || 0 !== $this->getTransactionNestingLevel()) {
-            @parent::beginTransaction();
-
+        if ($this->getTransactionNestingLevel() > 1) {
+            parent::beginTransaction();
             return;
         }
 
-        $this->doWithRetry(function (): bool {
+        $this->doWithRetry(function (): void {
             parent::beginTransaction();
-
-            return true;
         });
     }
 

@@ -54,7 +54,12 @@ class Statement extends \Doctrine\DBAL\Statement
 
         /** @var mixed $value */
         foreach ($this->boundValues as $param => $value) {
-            parent::bindValue($param, $value, $this->types[$param] ?? ParameterType::STRING);
+            $type = ParameterType::STRING;
+            if (isset($this->types[$param])) {
+                $type = $this->types[$param];
+            }
+
+            parent::bindValue($param, $value, $type);
         }
     }
 
@@ -85,12 +90,9 @@ class Statement extends \Doctrine\DBAL\Statement
      */
     private function executeWithRetry(callable $callable, ...$params)
     {
-        $parentCall = \Closure::fromCallable($callable);
-        $parentCall->bindTo($this, parent::class);
-
         try {
             attempt:
-            $result = $parentCall(...$params);
+            $result = $callable(...$params);
         } catch (Exception $e) {
             if (! $this->retriableConnection->canTryAgain($e, $this->sql)) {
                 throw $e;

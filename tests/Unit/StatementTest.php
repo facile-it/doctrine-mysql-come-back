@@ -17,7 +17,7 @@ class StatementTest extends BaseUnitTestCase
     use ProphecyTrait;
     use DeprecationTrait;
 
-    public function testExecuteStatementShouldThrowWhenItsNotRetriable(): void
+    public function testExecuteStatementShouldThrowWhenItsNotRetryable(): void
     {
         $connection = $this->mockConnection();
         $statement = Statement::fromDBALStatement(
