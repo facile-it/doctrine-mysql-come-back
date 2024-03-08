@@ -272,4 +272,23 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
         $this->assertConnectionCount(2, $connection);
     }
+
+    /**
+     * @dataProvider driverDataProvider
+     *
+     * @param class-string<Driver> $driver
+     */
+    public function testShouldNotReconnectOnBrokenTransaction(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+
+        $this->assertTrue($connection->beginTransaction());
+        $statement = $connection->prepare('SELECT 1');
+
+        $this->forceDisconnect($connection);
+
+        $this->expectException(Exception\ConnectionLost::class);
+        $statement->executeQuery();
+    }
 }
