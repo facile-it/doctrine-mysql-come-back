@@ -10,7 +10,7 @@ RUN set -ex \
         autoconf \
         make \
         g++ \
-    && pecl install -o xdebug && docker-php-ext-enable xdebug \
+    && pecl install -o xdebug-3.1.6 && docker-php-ext-enable xdebug \
     && apk del build-dependencies
 
 # custom user
