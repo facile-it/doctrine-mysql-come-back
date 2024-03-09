@@ -34,6 +34,7 @@
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^10.5",
         "psalm/plugin-phpunit": "^0.18.4",
+        "rector/rector": "^1.0",
         "vimeo/psalm": "^5.8.0"
     },
     "autoload": {
