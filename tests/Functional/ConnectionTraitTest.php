@@ -7,15 +7,16 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\ConnectionLost;
 use Doctrine\DBAL\ParameterType;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testExecuteQueryShouldNotReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 0);
@@ -28,10 +29,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testExecuteQueryShouldReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -44,10 +44,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testQueryShouldReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -60,10 +59,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testExecuteUpdateShouldReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -77,10 +75,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testExecuteStatementShouldReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -94,10 +91,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldReconnectOnStatementExecuteError(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -112,10 +108,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldResetStatementOnStatementExecuteError(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -135,10 +130,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -156,10 +150,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldReconnectOnStatementFetchAllAssociative(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -174,10 +167,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldReconnectOnStatementFetchAllNumeric(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -192,10 +184,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testBeginTransactionShouldNotReconnectIfNested(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -213,10 +204,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testBeginTransactionShouldNotReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 0);
@@ -233,10 +223,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testBeginTransactionShouldReconnect(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -256,10 +245,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldReconnectOnExecutePreparedStatement(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -273,10 +261,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldReconnectOnExecuteQueryPreparedStatement(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -290,10 +277,9 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testShouldNotReconnectOnBrokenTransaction(string $driver): void
     {
         $connection = $this->getConnectedConnection($driver, 1);
@@ -304,7 +290,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $this->forceDisconnect($connection);
 
-        $this->expectException(Exception\ConnectionLost::class);
+        $this->expectException(ConnectionLost::class);
         $statement->executeQuery();
     }
 }

@@ -7,6 +7,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\DriverManager;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
 {
@@ -45,10 +46,9 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
     }
 
     /**
-     * @dataProvider driverDataProvider
-     *
      * @param class-string<Driver> $driver
      */
+    #[DataProvider('driverDataProvider')]
     public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver): void
     {
         $connection = $this->createConnection($driver, 0);

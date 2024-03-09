@@ -7,13 +7,12 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Prophecy\Argument;
 
 class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
 {
-    /**
-     * @dataProvider invalidAttemptsDataProvider
-     */
+    #[DataProvider('invalidAttemptsDataProvider')]
     public function testDriverOptionsValidation(mixed $invalidValue, string $errorMessage): void
     {
         $this->expectException(\InvalidArgumentException::class);

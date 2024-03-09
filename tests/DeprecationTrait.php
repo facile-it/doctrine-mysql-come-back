@@ -3,10 +3,11 @@
 namespace Facile\DoctrineMySQLComeBack\Tests;
 
 use Doctrine\Deprecations\Deprecation;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 
 /**
- * @psalm-require-extends \PHPUnit\Framework\TestCase
+ * @psalm-require-extends TestCase
  */
 trait DeprecationTrait
 {
