@@ -101,11 +101,7 @@ class StatementTest extends BaseUnitTestCase
     }
 
     /**
-     * @param Connection $connection
-     *
      * @throws \Doctrine\DBAL\Exception
-     *
-     * @return \Doctrine\DBAL\Statement
      */
     protected function createDriverStatement(Connection $connection): \Doctrine\DBAL\Statement
     {

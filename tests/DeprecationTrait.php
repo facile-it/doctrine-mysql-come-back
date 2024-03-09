@@ -40,7 +40,7 @@ trait DeprecationTrait
             $message .= $deprecation['message'] . PHP_EOL . print_r($deprecation['context'], true) . PHP_EOL . PHP_EOL;
         }
 
-        if ($message) {
+        if ($message !== '') {
             $this->fail('Test failed due to deprecations: ' . PHP_EOL . $message);
         }
 

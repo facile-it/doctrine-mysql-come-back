@@ -15,19 +15,15 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
      */
     protected function createConnection(string $driver, int $attempts): PrimaryReadReplicaConnection
     {
-        $connection = DriverManager::getConnection(array_merge(
-            [
-                'primary' => $this->getConnectionParams(),
-                'replica' => [$this->getConnectionParams()],
-                'driverOptions' => [
-                    'x_reconnect_attempts' => $attempts,
-                ],
+        $connection = DriverManager::getConnection([
+            'primary' => $this->getConnectionParams(),
+            'replica' => [$this->getConnectionParams()],
+            'driverOptions' => [
+                'x_reconnect_attempts' => $attempts,
             ],
-            [
-                'wrapperClass' => PrimaryReadReplicaConnection::class,
-                'driverClass' => $driver,
-            ]
-        ));
+            'wrapperClass' => PrimaryReadReplicaConnection::class,
+            'driverClass' => $driver,
+        ]);
 
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
 

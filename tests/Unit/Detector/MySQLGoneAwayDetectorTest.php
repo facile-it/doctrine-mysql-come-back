@@ -7,8 +7,6 @@ use Facile\DoctrineMySQLComeBack\Tests\Unit\BaseUnitTestCase;
 
 class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
 {
-    private const RETRYABLE_ERROR = 'Lost connection to MySQL server during query is an error not retryable on UPDATE queries';
-
     private const RETRYABLE_ERROR_OUTSIDE_UPDATE = 'Lost connection to MySQL server during query is an error not retryable on UPDATE queries';
 
     private const RETRYABLE_ERROR_ON_SENDING_QUERY = 'Warning: Error while sending QUERY packet. PID=34';

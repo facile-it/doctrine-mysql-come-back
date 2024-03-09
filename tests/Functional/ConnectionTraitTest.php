@@ -224,7 +224,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
-        if (is_a($driver, PDODriver::class)) {
+        if ($driver instanceof PDODriver) {
             $this->expectException(Driver\PDO\Exception::class);
             $this->expectExceptionMessage('MySQL server has gone away');
         }
@@ -246,7 +246,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $connection->beginTransaction();
 
-        if (is_a($driver, PDODriver::class)) {
+        if ($driver instanceof PDODriver) {
             $this->assertConnectionCount(2, $connection);
         } else {
             $this->assertConnectionCount(1, $connection);

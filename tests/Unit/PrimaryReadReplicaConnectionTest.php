@@ -13,10 +13,8 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTestCase
 {
     /**
      * @dataProvider invalidAttemptsDataProvider
-     *
-     * @param mixed $invalidValue
      */
-    public function testDriverOptionsValidation($invalidValue, string $errorMessage): void
+    public function testDriverOptionsValidation(mixed $invalidValue, string $errorMessage): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid x_reconnect_attempts option: ' . $errorMessage);
