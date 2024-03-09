@@ -9,6 +9,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
 use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
@@ -30,9 +31,7 @@ class StatementTest extends BaseUnitTestCase
         $statement->executeStatement();
     }
 
-    /**
-     * @dataProvider attemptsDataProvider
-     */
+    #[DataProvider('attemptsDataProvider')]
     public function testReconnectionAttempsShouldRunOut(int $attempts): void
     {
         $driver = $this->prophesize(Driver::class);
@@ -63,7 +62,7 @@ class StatementTest extends BaseUnitTestCase
     /**
      * @return array{int}[]
      */
-    public function attemptsDataProvider(): array
+    public static function attemptsDataProvider(): array
     {
         return[
             [0],
@@ -101,11 +100,7 @@ class StatementTest extends BaseUnitTestCase
     }
 
     /**
-     * @param Connection $connection
-     *
      * @throws \Doctrine\DBAL\Exception
-     *
-     * @return \Doctrine\DBAL\Statement
      */
     protected function createDriverStatement(Connection $connection): \Doctrine\DBAL\Statement
     {

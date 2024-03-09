@@ -39,6 +39,18 @@ trait ConnectionTrait
         Driver $driver,
         ?Configuration $config = null
     ) {
+        $this->commonConstructor($params, $driver, $config);
+    }
+
+    /**
+     * @param array $params
+     * @param Driver $driver
+     * @param Configuration|null $config
+     *
+     * @return void
+     */
+    private function commonConstructor(array &$params, Driver $driver, ?Configuration $config): void
+    {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->maxReconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
             unset($params['driverOptions']['x_reconnect_attempts']);
@@ -53,10 +65,7 @@ trait ConnectionTrait
         parent::__construct($params, $driver, $config);
     }
 
-    /**
-     * @param mixed $attempts
-     */
-    private function validateAttemptsOption($attempts): int
+    private function validateAttemptsOption(mixed $attempts): int
     {
         if (! is_int($attempts)) {
             throw new \InvalidArgumentException('Invalid x_reconnect_attempts option: expecting int, got ' . gettype($attempts));
@@ -149,20 +158,16 @@ trait ConnectionTrait
     }
 
     /**
-     * @param string $sql
      * @param list<mixed>|array<string, mixed>                                     $params
      *
      * @psalm-param WrapperParameterTypeArray $types
      */
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
     {
-        return $this->doWithRetry(function () use ($sql, $params, $types, $qcp): Result {
-            return parent::executeQuery($sql, $params, $types, $qcp);
-        }, $sql);
+        return $this->doWithRetry(fn (): Result => parent::executeQuery($sql, $params, $types, $qcp), $sql);
     }
 
     /**
-     * @param string $sql
      * @param list<mixed>|array<string, mixed> $params
      *
      * @psalm-param WrapperParameterTypeArray $types
@@ -173,9 +178,7 @@ trait ConnectionTrait
      */
     public function executeStatement(string $sql, array $params = [], array $types = []): int|string
     {
-        return $this->doWithRetry(function () use ($sql, $params, $types) {
-            return parent::executeStatement($sql, $params, $types);
-        }, $sql);
+        return $this->doWithRetry(fn () => parent::executeStatement($sql, $params, $types), $sql);
     }
 
     public function beginTransaction(): void

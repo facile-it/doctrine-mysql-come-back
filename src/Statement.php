@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Types\Type;
 use Exception;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connections\PrimaryReadReplicaConnection;
 
@@ -63,7 +64,7 @@ class Statement extends \Doctrine\DBAL\Statement
         }
     }
 
-    public function bindValue($param, $value, $type = ParameterType::STRING): void
+    public function bindValue(string|int $param, mixed $value, string|ParameterType|Type $type = ParameterType::STRING): void
     {
         $this->boundValues[$param] = $value;
         parent::bindValue($param, $value, $type);
@@ -71,12 +72,12 @@ class Statement extends \Doctrine\DBAL\Statement
 
     public function executeQuery(): Result
     {
-        return $this->executeWithRetry(fn () => parent::executeQuery());
+        return $this->executeWithRetry(fn (): Result => parent::executeQuery());
     }
 
     public function executeStatement(): int|string
     {
-        return $this->executeWithRetry(fn () => parent::executeStatement());
+        return $this->executeWithRetry(fn (): int|string => parent::executeStatement());
     }
 
     /**

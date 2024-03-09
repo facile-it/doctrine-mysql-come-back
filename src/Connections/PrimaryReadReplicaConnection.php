@@ -8,9 +8,7 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\ConnectionTrait;
 
 class PrimaryReadReplicaConnection extends \Doctrine\DBAL\Connections\PrimaryReadReplicaConnection
 {
-    use ConnectionTrait {
-        __construct as __traitConstruct;
-    }
+    use ConnectionTrait;
 
     public function __construct(array $params, Driver $driver, ?Configuration $config = null)
     {
@@ -19,6 +17,6 @@ class PrimaryReadReplicaConnection extends \Doctrine\DBAL\Connections\PrimaryRea
             unset($params['primary']['driverOptions']['x_reconnect_attempts']);
         }
 
-        self::__traitConstruct($params, $driver, $config);
+        $this->commonConstructor($params, $driver, $config);
     }
 }

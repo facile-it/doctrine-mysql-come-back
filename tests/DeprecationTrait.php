@@ -3,10 +3,11 @@
 namespace Facile\DoctrineMySQLComeBack\Tests;
 
 use Doctrine\Deprecations\Deprecation;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 
 /**
- * @psalm-require-extends \PHPUnit\Framework\TestCase
+ * @psalm-require-extends TestCase
  */
 trait DeprecationTrait
 {
@@ -40,7 +41,7 @@ trait DeprecationTrait
             $message .= $deprecation['message'] . PHP_EOL . print_r($deprecation['context'], true) . PHP_EOL . PHP_EOL;
         }
 
-        if ($message) {
+        if ($message !== '') {
             $this->fail('Test failed due to deprecations: ' . PHP_EOL . $message);
         }
 

@@ -4,11 +4,10 @@ namespace Facile\DoctrineMySQLComeBack\Tests\Unit\Detector;
 
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Tests\Unit\BaseUnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
 {
-    private const RETRYABLE_ERROR = 'Lost connection to MySQL server during query is an error not retryable on UPDATE queries';
-
     private const RETRYABLE_ERROR_OUTSIDE_UPDATE = 'Lost connection to MySQL server during query is an error not retryable on UPDATE queries';
 
     private const RETRYABLE_ERROR_ON_SENDING_QUERY = 'Warning: Error while sending QUERY packet. PID=34';
@@ -17,9 +16,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
 
     private const NOT_RETRYABLE_ERROR = 'Unknown error';
 
-    /**
-     * @dataProvider isUpdateQueryDataProvider
-     */
+    #[DataProvider('isUpdateQueryDataProvider')]
     public function testIsUpdateQuery(string $query, bool $isUpdate): void
     {
         $error = new \Exception(self::RETRYABLE_ERROR_OUTSIDE_UPDATE);
@@ -30,9 +27,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
         $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
     }
 
-    /**
-     * @dataProvider savepointDataProvider
-     */
+    #[DataProvider('savepointDataProvider')]
     public function testSavepointShouldNotBeRetried(string $sql): void
     {
         $error = new \Exception(self::RETRYABLE_ERROR_ON_SERVER_GONE);
@@ -43,9 +38,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
         $this->assertTrue($goneAwayDetector->isGoneAwayException($error, 'SELECT 1'));
     }
 
-    /**
-     * @dataProvider isGoneAwayExceptionDataProvider
-     */
+    #[DataProvider('isGoneAwayExceptionDataProvider')]
     public function testIsGoneAwayException(string $message, bool $isUpdate, bool $expectedIsGoneAwayException): void
     {
         $error = new \Exception($message);
@@ -60,7 +53,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
     /**
      * @return array{string, bool}[]
      */
-    public function isUpdateQueryDataProvider(): array
+    public static function isUpdateQueryDataProvider(): array
     {
         return [
             ['UPDATE ', true],
@@ -82,7 +75,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
     /**
      * @return array{string}[]
      */
-    public function savepointDataProvider(): array
+    public static function savepointDataProvider(): array
     {
         return [
             ['SAVEPOINT foo'],
@@ -95,7 +88,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
     /**
      * @return array{0: string, 1: bool, 2: bool}[]
      */
-    public function isGoneAwayExceptionDataProvider(): array
+    public static function isGoneAwayExceptionDataProvider(): array
     {
         return [
             [self::RETRYABLE_ERROR_ON_SERVER_GONE, true, true],
