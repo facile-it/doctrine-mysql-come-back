@@ -145,8 +145,7 @@ trait ConnectionTrait
     }
 
     /**
-     * @param string $sql
-     * @param list<mixed>|array<string, mixed>                                     $params
+     * @param list<mixed>|array<string, mixed> $params
      * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types
      */
     public function executeQuery(string $sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null): Result
@@ -158,7 +157,7 @@ trait ConnectionTrait
 
     /**
      * @param string $sql
-     * @param list<mixed>|array<string, mixed>                                     $params
+     * @param list<mixed>|array<string, mixed> $params
      * @param array<int, int|string|Type|null>|array<string, int|string|Type|null> $types
      *
      * @psalm-suppress MoreSpecificImplementedParamType
