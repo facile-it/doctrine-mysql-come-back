@@ -7,6 +7,7 @@
          beStrictAboutTodoAnnotatedTests="true"
          failOnRisky="true"
          failOnWarning="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
 >
   <php>
     <ini name="error_reporting" value="-1"/>
@@ -16,7 +17,6 @@
     <var name="db_user" value="root"/>
     <var name="db_pass" value=""/>
     <var name="db_dbname" value="test"/>
-    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
   </php>
   <testsuites>
     <testsuite name="doctrine-mysql-come-back Test Suite">
