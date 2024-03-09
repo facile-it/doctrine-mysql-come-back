@@ -29,12 +29,13 @@
         "ext-pdo": "*",
         "facile-it/facile-coding-standard": "^0.5.2",
         "fig/log-test": "^1.0",
-        "infection/infection": "^0.27.10",
+        "infection/infection": "^0.27.8",
         "phpdocumentor/reflection-docblock": ">=4.0.1",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^10.5",
         "psalm/plugin-phpunit": "^0.18.4",
         "rector/rector": "^1.0",
+        "roave/infection-static-analysis-plugin": "^1.34",
         "vimeo/psalm": "^5.8.0"
     },
     "autoload": {

@@ -77,7 +77,7 @@ jobs:
         if: matrix.job == 'Tests'
 
       - name: "Run mutation testing with Infection"
-        run: "vendor/bin/infection --ansi --show-mutations"
+        run: "vendor/bin/roave-infection-static-analysis-plugin --ansi --show-mutations"
         if: matrix.job == 'infection'
 
       - name: Upload code coverage
