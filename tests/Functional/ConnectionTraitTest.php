@@ -153,7 +153,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $statement->bindParam(2, $param, ParameterType::INTEGER);
         // change param by ref
         $param = 2;
-        if (PDODriver::class === $driver && PHP_VERSION_ID < 80100) {
+        if (PDODriver::class === $driver && PHP_VERSION_ID < 8_01_00) {
             // PDO driver before PHP 8.1 returns result always as string, ignoring parameter type
             $param = (string) $param;
         }

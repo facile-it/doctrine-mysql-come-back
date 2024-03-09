@@ -16,9 +16,9 @@ use PHPUnit\Framework\TestCase;
 
 abstract class AbstractFunctionalTestCase extends TestCase
 {
-    protected const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
-
     use DeprecationTrait;
+
+    protected const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
 
     /**
      * @param class-string<Driver> $driver
@@ -64,11 +64,11 @@ abstract class AbstractFunctionalTestCase extends TestCase
     {
         $connection->executeStatement(
             <<<'TABLE'
-CREATE TABLE IF NOT EXISTS test (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() 
-);
-TABLE
+                CREATE TABLE IF NOT EXISTS test (
+                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() 
+                );
+                TABLE
         );
 
         $connection->executeStatement('DELETE FROM `test`;');
@@ -95,7 +95,7 @@ TABLE
             'user' => getenv('MYSQL_USER') ?: $GLOBALS['db_user'] ?? 'root',
             'password' => getenv('MYSQL_PASS') ?: $GLOBALS['db_pass'] ?? '',
             'host' => getenv('MYSQL_HOST') ?: $GLOBALS['db_host'] ?? 'localhost',
-            'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3306),
+            'port' => (int) (getenv('MYSQL_PORT') ?: $GLOBALS['db_port'] ?? 3_306),
         ];
 
         $this->assertIsString($values['driver']);
@@ -111,7 +111,7 @@ TABLE
     }
 
     /**
-     * Disconnect other sessions
+     * Disconnect other sessions.
      */
     protected function forceDisconnect(DBALConnection $connection): void
     {

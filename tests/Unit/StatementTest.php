@@ -65,7 +65,7 @@ class StatementTest extends BaseUnitTestCase
      */
     public function attemptsDataProvider(): array
     {
-        return[
+        return [
             [0],
             [1],
             [5],
@@ -102,11 +102,7 @@ class StatementTest extends BaseUnitTestCase
     }
 
     /**
-     * @param Connection $connection
-     *
      * @throws \Doctrine\DBAL\Exception
-     *
-     * @return \Doctrine\DBAL\Statement
      */
     protected function createDriverStatement(Connection $connection): \Doctrine\DBAL\Statement
     {

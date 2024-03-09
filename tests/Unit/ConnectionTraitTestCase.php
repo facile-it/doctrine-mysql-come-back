@@ -11,9 +11,6 @@ use Prophecy\Argument;
 abstract class ConnectionTraitTestCase extends BaseUnitTestCase
 {
     /**
-     * @param Driver $driver
-     * @param int $attempts
-     *
      * @return Connection|PrimaryReadReplicaConnection
      */
     abstract protected function createConnection(Driver $driver, int $attempts = 0): \Doctrine\DBAL\Connection;

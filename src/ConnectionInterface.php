@@ -6,6 +6,4 @@ namespace Facile\DoctrineMySQLComeBack\Doctrine\DBAL;
 
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
 
-interface ConnectionInterface extends DriverConnection
-{
-}
+interface ConnectionInterface extends DriverConnection {}
