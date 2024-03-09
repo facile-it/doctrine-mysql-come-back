@@ -20,6 +20,7 @@ class Statement extends \Doctrine\DBAL\Statement
     /** @var Connection|PrimaryReadReplicaConnection */
     protected \Doctrine\DBAL\Connection $retriableConnection;
 
+    /** @var mixed[] */
     private array $boundValues = [];
 
     /**

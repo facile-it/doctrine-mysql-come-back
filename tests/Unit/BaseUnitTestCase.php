@@ -3,14 +3,12 @@
 namespace Facile\DoctrineMySQLComeBack\Tests\Unit;
 
 use Doctrine\DBAL\Configuration;
-use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 abstract class BaseUnitTestCase extends TestCase
 {
     use ProphecyTrait;
-    use DeprecationTrait;
 
     protected function mockConfiguration(): Configuration
     {

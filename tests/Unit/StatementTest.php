@@ -8,7 +8,6 @@ use Doctrine\DBAL\Driver\Statement as DriverStatement;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Statement;
-use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -16,7 +15,6 @@ use Prophecy\PhpUnit\ProphecyTrait;
 class StatementTest extends BaseUnitTestCase
 {
     use ProphecyTrait;
-    use DeprecationTrait;
 
     public function testExecuteStatementShouldThrowWhenItsNotRetryable(): void
     {

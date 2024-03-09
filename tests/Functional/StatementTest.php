@@ -3,13 +3,10 @@
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
 use Doctrine\DBAL\Driver;
-use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class StatementTest extends AbstractFunctionalTestCase
 {
-    use DeprecationTrait;
-
     /**
      * @param class-string<Driver> $driver
      */
