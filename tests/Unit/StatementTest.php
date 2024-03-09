@@ -62,7 +62,7 @@ class StatementTest extends BaseUnitTestCase
      */
     public static function attemptsDataProvider(): array
     {
-        return[
+        return [
             [0],
             [1],
             [5],
