@@ -11,7 +11,10 @@ start:
 composer-install:
 	@docker-compose exec -T php composer install --ansi
 
-pre-commit-checks: code-style-fix psalm test infection
+pre-commit-checks: rector code-style-fix psalm test infection
+
+rector:
+	@docker-compose exec -T php ./vendor/bin/rector --ansi
 
 code-style-check: start
 	@docker-compose exec -T php ./vendor/bin/php-cs-fixer fix --verbose --ansi --dry-run
