@@ -1,34 +1,42 @@
+WAIT=docker compose up --wait --no-deps
+
 # start targets
 setup: start composer-install
 
-shell: start
-	@docker-compose exec php zsh
+shell: wait-php
+	@docker compose exec php zsh
 
 start:
-	@docker-compose up -d
+	@docker compose up -d
+
+wait-php:
+	@$(WAIT) php
+
+wait-mysql:
+	@$(WAIT) mysql
 
 # commands
-composer-install:
-	@docker-compose exec -T php composer install --ansi
+composer-install: wait-php
+	@docker compose exec -T php composer install --ansi
 
 pre-commit-checks: rector code-style-fix psalm test infection
 
-rector:
-	@docker-compose exec -T php ./vendor/bin/rector --ansi
+rector: wait-php
+	@docker compose exec -T php ./vendor/bin/rector --ansi
 
-code-style-check: start
-	@docker-compose exec -T php ./vendor/bin/php-cs-fixer fix --verbose --ansi --dry-run
+code-style-check: wait-php
+	@docker compose exec -T php ./vendor/bin/php-cs-fixer fix --verbose --ansi --dry-run
 
-code-style-fix: start
-	@docker-compose exec -T php ./vendor/bin/php-cs-fixer fix --verbose --ansi
+code-style-fix: wait-php
+	@docker compose exec -T php ./vendor/bin/php-cs-fixer fix --verbose --ansi
 
-psalm: start
-	@docker-compose exec -T php ./vendor/bin/psalm
+psalm: wait-php
+	@docker compose exec -T php ./vendor/bin/psalm
 
-test:
-	@docker-compose exec -T php ./vendor/bin/phpunit --colors=always
+test: wait-php wait-mysql
+	@docker compose exec -T php ./vendor/bin/phpunit --colors=always
 
-infection:
-	@docker-compose exec -e XDEBUG_MODE=coverage -T php ./vendor/bin/infection --show-mutations --ansi
+infection: wait-php wait-mysql
+	@docker compose exec -e XDEBUG_MODE=coverage -T php ./vendor/bin/infection --show-mutations --ansi
 
 .SILENT:
