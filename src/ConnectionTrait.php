@@ -39,6 +39,18 @@ trait ConnectionTrait
         Driver $driver,
         ?Configuration $config = null
     ) {
+        $this->commonConstructor($params, $driver, $config);
+    }
+
+    /**
+     * @param array $params
+     * @param Driver $driver
+     * @param Configuration|null $config
+     *
+     * @return void
+     */
+    private function commonConstructor(array &$params, Driver $driver, ?Configuration $config): void
+    {
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->maxReconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
             unset($params['driverOptions']['x_reconnect_attempts']);
