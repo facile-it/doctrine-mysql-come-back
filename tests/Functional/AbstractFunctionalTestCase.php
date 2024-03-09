@@ -10,7 +10,6 @@ use Doctrine\DBAL\Driver\Mysqli\Driver as MysqliDriver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\DriverManager;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\ConnectionTrait;
-use Facile\DoctrineMySQLComeBack\Tests\DeprecationTrait;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\Connection;
 use Facile\DoctrineMySQLComeBack\Tests\Functional\Spy\PrimaryReadReplicaConnection;
 use PHPUnit\Framework\TestCase;
@@ -18,8 +17,6 @@ use PHPUnit\Framework\TestCase;
 abstract class AbstractFunctionalTestCase extends TestCase
 {
     protected const UPDATE_QUERY = 'UPDATE test SET updatedAt = CURRENT_TIMESTAMP WHERE id = 1';
-
-    use DeprecationTrait;
 
     /**
      * @param class-string<Driver> $driver
@@ -63,12 +60,12 @@ abstract class AbstractFunctionalTestCase extends TestCase
     protected function createTestTable(DBALConnection $connection): void
     {
         $connection->executeStatement(
-            <<<'TABLE'
+            <<<'TABLE_WRAP'
 CREATE TABLE IF NOT EXISTS test (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() 
 );
-TABLE
+TABLE_WRAP
         );
 
         $connection->executeStatement('DELETE FROM `test`;');
@@ -159,7 +156,7 @@ TABLE
     {
         $this->assertTrue(
             property_exists($connection, 'connectCount'),
-            sprintf('Expecting connection that implements %s, got %s', ConnectionTrait::class, get_class($connection))
+            sprintf('Expecting connection that implements %s, got %s', ConnectionTrait::class, $connection::class)
         );
 
         $this->assertSame($expected, $connection->connectCount);

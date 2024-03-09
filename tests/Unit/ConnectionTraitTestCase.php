@@ -11,9 +11,6 @@ use Prophecy\Argument;
 abstract class ConnectionTraitTestCase extends BaseUnitTestCase
 {
     /**
-     * @param Driver $driver
-     * @param int $attempts
-     *
      * @return Connection|PrimaryReadReplicaConnection
      */
     abstract protected function createConnection(Driver $driver, int $attempts = 0): \Doctrine\DBAL\Connection;
@@ -95,7 +92,7 @@ abstract class ConnectionTraitTestCase extends BaseUnitTestCase
     /**
      * @return array{mixed, string}[]
      */
-    public function invalidAttemptsDataProvider(): array
+    public static function invalidAttemptsDataProvider(): array
     {
         return [
             ['1', 'expecting int, got string'],

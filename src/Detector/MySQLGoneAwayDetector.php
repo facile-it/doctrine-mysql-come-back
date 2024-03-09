@@ -23,11 +23,9 @@ class MySQLGoneAwayDetector implements GoneAwayDetector
             return false;
         }
 
-        if ($this->isUpdateQuery($sql)) {
-            $possibleMatches = $this->goneAwayInUpdateExceptions;
-        } else {
-            $possibleMatches = $this->goneAwayExceptions;
-        }
+        $possibleMatches = $this->isUpdateQuery($sql)
+            ? $this->goneAwayInUpdateExceptions
+            : $this->goneAwayExceptions;
 
         $message = $exception->getMessage();
 

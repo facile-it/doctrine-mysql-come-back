@@ -28,13 +28,12 @@
     "require-dev": {
         "ext-pdo": "*",
         "facile-it/facile-coding-standard": "^0.5.2",
-        "fig/log-test": "^1.0",
-        "infection/infection": "^0.26.6",
+        "infection/infection": "^0.27.10",
         "phpdocumentor/reflection-docblock": ">=4.0.1",
         "phpspec/prophecy-phpunit": "^2.0",
-        "phpunit/phpunit": "^9.6",
+        "phpunit/phpunit": "^10.5",
         "psalm/plugin-phpunit": "^0.18.4",
-        "symfony/phpunit-bridge": "^6.2",
+        "rector/rector": "^1.0",
         "vimeo/psalm": "^5.8.0"
     },
     "autoload": {
