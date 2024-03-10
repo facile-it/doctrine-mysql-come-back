@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 * ...
 
+## [3.0.0] - 2024-03-10
+This new major version is identical to the previous one; the only changes are the ones needed to maintain compatibility with the new DBAL major, so mainly signature changes.
+
+### Added
+* Support DBAL 4
+
+### Removed
+* Drop support for DBAL 3
+
 ## [2.0.0] - 2023-06-08
 This is the final, stable release of the new version of this library, supporting DBAL 3.6+; unfortunately, DBAL 3.0 to 3.5 is unsupported (but upgrading to 3.6 should not be an issue).
 
