@@ -14,6 +14,11 @@ It does so by providing a `doctrine/dbal` driver wrapper that automatically reco
 
 # Installation
 
+If you're using DBAL 4.0+
+```console
+$ composer require facile-it/doctrine-mysql-come-back ^3.0
+```
+
 If you're using DBAL 3.6+
 ```console
 $ composer require facile-it/doctrine-mysql-come-back ^2.0
