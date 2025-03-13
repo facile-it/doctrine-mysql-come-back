@@ -33,6 +33,8 @@ trait ConnectionTrait
 
     private bool $hasBeenClosedWithAnOpenTransaction = false;
 
+    private bool $currentlyOpeningFirstLevelTransaction = false;
+
     private ?\ReflectionProperty $selfReflectionNestingLevelProperty = null;
 
     public function __construct(
@@ -174,14 +176,20 @@ trait ConnectionTrait
 
     public function beginTransaction(): void
     {
+        if ($this->getTransactionNestingLevel() === 0) {
+            $this->currentlyOpeningFirstLevelTransaction = true;
+        }
+
         $this->doWithRetry(function (): void {
             parent::beginTransaction();
         });
+
+        $this->currentlyOpeningFirstLevelTransaction = false;
     }
 
     public function canTryAgain(\Throwable $throwable, string $sql = null): bool
     {
-        if ($this->hasBeenClosedWithAnOpenTransaction) {
+        if ($this->hasBeenClosedWithAnOpenTransaction && ! $this->currentlyOpeningFirstLevelTransaction) {
             return false;
         }
 

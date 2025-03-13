@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 * ...
 
+## [3.0.1] - 2025-03-13
+* Fixed `beginTransaction` reconnection behavior with MySQLi and DBAL 4.2.3+
+
 ## [3.0.0] - 2024-03-10
 This new major version is identical to the previous one; the only changes are the ones needed to maintain compatibility with the new DBAL major, so mainly signature changes.
 

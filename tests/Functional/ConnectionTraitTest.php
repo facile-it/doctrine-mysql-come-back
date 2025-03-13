@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
@@ -214,12 +215,17 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
 
-        if ($driver instanceof PDODriver) {
-            $this->expectException(Driver\PDO\Exception::class);
-            $this->expectExceptionMessage('MySQL server has gone away');
+        try {
+            $connection->beginTransaction();
+        } catch (\Throwable $e) {
+            $this->assertStringContainsString('MySQL server has gone away', $e->getMessage());
+
+            return;
         }
 
-        $connection->beginTransaction();
+        if ($driver instanceof PDODriver) {
+            $this->fail();
+        }
     }
 
     /**
@@ -235,7 +241,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $connection->beginTransaction();
 
-        if ($driver instanceof PDODriver) {
+        if ($this->isDbalBehaviorUniform() || $driver instanceof PDODriver) {
             $this->assertConnectionCount(2, $connection);
         } else {
             $this->assertConnectionCount(1, $connection);
@@ -292,5 +298,15 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
 
         $this->expectException(ConnectionLost::class);
         $statement->executeQuery();
+    }
+
+    /**
+     * @see https://github.com/doctrine/dbal/pull/6812
+     * DBAL behavior on connection issues changed in 4.2.3, introducing this new method.
+     * Before, drivers would behave differently; now, all drivers close the connection explicitly before throwing.
+     */
+    private function isDbalBehaviorUniform(): bool
+    {
+        return method_exists(Connection::class, 'handleDriverException');
     }
 }

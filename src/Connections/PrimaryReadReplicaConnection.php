@@ -10,6 +10,11 @@ class PrimaryReadReplicaConnection extends \Doctrine\DBAL\Connections\PrimaryRea
 {
     use ConnectionTrait;
 
+    /**
+     * @param array<string,mixed> $params
+     *
+     * @psalm-suppress MixedArrayAccess,MixedArrayAssignment
+     */
     public function __construct(array $params, Driver $driver, ?Configuration $config = null)
     {
         if (isset($params['primary']['driverOptions']['x_reconnect_attempts'])) {
