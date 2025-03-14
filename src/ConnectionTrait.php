@@ -78,7 +78,7 @@ trait ConnectionTrait
      *
      * @return R
      */
-    private function doWithRetry(callable $callable, string $sql = null)
+    private function doWithRetry(callable $callable, ?string $sql = null)
     {
         try {
             attempt:
@@ -175,7 +175,7 @@ trait ConnectionTrait
         return $this->doWithRetry(fn(): bool => parent::beginTransaction());
     }
 
-    public function canTryAgain(\Throwable $throwable, string $sql = null): bool
+    public function canTryAgain(\Throwable $throwable, ?string $sql = null): bool
     {
         if ($this->hasBeenClosedWithAnOpenTransaction) {
             return false;

@@ -17,7 +17,7 @@ class MySQLGoneAwayDetector implements GoneAwayDetector
         'Error while sending QUERY packet',
     ];
 
-    public function isGoneAwayException(\Throwable $exception, string $sql = null): bool
+    public function isGoneAwayException(\Throwable $exception, ?string $sql = null): bool
     {
         if ($this->isSavepoint($sql)) {
             return false;
