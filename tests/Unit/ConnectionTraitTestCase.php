@@ -92,7 +92,7 @@ abstract class ConnectionTraitTestCase extends BaseUnitTestCase
     /**
      * @return array{mixed, string}[]
      */
-    public function invalidAttemptsDataProvider(): array
+    public static function invalidAttemptsDataProvider(): array
     {
         return [
             ['1', 'expecting int, got string'],
