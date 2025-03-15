@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 * ...
 
+## [2.0.1] - 2025-03-16
+* Resolve PHP 8.4 deprecation
+
 ## [2.0.0] - 2023-06-08
 This is the final, stable release of the new version of this library, supporting DBAL 3.6+; unfortunately, DBAL 3.0 to 3.5 is unsupported (but upgrading to 3.6 should not be an issue).
 
