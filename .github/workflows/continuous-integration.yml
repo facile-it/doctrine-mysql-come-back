@@ -29,9 +29,6 @@ jobs:
           - "--prefer-dist"
         job:
           - Tests
-        # https://stackoverflow.com/questions/78445419/unknown-variable-default-authentication-plugin-mysql-native-password
-        custom-entrypoint:
-          - --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --mysql-native-password=ON"
         include:
           - php-version: "7.4"
             mysql-version: "8.0"
@@ -63,7 +60,7 @@ jobs:
           --health-cmd "mysqladmin ping --silent"
           -e MYSQL_ALLOW_EMPTY_PASSWORD=yes
           -e MYSQL_DATABASE=test
-          ${{ matrix.custom-entrypoint }}
+          --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --mysql-native-password=ON"
         ports:
           - "3306:3306"
 
@@ -89,7 +86,7 @@ jobs:
 
       - name: "Run PHPUnit with coverage"
         run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml --coverage-clover=coverage.xml"
-        if: matrix.job == 'Tests'
+        if: matrix.job != 'infection'
 
       - name: "Run mutation testing with Infection"
         run: "vendor/bin/infection --ansi --show-mutations"
