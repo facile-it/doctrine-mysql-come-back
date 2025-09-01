@@ -17,11 +17,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteQueryShouldNotReconnect(string $driver, bool $enableSavepoints): void
+    public function testExecuteQueryShouldNotReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 0, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->expectException(Exception::class);
 
@@ -32,11 +32,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteQueryShouldReconnect(string $driver, bool $enableSavepoints): void
+    public function testExecuteQueryShouldReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->executeQuery('SELECT 1')->fetchAllNumeric();
 
@@ -47,11 +47,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testQueryShouldReconnect(string $driver, bool $enableSavepoints): void
+    public function testQueryShouldReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->executeQuery('SELECT 1');
 
@@ -62,12 +62,12 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteUpdateShouldReconnect(string $driver, bool $enableSavepoints): void
+    public function testExecuteUpdateShouldReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->createTestTable($connection);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->executeStatement(self::UPDATE_QUERY);
 
@@ -78,12 +78,12 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteStatementShouldReconnect(string $driver, bool $enableSavepoints): void
+    public function testExecuteStatementShouldReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->createTestTable($connection);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->executeStatement(self::UPDATE_QUERY);
 
@@ -94,11 +94,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldReconnectOnStatementExecuteError(string $driver, bool $enableSavepoints): void
+    public function testShouldReconnectOnStatementExecuteError(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
@@ -111,11 +111,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldResetStatementOnStatementExecuteError(string $driver, bool $enableSavepoints): void
+    public function testShouldResetStatementOnStatementExecuteError(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $statement = $connection->prepare("SELECT 'foo', ?, ?");
         $statement->bindValue(1, 'bar');
@@ -135,7 +135,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver, bool $enableSavepoints): void
+    public function testBindParamShouldRespectTypeWhenRecreatingStatement(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
@@ -152,7 +152,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
             $param = (string) $param;
         }
 
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
         $result = $statement->executeQuery()->fetchAllNumeric();
 
         $this->assertSame([['foo', 'bar', $param]], $result);
@@ -163,11 +163,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldReconnectOnStatementFetchAllAssociative(string $driver, bool $enableSavepoints): void
+    public function testShouldReconnectOnStatementFetchAllAssociative(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllAssociative();
@@ -180,11 +180,11 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldReconnectOnStatementFetchAllNumeric(string $driver, bool $enableSavepoints): void
+    public function testShouldReconnectOnStatementFetchAllNumeric(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $statement = $connection->prepare("SELECT 'foo'");
         $result = $statement->executeQuery()->fetchAllNumeric();
@@ -197,14 +197,14 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testBeginTransactionShouldNotReconnectIfNested(string $driver, bool $enableSavepoints): void
+    public function testBeginTransactionShouldNotReconnectIfNested(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
 
         $connection->beginTransaction();
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->expectExceptionMessage('MySQL server has gone away');
 
@@ -221,12 +221,12 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testBeginTransactionShouldNotReconnect(string $driver, bool $enableSavepoints): void
+    public function testBeginTransactionShouldNotReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 0, $enableSavepoints);
         $driver = $connection->getDriver();
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         if ($driver instanceof \Doctrine\DBAL\Driver\PDO\MySQL\Driver) {
             $this->expectException(\PDOException::class);
@@ -240,12 +240,12 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testBeginTransactionShouldReconnect(string $driver, bool $enableSavepoints): void
+    public function testBeginTransactionShouldReconnect(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $driver = $connection->getDriver();
         $this->assertConnectionCount(1, $connection);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->beginTransaction();
 
@@ -262,13 +262,13 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldReconnectOnExecutePreparedStatement(string $driver, bool $enableSavepoints): void
+    public function testShouldReconnectOnExecutePreparedStatement(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->assertSame(1, $statement->executeStatement());
         $this->assertConnectionCount(2, $connection);
@@ -278,13 +278,13 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldReconnectOnExecuteQueryPreparedStatement(string $driver, bool $enableSavepoints): void
+    public function testShouldReconnectOnExecuteQueryPreparedStatement(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $statement = $connection->prepare('SELECT 1');
 
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->assertEquals([[1 => '1']], $statement->executeQuery()->fetchAllAssociative());
         $this->assertConnectionCount(2, $connection);
@@ -294,7 +294,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testShouldNotReconnectOnBrokenTransaction(string $driver, bool $enableSavepoints): void
+    public function testShouldNotReconnectOnBrokenTransaction(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
@@ -302,7 +302,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $this->assertTrue($connection->beginTransaction());
         $statement = $connection->prepare('SELECT 1');
 
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->expectException(ConnectionLost::class);
         $statement->executeQuery();

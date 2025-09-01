@@ -14,15 +14,15 @@ class StatementTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testRetriesShouldNotRetryConnection(string $driver, bool $enableSavepoints): void
+    public function testRetriesShouldNotRetryConnection(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->createConnection($driver, 1, $enableSavepoints);
         $statement = $connection->prepare('SELECT 1');
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $this->assertEquals([[1]], $statement->executeQuery()->fetchAllNumeric());
 
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         // attempts counter should be reset, so it should reconnect fine now
         $this->assertEquals([[1]], $statement->executeQuery()->fetchAllNumeric());
@@ -32,7 +32,7 @@ class StatementTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteQueryWithDeprecatedPassingParams(string $driver, bool $enableSavepoints): void
+    public function testExecuteQueryWithDeprecatedPassingParams(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->createConnection($driver, 1, $enableSavepoints);
         $statement = $connection->prepare('SELECT ?, ?');
@@ -46,7 +46,7 @@ class StatementTest extends AbstractFunctionalTestCase
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testExecuteStatementWithDeprecatedPassingParams(string $driver, bool $enableSavepoints): void
+    public function testExecuteStatementWithDeprecatedPassingParams(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->createConnection($driver, 1, $enableSavepoints);
         $statement = $connection->prepare('SELECT ?, ?');
