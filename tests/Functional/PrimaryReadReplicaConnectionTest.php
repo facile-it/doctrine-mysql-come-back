@@ -45,12 +45,12 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
      * @param class-string<Driver> $driver
      */
     #[DataProvider('driverDataProvider')]
-    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver, bool $enableSavepoints): void
+    public function testBeginTransactionShouldNotInterfereWhenSwitchingToPrimary(string $driver, bool $enableSavepoints, bool $withTimeout): void
     {
         $connection = $this->createConnection($driver, 0, $enableSavepoints);
         $this->assertFalse($connection->isConnectedToPrimary());
         $this->assertSame(1, $connection->connectCount);
-        $this->forceDisconnect($connection);
+        $this->forceDisconnect($connection, $withTimeout);
 
         $connection->beginTransaction();
 

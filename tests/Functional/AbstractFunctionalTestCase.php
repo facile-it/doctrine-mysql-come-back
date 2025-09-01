@@ -113,8 +113,15 @@ abstract class AbstractFunctionalTestCase extends TestCase
     /**
      * Disconnect other sessions.
      */
-    protected function forceDisconnect(DBALConnection $connection): void
+    protected function forceDisconnect(DBALConnection $connection, bool $withTimeout = false): void
     {
+        if ($withTimeout) {
+            $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
+            sleep(2);
+
+            return;
+        }
+
         $connection2 = DriverManager::getConnection(array_merge(
             $this->getConnectionParams(),
             [
@@ -136,16 +143,35 @@ abstract class AbstractFunctionalTestCase extends TestCase
     }
 
     /**
-     * @return array<string, array{class-string<Driver>, bool}>
+     * @return \Generator<string, array{class-string<Driver>, bool, bool}>
      */
-    public static function driverDataProvider(): array
+    public static function driverDataProvider(): \Generator
     {
-        return [
-            'Mysqli with savepoints' => [MysqliDriver::class, true],
-            'Mysqli with no savepoints' => [MysqliDriver::class, false],
-            'PDO with savepoints' => [PDODriver::class, true],
-            'PDO with no savepoints' => [PDODriver::class, false],
+        $drivers = [
+            'Mysqli' => MysqliDriver::class,
+            'PDO' => PDODriver::class,
         ];
+
+        $savepoints = [true, false];
+        $sessionTimeouts = [false];
+        if (PHP_VERSION_ID >= 8_04_00) {
+            $sessionTimeouts[] = true;
+        }
+
+        foreach ($savepoints as $savepoint) {
+            foreach ($drivers as $name => $driver) {
+                foreach ($sessionTimeouts as $timeout) {
+                    $description = sprintf(
+                        '%s - %s - %s',
+                        $name,
+                        $savepoint ? 'with savepoint' : 'with NO savepoint',
+                        $timeout ? 'with timeout' : 'with NO timeout',
+                    );
+
+                    yield $description => [$driver, $savepoint, $timeout];
+                }
+            }
+        }
     }
 
     /**
