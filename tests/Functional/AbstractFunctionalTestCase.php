@@ -49,6 +49,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
     protected function getConnectedConnection(string $driver, int $attempts): DBALConnection
     {
         $connection = $this->createConnection($driver, $attempts);
+        $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
         $connection->executeQuery('SELECT 1');
 
         return $connection;
@@ -140,7 +141,6 @@ abstract class AbstractFunctionalTestCase extends TestCase
 
     protected function forceDisconnectionByTimeout(DBALConnection $connection): void
     {
-        $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
         $connection->executeQuery('SELECT 1');
         sleep(1);
         usleep(100);
