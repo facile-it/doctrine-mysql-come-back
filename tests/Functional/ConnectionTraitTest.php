@@ -12,6 +12,7 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\ConnectionLost;
 use Doctrine\DBAL\ParameterType;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
@@ -39,6 +40,22 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $connection = $this->getConnectedConnection($driver, 1);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
+
+        $connection->executeQuery('SELECT 1')->fetchAllNumeric();
+
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @param class-string<Driver> $driver
+     */
+    #[DataProvider('driverDataProvider')]
+    #[RequiresPhp('>=8.4.0')]
+    public function testExecuteQueryShouldReconnectAfterSessionTimeout(string $driver): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1);
+        $this->assertConnectionCount(1, $connection);
+        $this->forceDisconnectionByTimeout($connection);
 
         $connection->executeQuery('SELECT 1')->fetchAllNumeric();
 

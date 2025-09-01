@@ -138,6 +138,13 @@ abstract class AbstractFunctionalTestCase extends TestCase
         $connection2->close();
     }
 
+    protected function forceDisconnectionByTimeout(DBALConnection $connection): void
+    {
+        $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
+        sleep(1);
+        usleep(100);
+    }
+
     /**
      * @return array<string, array{class-string<Driver>}>
      */
