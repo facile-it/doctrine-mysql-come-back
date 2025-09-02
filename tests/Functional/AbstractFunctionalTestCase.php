@@ -52,6 +52,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
     protected function getConnectedConnection(string $driver, int $attempts, bool $enableSavepoints): DBALConnection
     {
         $connection = $this->createConnection($driver, $attempts, $enableSavepoints);
+        $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
         $connection->executeQuery('SELECT 1');
 
         return $connection;
@@ -133,6 +134,12 @@ abstract class AbstractFunctionalTestCase extends TestCase
             $connection2->executeStatement(sprintf('KILL %d', $id));
         }
         $connection2->close();
+    }
+
+    protected function forceDisconnectionByTimeout(DBALConnection $connection): void
+    {
+        $connection->executeQuery('SELECT 1');
+        sleep(2);
     }
 
     /**

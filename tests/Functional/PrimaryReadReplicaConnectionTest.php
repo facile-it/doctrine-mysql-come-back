@@ -37,6 +37,7 @@ class PrimaryReadReplicaConnectionTest extends ConnectionTraitTest
         $connection = parent::getConnectedConnection($driver, $attempts, $enableSavepoints);
         $this->assertInstanceOf(PrimaryReadReplicaConnection::class, $connection);
         $connection->ensureConnectedToPrimary();
+        $connection->executeQuery('SET SESSION WAIT_TIMEOUT=1');
 
         return $connection;
     }
