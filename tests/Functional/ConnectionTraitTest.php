@@ -10,6 +10,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
+use PHPUnit\Framework\Attributes\RequiresPhp;
 
 class ConnectionTraitTest extends AbstractFunctionalTestCase
 {
@@ -37,6 +38,22 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
         $this->assertConnectionCount(1, $connection);
         $this->forceDisconnect($connection);
+
+        $connection->executeQuery('SELECT 1')->fetchAllNumeric();
+
+        $this->assertConnectionCount(2, $connection);
+    }
+
+    /**
+     * @param class-string<Driver> $driver
+     */
+    #[DataProvider('driverDataProvider')]
+    #[RequiresPhp('>=8.4.0')]
+    public function testExecuteQueryShouldReconnectAfterSessionTimeout(string $driver, bool $enableSavepoints): void
+    {
+        $connection = $this->getConnectedConnection($driver, 1, $enableSavepoints);
+        $this->assertConnectionCount(1, $connection);
+        $this->forceDisconnectionByTimeout($connection);
 
         $connection->executeQuery('SELECT 1')->fetchAllNumeric();
 
