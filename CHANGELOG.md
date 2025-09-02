@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.1.0] - 2025-09-02
 * Bump minimum PHP version to 8.1
 * Intercept new timeout message in MySQL 8.0.24+ under PHP 8.4+ (thanks @ackermannd)
+* Test against PHP 8.5
 
 ## [2.0.2] - 2025-04-22
 * Resolve PHP 8.4 deprecation (fix 2.0.1 tag)

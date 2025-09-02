@@ -29,6 +29,9 @@ jobs:
         job:
           - Tests
         include:
+          - php-version: "8.5"
+            mysql-version: "8.0"
+            composer-options: "--prefer-dist --ignore-platform-req=php+"
           - php-version: "8.2"
             mysql-version: "5.7"
           - php-version: "8.4"
