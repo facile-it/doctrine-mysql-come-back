@@ -91,7 +91,7 @@ class Statement extends \Doctrine\DBAL\Statement
      *
      * @return R
      */
-    private function executeWithRetry(callable $callable, ...$params)
+    private function executeWithRetry(callable $callable, array ...$params)
     {
         $parentCall = \Closure::fromCallable($callable);
         $parentCall->bindTo($this, parent::class);

@@ -62,7 +62,7 @@ class ConnectionTest extends ConnectionTraitTestCase
             $this->mockConfiguration(),
         );
 
-        static::assertInstanceOf(Connection::class, $connection);
+        self::assertInstanceOf(Connection::class, $connection);
     }
 
     public function testPrepareShouldThrowWhenItsNotRetriable(): void
