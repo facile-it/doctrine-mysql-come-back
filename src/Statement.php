@@ -66,12 +66,12 @@ class Statement extends \Doctrine\DBAL\Statement
 
     public function executeQuery(): Result
     {
-        return $this->executeWithRetry(fn(): Result => parent::executeQuery());
+        return $this->executeWithRetry(parent::executeQuery(...));
     }
 
     public function executeStatement(): int|string
     {
-        return $this->executeWithRetry(fn(): int|string => parent::executeStatement());
+        return $this->executeWithRetry(parent::executeStatement(...));
     }
 
     /**
