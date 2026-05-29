@@ -41,6 +41,7 @@ jobs:
         include:
           - php-version: "8.5"
             mysql-version: "8.0"
+            mysql-image: "mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
             composer-options: "--prefer-dist --ignore-platform-req=php+"
           - php-version: "8.2"
             mysql-version: "5.7"
@@ -144,4 +145,4 @@ jobs:
       - name: ${{ matrix.commandName }}
         env:
           COMMAND: ${{ matrix.command }}
-        run: $COMMAND
+        run: bash -c "$COMMAND"
