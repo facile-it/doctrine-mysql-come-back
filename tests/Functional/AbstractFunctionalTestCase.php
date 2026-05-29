@@ -33,7 +33,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
                 'driverOptions' => [
                     'x_reconnect_attempts' => $attempts,
                 ],
-            ]
+            ],
         ));
 
         $this->assertInstanceOf(Connection::class, $connection);
@@ -66,7 +66,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
                     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() 
                 );
-                TABLE_WRAP
+                TABLE_WRAP,
         );
 
         $connection->executeStatement('DELETE FROM `test`;');
@@ -127,7 +127,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
                 'driverOptions' => [
                     'x_reconnect_attempts' => 0,
                 ],
-            ]
+            ],
         ));
 
         /** @var list<numeric-string|int> $ids */
@@ -163,7 +163,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
     {
         $this->assertTrue(
             property_exists($connection, 'connectCount'),
-            sprintf('Expecting connection that implements %s, got %s', ConnectionTrait::class, $connection::class)
+            sprintf('Expecting connection that implements %s, got %s', ConnectionTrait::class, $connection::class),
         );
 
         $this->assertSame($expected, $connection->connectCount);

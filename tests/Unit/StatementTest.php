@@ -106,7 +106,7 @@ class StatementTest extends BaseUnitTestCase
         return new \Doctrine\DBAL\Statement(
             $connection,
             $this->mockDriverStatement(),
-            'SELECT 1'
+            'SELECT 1',
         );
     }
 }

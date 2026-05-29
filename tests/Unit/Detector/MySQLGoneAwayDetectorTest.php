@@ -46,7 +46,7 @@ class MySQLGoneAwayDetectorTest extends BaseUnitTestCase
 
         $this->assertSame(
             $expectedIsGoneAwayException,
-            (new MySQLGoneAwayDetector())->isGoneAwayException($error, $query)
+            (new MySQLGoneAwayDetector())->isGoneAwayException($error, $query),
         );
     }
 

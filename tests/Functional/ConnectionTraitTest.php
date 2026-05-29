@@ -328,7 +328,7 @@ class ConnectionTraitTest extends AbstractFunctionalTestCase
         return version_compare(
             InstalledVersions::getPrettyVersion('doctrine/dbal') ?? '1.0.0',
             '4.2.3',
-            '>='
+            '>=',
         );
     }
 }

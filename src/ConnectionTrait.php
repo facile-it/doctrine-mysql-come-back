@@ -40,7 +40,7 @@ trait ConnectionTrait
     public function __construct(
         array $params,
         Driver $driver,
-        ?Configuration $config = null
+        ?Configuration $config = null,
     ) {
         $this->commonConstructor($params, $driver, $config);
     }
