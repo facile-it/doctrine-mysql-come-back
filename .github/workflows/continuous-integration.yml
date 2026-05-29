@@ -9,6 +9,13 @@ on:
   schedule:
     - cron: "42 3 * * 1"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   phpunit-mysql:
     name: ${{ matrix.job }}${{ matrix.name }} (PHP ${{ matrix.php-version }} / MySQL ${{ matrix.mysql-version }})
@@ -23,9 +30,11 @@ jobs:
           - "8.4"
         mysql-version:
           - "8.0"
+        mysql-image:
+          - "mysql@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
         dependencies:
           - "highest"
-        composer-options: 
+        composer-options:
           - "--prefer-dist"
         job:
           - Tests
@@ -35,17 +44,19 @@ jobs:
             composer-options: "--prefer-dist --ignore-platform-req=php+"
           - php-version: "8.2"
             mysql-version: "5.7"
+            mysql-image: "mysql@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb"
           - php-version: "8.3"
             mysql-version: "8.0"
             job: Infection
           - dependencies: "lowest"
             php-version: "8.1"
             mysql-version: "5.7"
+            mysql-image: "mysql@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb"
             name: Lowest deps
 
     services:
       mysql:
-        image: "mysql:${{ matrix.mysql-version }}"
+        image: ${{ matrix.mysql-image }}
 
         options: >-
           --health-cmd "mysqladmin ping --silent"
@@ -57,12 +68,13 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v6"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 2
+          persist-credentials: false
 
       - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # 2.37.1
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: "pcov"
@@ -78,7 +90,7 @@ jobs:
             vimeo/psalm
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v4
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
         with:
           dependency-versions: ${{ matrix.dependencies }}
           composer-options: ${{ matrix.composer-options }}
@@ -113,20 +125,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 2
+          persist-credentials: false
 
       - name: Install PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # 2.37.1
         with:
           php-version: 8.3
 
       - name: Install dependencies
-        uses: ramsey/composer-install@v4
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
         with:
           dependency-versions: highest
           composer-options: --prefer-dist
 
       - name: ${{ matrix.commandName }}
-        run: ${{ matrix.command }}
+        env:
+          COMMAND: ${{ matrix.command }}
+        run: $COMMAND
