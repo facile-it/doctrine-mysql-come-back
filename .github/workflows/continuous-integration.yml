@@ -46,7 +46,7 @@ jobs:
           - php-version: "8.2"
             mysql-version: "5.7"
             mysql-image: "mysql@sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb"
-          - php-version: "8.3"
+          - php-version: "8.5"
             mysql-version: "8.0"
             job: Infection
           - dependencies: "lowest"
