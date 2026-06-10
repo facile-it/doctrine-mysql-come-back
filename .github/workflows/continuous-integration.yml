@@ -83,11 +83,16 @@ jobs:
           extensions: "mysqli, pdo_mysql"
 
       - name: Remove unneeded dependencies
-        if: matrix.php-version == '8.1'
         run: |-
           composer remove --dev --no-update \
-            facile-it/facile-coding-standard \
+            facile-it/facile-coding-standard
+
+      - name: Remove Psalm & Infection
+        if: matrix.job != 'infection'
+        run: |-
+          composer remove --dev --no-update \
             psalm/plugin-phpunit \
+            roave/infection-static-analysis-plugin \
             vimeo/psalm
 
       - name: Install dependencies
