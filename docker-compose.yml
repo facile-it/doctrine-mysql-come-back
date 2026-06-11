@@ -1,17 +1,10 @@
-x-mysql-props: &mysql-props
-  environment:
-    MYSQL_DATABASE: test
-    MYSQL_ROOT_PASSWORD: ""
-    MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-
 services:
-  mysql57:
-    image: mysql:5.7
-    <<: *mysql-props
-
-  mysql80:
-    image: mysql:8.0
-    <<: *mysql-props
+  mysql:
+    image: mysql:${MYSQL_VERSION:-8.0}
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
 
   php:
     image: facile.example.com/php:${PHP_VERSION}
@@ -21,8 +14,6 @@ services:
         PHP_VERSION: ${PHP_VERSION}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - mysql80
     volumes:
       - ./:/app
       - ./docker/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
@@ -30,12 +21,11 @@ services:
     command: [ "tail", '-f', '/dev/null' ]
     environment:
       PHP_IDE_CONFIG: serverName=MySQLComeBack
-      MYSQL_HOST: mysql80
+      MYSQL_HOST: mysql
       MYSQL_DRIVER: pdo_mysql
       MYSQL_DATABASE: test
       MYSQL_USER: root
       MYSQL_PASS: ""
-      XDEBUG_CONFIG: "log=/app/xdebug.log"
       XDEBUG_HOST: 'host.docker.internal'
       XDEBUG_MODE: off
       XDEBUG_START_WITH_REQUEST: 'yes'
