@@ -45,6 +45,9 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: "Fix Git permissions"
+        run: 'git config --global --add safe.directory /app'
+
       - name: "Remove Psalm & Infection deps"
         run: 'make composer-remove-psalm'
         if: matrix.job != 'Infection'
