@@ -117,7 +117,7 @@ jobs:
         include:
           - name: Rector + Code style
             commandName: Run Rector + code style check
-            command: vendor/bin/rector --ansi --dry-run && vendor/bin/php-cs-fixer fix --dry-run --ansi --verbose
+            command: 'vendor/bin/rector --ansi --dry-run && vendor/bin/php-cs-fixer fix --dry-run --ansi --diff'
           - name: Psalm
             commandName: Run Psalm analysis
             command: vendor/bin/psalm --show-info=true
