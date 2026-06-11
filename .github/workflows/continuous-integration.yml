@@ -13,7 +13,6 @@ jobs:
   phpunit-mysql:
     name: ${{ matrix.job }}${{ matrix.name }} (PHP ${{ matrix.php-version }} / MySQL ${{ matrix.mysql-version }})
     runs-on: "ubuntu-24.04"
-
     strategy:
       matrix:
         php-version:

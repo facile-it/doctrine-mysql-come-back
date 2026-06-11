@@ -3,8 +3,7 @@ services:
     image: mysql:${MYSQL_VERSION:-8.0}
     environment:
       MYSQL_DATABASE: test
-      MYSQL_ROOT_PASSWORD: ""
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: 'root_test_pass'
 
   php:
     image: facile.example.com/php:${PHP_VERSION}
@@ -25,7 +24,7 @@ services:
       MYSQL_DRIVER: pdo_mysql
       MYSQL_DATABASE: test
       MYSQL_USER: root
-      MYSQL_PASS: ""
+      MYSQL_PASS: 'root_test_pass'
       XDEBUG_HOST: 'host.docker.internal'
       XDEBUG_MODE: off
       XDEBUG_START_WITH_REQUEST: 'yes'
