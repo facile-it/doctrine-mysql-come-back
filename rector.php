@@ -23,7 +23,4 @@ return RectorConfig::configure()
     )
     ->withSets([
         PHPUnitSetList::PHPUNIT_100,
-    ])
-    ->withRules([
-        AddVoidReturnTypeWhereNoReturnRector::class,
     ]);
