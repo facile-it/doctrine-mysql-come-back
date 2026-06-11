@@ -47,16 +47,23 @@ jobs:
 
       - name: "Setup project"
         run: 'make setup'
-        with:
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
           PHP_VERSION: "${{ matrix.php-version }}"
 
       - name: "Run PHPUnit with coverage"
         run: "make test-with-coverage"
         if: matrix.job != 'Infection'
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
+          PHP_VERSION: "${{ matrix.php-version }}"
 
       - name: "Run mutation testing with Infection"
         run: "make infection"
         if: matrix.job == 'Infection'
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
+          PHP_VERSION: "${{ matrix.php-version }}"
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v7
