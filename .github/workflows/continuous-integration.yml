@@ -45,34 +45,48 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: "Fix Git permissions"
-        run: 'git config --global --add safe.directory /app'
+      - name: 'Use CI Docker Compose override configuration'
+        run: 'cp docker-compose.ci.override.yml docker-compose.override.yml'
 
-      - name: "Remove Psalm & Infection deps"
-        run: 'make composer-remove-psalm'
-        if: matrix.job != 'Infection'
-        env:
-          PHP_VERSION: "${{ matrix.php-version }}"
-        
-      - name: "Setup project"
-        run: 'make setup'
+      - name: 'Start MySQL'
+        run: 'docker compose up -d mysql'
         env:
           MYSQL_VERSION: "${{ matrix.mysql-version }}"
-          PHP_VERSION: "${{ matrix.php-version }}"
+
+      - name: "Install PHP"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          php-version: "${{ matrix.php-version }}"
+          coverage: "pcov"
+          ini-values: "zend.assertions=1"
+          extensions: "mysqli, pdo_mysql"
+        
+      - name: Remove unneeded dependencies
+        if: matrix.php-version == '8.1'
+        run: |-
+          composer remove --dev --no-update \
+            facile-it/facile-coding-standard \
+            psalm/plugin-phpunit \
+            vimeo/psalm
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v4
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+          composer-options: ${{ matrix.composer-options }}
+
+      - name: 'Wait for MySQL to be ready'
+        run: 'make wait-mysql'
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
 
       - name: "Run PHPUnit with coverage"
-        run: "make test-with-coverage"
-        if: matrix.job != 'Infection'
-        env:
-          MYSQL_VERSION: "${{ matrix.mysql-version }}"
-          PHP_VERSION: "${{ matrix.php-version }}"
+        run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
+        if: matrix.job != 'infection'
 
       - name: "Run mutation testing with Infection"
-        run: "make infection"
-        if: matrix.job == 'Infection'
-        env:
-          MYSQL_VERSION: "${{ matrix.mysql-version }}"
-          PHP_VERSION: "${{ matrix.php-version }}"
+        run: "vendor/bin/roave-infection-static-analysis-plugin --ansi --show-mutations"
+        if: matrix.job == 'infection'
 
       - name: Upload code coverage
         uses: codecov/codecov-action@v7
