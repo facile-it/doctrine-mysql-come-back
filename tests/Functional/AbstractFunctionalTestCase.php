@@ -98,7 +98,7 @@ abstract class AbstractFunctionalTestCase extends TestCase
             'dbname' => getenv('MYSQL_DBNAME') !== false ? getenv('MYSQL_DBNAME') : ($GLOBALS['db_dbname'] ?? 'test'),
             'user' => getenv('MYSQL_USER') !== false ? getenv('MYSQL_USER') : ($GLOBALS['db_user'] ?? 'root'),
             'password' => getenv('MYSQL_PASS') !== false ? getenv('MYSQL_PASS') : ($GLOBALS['db_pass'] ?? ''),
-            'host' => getenv('MYSQL_HOST') !== false ? getenv('MYSQL_HOST') : ($GLOBALS['db_host'] ?? 'localhost'),
+            'host' => getenv('MYSQL_HOST') !== false ? getenv('MYSQL_HOST') : ($GLOBALS['db_host'] ?? '127.0.0.1'),
             'port' => (int) (getenv('MYSQL_PORT') !== false ? getenv('MYSQL_PORT') : ($GLOBALS['db_port'] ?? 3_306)),
         ];
 
