@@ -115,9 +115,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Rector + Code style
-            commandName: Run Rector + code style check
-            command: 'vendor/bin/rector --ansi --dry-run && vendor/bin/php-cs-fixer fix --dry-run --ansi --diff'
+          - name: Rector
+            commandName: Run Rector
+            command: 'vendor/bin/rector --ansi --dry-run'
+          - name: Code style
+            commandName: Run code style check
+            command: 'vendor/bin/php-cs-fixer fix --dry-run --ansi --diff'
           - name: Psalm
             commandName: Run Psalm analysis
             command: vendor/bin/psalm --show-info=true
