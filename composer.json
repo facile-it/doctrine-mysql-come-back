@@ -29,7 +29,6 @@
         "ext-pdo": "*",
         "facile-it/facile-coding-standard": "1.5.0",
         "infection/infection": "^0.27.8 || ^0.32",
-        "phpdocumentor/reflection-docblock": ">=4.0.1",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^10.5",
         "psalm/plugin-phpunit": "0.19.2",
