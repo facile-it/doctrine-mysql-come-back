@@ -13,7 +13,6 @@ jobs:
   phpunit-mysql:
     name: ${{ matrix.job }}${{ matrix.name }} (PHP ${{ matrix.php-version }} / MySQL ${{ matrix.mysql-version }})
     runs-on: "ubuntu-24.04"
-
     strategy:
       matrix:
         php-version:
@@ -31,35 +30,28 @@ jobs:
           - Tests
         include:
           - php-version: "8.5"
-            mysql-version: "8.0"
-            composer-options: "--prefer-dist --ignore-platform-req=php+"
-          - php-version: "8.2"
-            mysql-version: "5.7"
-          - php-version: "8.3"
-            mysql-version: "8.0"
+            mysql-version: "8.4"
+          - php-version: "8.5"
+            mysql-version: "8.2"
             job: Infection
           - dependencies: "lowest"
             php-version: "8.1"
             mysql-version: "5.7"
             name: Lowest deps
 
-    services:
-      mysql:
-        image: "mysql:${{ matrix.mysql-version }}"
-
-        options: >-
-          --health-cmd "mysqladmin ping --silent"
-          -e MYSQL_ALLOW_EMPTY_PASSWORD=yes
-          -e MYSQL_DATABASE=test
-          --entrypoint sh mysql:8 -c "exec docker-entrypoint.sh mysqld --mysql-native-password=ON"
-        ports:
-          - "3306:3306"
-
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v6"
         with:
           fetch-depth: 2
+
+      - name: 'Use CI Docker Compose override configuration'
+        run: 'cp docker-compose.ci.override.yml docker-compose.override.yml'
+
+      - name: 'Start MySQL'
+        run: 'docker compose up -d mysql'
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
 
       - name: "Install PHP"
         uses: "shivammathur/setup-php@v2"
@@ -68,13 +60,19 @@ jobs:
           coverage: "pcov"
           ini-values: "zend.assertions=1"
           extensions: "mysqli, pdo_mysql"
-
+        
       - name: Remove unneeded dependencies
-        if: matrix.php-version == '8.1'
         run: |-
           composer remove --dev --no-update \
             facile-it/facile-coding-standard \
+            rector/rector
+
+      - name: Remove Psalm & Infection
+        if: matrix.job != 'Infection'
+        run: |-
+          composer remove --dev --no-update \
             psalm/plugin-phpunit \
+            roave/infection-static-analysis-plugin \
             vimeo/psalm
 
       - name: Install dependencies
@@ -83,8 +81,13 @@ jobs:
           dependency-versions: ${{ matrix.dependencies }}
           composer-options: ${{ matrix.composer-options }}
 
+      - name: 'Wait for MySQL to be ready'
+        run: 'make wait-mysql'
+        env:
+          MYSQL_VERSION: "${{ matrix.mysql-version }}"
+
       - name: "Run PHPUnit with coverage"
-        run: "vendor/bin/phpunit -c ci/github/phpunit/phpunit.xml --coverage-clover=coverage.xml"
+        run: "vendor/bin/phpunit --coverage-clover=coverage.xml"
         if: matrix.job != 'infection'
 
       - name: "Run mutation testing with Infection"
@@ -120,7 +123,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
 
       - name: Install dependencies
         uses: ramsey/composer-install@v4

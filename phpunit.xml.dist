@@ -15,7 +15,7 @@
     <var name="db_host" value="127.0.0.1"/>
     <var name="db_port" value="3306"/>
     <var name="db_user" value="root"/>
-    <var name="db_pass" value=""/>
+    <var name="db_pass" value="root_test_pass"/>
     <var name="db_dbname" value="test"/>
   </php>
   <testsuites>

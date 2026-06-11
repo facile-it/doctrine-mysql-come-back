@@ -13,7 +13,7 @@ wait-php:
 	@$(WAIT) php
 
 wait-mysql:
-	@$(WAIT) mysql80
+	@$(WAIT) mysql
 
 # commands
 composer-update: wait-php
@@ -35,6 +35,9 @@ psalm: wait-php
 
 test: wait-php wait-mysql
 	@docker compose exec -T php ./vendor/bin/phpunit --colors=always
+
+test-with-coverage: wait-php wait-mysql
+	@docker compose exec -e XDEBUG_MODE=coverage -T php ./vendor/bin/phpunit --colors=always --coverage-clover=coverage.xml
 
 infection: wait-php wait-mysql
 	@docker compose exec -e XDEBUG_MODE=coverage -T php ./vendor/bin/roave-infection-static-analysis-plugin --show-mutations --ansi
