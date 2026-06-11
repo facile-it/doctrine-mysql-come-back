@@ -45,6 +45,12 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: "Remove Psalm & Infection deps"
+        run: 'make composer-remove-psalm'
+        if: matrix.job != 'Infection'
+        env:
+          PHP_VERSION: "${{ matrix.php-version }}"
+        
       - name: "Setup project"
         run: 'make setup'
         env:

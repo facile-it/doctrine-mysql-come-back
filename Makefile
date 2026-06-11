@@ -42,4 +42,10 @@ test-with-coverage: wait-php wait-mysql
 infection: wait-php wait-mysql
 	@docker compose exec -e XDEBUG_MODE=coverage -T php ./vendor/bin/roave-infection-static-analysis-plugin --show-mutations --ansi
 
+composer-remove-psalm: wait-php
+	@docker compose exec -T php composer remove --dev --no-update \
+            psalm/plugin-phpunit \
+            roave/infection-static-analysis-plugin \
+            vimeo/psalm
+
 .SILENT:
