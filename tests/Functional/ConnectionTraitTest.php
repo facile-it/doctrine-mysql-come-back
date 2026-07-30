@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Facile\DoctrineMySQLComeBack\Tests\Functional;
 
 use Composer\InstalledVersions;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver as PDODriver;
 use Doctrine\DBAL\Exception;
