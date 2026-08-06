@@ -16,6 +16,8 @@ use Doctrine\DBAL\Statement as DBALStatement;
 use Doctrine\DBAL\Types\Type;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\GoneAwayDetector;
 use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 
 /**
  * @psalm-require-extends Connection
@@ -25,6 +27,8 @@ use Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Detector\MySQLGoneAwayDetector;
  */
 trait ConnectionTrait
 {
+    use LoggerAwareTrait;
+
     protected GoneAwayDetector $goneAwayDetector;
 
     protected int $maxReconnectAttempts = 0;
@@ -36,6 +40,13 @@ trait ConnectionTrait
     private bool $currentlyOpeningFirstLevelTransaction = false;
 
     private ?\ReflectionProperty $selfReflectionNestingLevelProperty = null;
+
+    // New properties for retry delay functionality
+    protected int $baseRetryDelayMs = 0;
+
+    protected float $retryDelayMultiplier = 1.0;
+
+    protected bool $enableRetryLogging = false;
 
     public function __construct(
         array $params,
@@ -50,6 +61,22 @@ trait ConnectionTrait
         if (isset($params['driverOptions']['x_reconnect_attempts'])) {
             $this->maxReconnectAttempts = $this->validateAttemptsOption($params['driverOptions']['x_reconnect_attempts']);
             unset($params['driverOptions']['x_reconnect_attempts']);
+        }
+
+        // New driver options for retry delay functionality
+        if (isset($params['driverOptions']['x_reconnect_delay_ms'])) {
+            $this->baseRetryDelayMs = $this->validateDelayOption($params['driverOptions']['x_reconnect_delay_ms']);
+            unset($params['driverOptions']['x_reconnect_delay_ms']);
+        }
+
+        if (isset($params['driverOptions']['x_reconnect_delay_multiplier'])) {
+            $this->retryDelayMultiplier = $this->validateMultiplierOption($params['driverOptions']['x_reconnect_delay_multiplier']);
+            unset($params['driverOptions']['x_reconnect_delay_multiplier']);
+        }
+
+        if (isset($params['driverOptions']['x_reconnect_logging'])) {
+            $this->enableRetryLogging = (bool) $params['driverOptions']['x_reconnect_logging'];
+            unset($params['driverOptions']['x_reconnect_logging']);
         }
 
         $this->goneAwayDetector = new MySQLGoneAwayDetector();
@@ -72,6 +99,36 @@ trait ConnectionTrait
         }
 
         return $attempts;
+    }
+
+    private function validateDelayOption(mixed $delay): int
+    {
+        if (! is_int($delay) && ! is_float($delay)) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_delay_ms option: expecting int/float, got ' . gettype($delay));
+        }
+
+        $delay = (int) $delay;
+
+        if ($delay < 0) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_delay_ms option: it must not be negative');
+        }
+
+        return $delay;
+    }
+
+    private function validateMultiplierOption(mixed $multiplier): float
+    {
+        if (! is_int($multiplier) && ! is_float($multiplier)) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_delay_multiplier option: expecting int/float, got ' . gettype($multiplier));
+        }
+
+        $multiplier = (float) $multiplier;
+
+        if ($multiplier < 1.0) {
+            throw new \InvalidArgumentException('Invalid x_reconnect_delay_multiplier option: it must be >= 1.0');
+        }
+
+        return $multiplier;
     }
 
     public function setGoneAwayDetector(GoneAwayDetector $goneAwayDetector): void
@@ -99,6 +156,18 @@ trait ConnectionTrait
             $this->close();
             $this->increaseAttemptCount();
 
+            // Calculate and apply delay before retry
+            if ($this->baseRetryDelayMs > 0) {
+                $delayMs = $this->calculateRetryDelay();
+
+                // Log retry attempt if logging is enabled
+                if ($this->enableRetryLogging) {
+                    $this->logRetryAttempt($e, $sql, $delayMs);
+                }
+
+                $this->applyDelay($delayMs);
+            }
+
             goto attempt;
         }
 
@@ -106,6 +175,47 @@ trait ConnectionTrait
 
         /** @psalm-suppress PossiblyUndefinedVariable */
         return $result;
+    }
+
+    /**
+     * Calculate the delay for the current retry attempt using exponential backoff.
+     */
+    private function calculateRetryDelay(): int
+    {
+        // Calculate delay as: base_delay * (multiplier ^ attempt_number)
+        // Where attempt_number starts from 0
+        $calculatedDelay = (float) $this->baseRetryDelayMs * pow($this->retryDelayMultiplier, $this->currentAttempts);
+
+        // Apply a reasonable maximum to prevent excessive delays
+        $actualDelay = min((int) $calculatedDelay, 60_000);
+
+        return $actualDelay;
+    }
+
+    /**
+     * Apply the delay using usleep (convert milliseconds to microseconds).
+     */
+    private function applyDelay(int $delayMs): void
+    {
+        if ($delayMs > 0) {
+            usleep($delayMs * 1_000); // Convert milliseconds to microseconds
+        }
+    }
+
+    /**
+     * Log retry attempt if logging is enabled.
+     */
+    private function logRetryAttempt(\Throwable $exception, ?string $sql, int $delayMs): void
+    {
+        if ($this->enableRetryLogging && $this->logger instanceof LoggerInterface) {
+            $this->logger->debug('MySQL reconnect attempt', [
+                'attempt' => $this->currentAttempts + 1,
+                'delay_ms' => $delayMs,
+                'exception_message' => $exception->getMessage(),
+                'query' => $sql ?? 'N/A',
+                'exception_class' => $exception::class,
+            ]);
+        }
     }
 
     /**
