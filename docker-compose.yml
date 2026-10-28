@@ -4,6 +4,12 @@ services:
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: 'root_test_pass'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_test_pass" ]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
 
   php:
     image: facile.example.com/php:${PHP_VERSION}
