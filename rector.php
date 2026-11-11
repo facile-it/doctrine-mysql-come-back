@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\PHPUnit\Set\PHPUnitSetList;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -13,6 +12,10 @@ return RectorConfig::configure()
     ])
     // uncomment to reach your current PHP version
     ->withPhpSets()
+    ->withComposerBased(
+        
+        phpunit: true,
+    )
     ->withImportNames(importShortClasses: false)
     ->withPreparedSets(
         deadCode: true,
@@ -20,7 +23,4 @@ return RectorConfig::configure()
         typeDeclarations: true,
         instanceOf: true,
         earlyReturn: true
-    )
-    ->withSets([
-        PHPUnitSetList::PHPUNIT_100,
-    ]);
+    );
