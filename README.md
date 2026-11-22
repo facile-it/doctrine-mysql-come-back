@@ -34,6 +34,12 @@ $ composer require facile-it/doctrine-mysql-come-back ^1.0
 In order to use DoctrineMySQLComeBack you have to set the `wrapperClass` connection parameter.
 You can choose how many times Doctrine should be able to reconnect, setting `x_reconnect_attempts` driver option. Its value must be an int.
 
+Additional driver options are available for configuring retry delays:
+
+- `x_reconnect_delay_ms`: Base delay in milliseconds between retry attempts (default: 0)
+- `x_reconnect_delay_multiplier`: Multiplier for exponential backoff (default: 1.0 for fixed delay)
+- `x_reconnect_logging`: Enable debug logging of retry attempts (default: false)
+
 If you're using DBAL v2, you also need to set the `driverClass` parameter too; please refer to the [previous version of this readme](https://github.com/facile-it/doctrine-mysql-come-back/blob/1.10.1/README.md#configuration) for that.
 
 An example of configuration at connection instantiation time:
@@ -54,7 +60,10 @@ $connectionParams = [
     // [doctrine-mysql-come-back] settings
     'wrapperClass' => 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection',
     'driverOptions' => [
-        'x_reconnect_attempts' => 3
+        'x_reconnect_attempts' => 3,
+        'x_reconnect_delay_ms' => 100,        // 100ms base delay
+        'x_reconnect_delay_multiplier' => 2.0, // Exponential backoff
+        'x_reconnect_logging' => true         // Enable logging
     ],
 ];
 
@@ -75,6 +84,9 @@ doctrine:
                 wrapper_class: 'Facile\DoctrineMySQLComeBack\Doctrine\DBAL\Connection'
                 options:
                     x_reconnect_attempts: 3
+                    x_reconnect_delay_ms: 100
+                    x_reconnect_delay_multiplier: 2.0
+                    x_reconnect_logging: true
 ``` 
 
 An example of configuration on Laminas Framework 2projects:
@@ -94,6 +106,9 @@ return [
                     'charset' => 'UTF8',
                     'driverOptions' => [
                         'x_reconnect_attempts' => 9,
+                        'x_reconnect_delay_ms' => 50,
+                        'x_reconnect_delay_multiplier' => 1.5,
+                        'x_reconnect_logging' => false,
                     ]
                 ],
             ],
@@ -116,7 +131,10 @@ $connectionParams = [
     'primary' => [
         // ...
         'driverOptions' => [
-            'x_reconnect_attempts' => 3
+            'x_reconnect_attempts' => 3,
+            'x_reconnect_delay_ms' => 100,
+            'x_reconnect_delay_multiplier' => 2.0,
+            'x_reconnect_logging' => true,
         ],
     ],   
 ];
